@@ -1,0 +1,34 @@
+name: Muni
+main: com.teamglokk.muni.Muni
+version: 0.1.ALPHA
+authors: [BobbShields]
+commands:
+    town:
+        description: Shopping goes through here!
+        aliases: []
+        usage: /town [params]
+permissions:
+    muni.*:
+        description: Gives access to all Muni permissions
+        children:
+            muni.admin: true
+            muni.mayor: true
+            muni.deputy: true
+            muni.town: true
+    muni.admin:
+        description: Gives access to mayor abilities with no cost
+        default: false
+    muni.mayor:
+        description: Grants ability to become a mayor
+        default: true
+        children:
+            muni.deputy: true
+            muni.town: true
+    muni.deputy:
+        description: Grants ability to become a deputy
+        default: false
+        children:
+            muni.town: true
+    muni.town:
+        description: Gives access to town commands
+        default: false
