@@ -1,6 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Makes the World Guard Commands easier to work with
+ * @author BobbShields
  */
 package com.teamglokk.muni.WGWrapper;
 

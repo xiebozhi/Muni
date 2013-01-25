@@ -1,12 +1,20 @@
+/**
+ * Muni.java: Startup and shutdown for the Muni plugin
+ * 
+ * @author bobbshields
+ */
 
 package com.teamglokk.muni;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.milkbowl.vault.economy.Economy;
-//import com.teamglokk.muni.SampleBlockListener;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -27,81 +35,84 @@ public class Muni extends JavaPlugin {
     //private final SampleBlockListener blockListener = new SampleBlockListener();
     //private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
     protected static WorldGuardPlugin wgp;
-
     protected static WGWrapper wgwrapper = null;
-    protected static EconWrapper econwrapper = null;
-    protected static Permission perms = null;
+            
     protected static Economy economy = null;
-    protected Town [] towns = null;
-    //private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
-    //private static final String MUNI_TEXT_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.txt";
+    protected static EconWrapper econwrapper = null;
+    
+    protected static Permission perms = null;
+
+    //Config file path
+    private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
+    private static final String MUNI_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.yml";
     //private static Config options;
+
+    //Global options to be pulled from config
+    protected double maxTaxRate = 10000;
+    protected boolean useMYSQL = false;
+    protected String db_url = "jdbc:mysql://localhost:3306/defaultdb";
+    protected String db_user = "defaultuser";
+    protected String db_pass = "defaultpass"; 
+    
+    private static boolean DEBUG = false;
+    private static boolean USEMYSQL = false;
+    
+    protected int totalTownRanks = 5;
+    private TownRank [] townRanks;
+    
+    protected Set<Town> towns = null;
 
     @Override
     public void onDisable() {
-        // TODO: Place any custom disable code here
-
-        // NOTE: All registered events are automatically unregistered when a plugin is disabled
-
-        // EXAMPLE: Custom code, here we just output some info so we can check all is well
         getLogger().info("Shutting Down");
+        //save all towns to database 
+        getLogger().info("Shut Down sequence ended");
     }
 
     @Override
     public void onEnable() {
-        // TODO: Place any custom enable code here including the registration of any events
-
+        getLogger().info("Starting Up");
+        hookInDependencies();
+        
         // Register our events
         //PluginManager pm = getServer().getPluginManager();
         //pm.registerEvents(playerListener, this);
         //pm.registerEvents(blockListener, this);
 
-        getLogger().info("Starting Up");
-        hookInDependencies();
+        // Register Muni commands
+        getCommand( "town"   ).setExecutor(new TownCommand(this));
+        //getCommand("deputy").setExecutor(new OfficerCommand(this) );
+        //getCommand("mayor" ).setExecutor(new OfficerCommand(this) );
         
-        // Register our commands
-        getCommand("town").setExecutor(new TownCommand(this));
-        //getCommand("debug").setExecutor(new SampleDebugCommand(this));
-        //getCommand("pos").setExecutor(new SamplePosCommand());
+        //Load the configuration file
+        // set the DEBUG variable
+        //Give the static database wrapper its connection parameters
+        
+        // find the total number of town ranks from config:  totalTownRanks = 5;
+        // townRanks = new TownRank [totalTownRanks];
+        //parse the config files for the town rank definitions and push to 
+        // TownRank (int id, String name, int max_Deputies, int min_Citizens, int max_Citizens, double money_Cost, int item_Cost )
+        // for each of the town ranks
 
-        // EXAMPLE: Custom code, here we just output some info so we can check all is well
-        PluginDescriptionFile pdfFile = this.getDescription();
-        getLogger().info( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
-    }
-/*
-    public boolean isDebugging(final Player player) {
-        if (debugees.containsKey(player)) {
-            return debugees.get(player);
-        } else {
-            return false;
-        }
+        //Load the towns into memory from the database 
+        // for (database results) {add all town data to the towns set} 
+        /* townname
+         * tax rate
+         * mayor
+         * deputies
+         * citizens
+         * invitees
+         * applicants
+         */
     }
 
-    public void setDebugging(final Player player, final boolean value) {
-        debugees.put(player, value);
-    }
-    * 
-    * /* If you're having these methods in your plugin's main class (which extends JavaPlugin), you can remove parameters plugin from them,
-    * and in the FixedMetadataValue constructor and getMetadata method, use "this" instead* /
-    public void setMetadata(Player player, String key, Object value, Plugin plugin){
-      player.setMetadata(key,new FixedMetadataValue(plugin,value));
-    }
-    public Object getMetadata(Player player, String key, Plugin plugin){
-      List<MetadataValue> values = player.getMetadata(key);  
-      for(MetadataValue value : values){
-         if(value.getOwningPlugin().getDescription().getName().equals(plugin.getDescription().getName())){
-            return value.value();
-         }
-      }
-    }
-    */
     private void hookInDependencies() {
         try {
             wgp = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
             wgwrapper = new WGWrapper(this);
         } catch (Exception e) {
             getLogger().severe( "[Muni] Error occurred in hooking in to WorldGuard. Are both WorldGuard and WorldEdit installed?");
-            getLogger().severe("[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
+            getLogger().severe( "[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
             this.getPluginLoader().disablePlugin(this);
         }
 
@@ -141,6 +152,8 @@ public class Muni extends JavaPlugin {
         perms = rsp.getProvider();
         return perms != null;
     }
-     
+   
+   public boolean isDebug() { return DEBUG; }
+   public boolean isMySQL() { return USEMYSQL; }
     
 }

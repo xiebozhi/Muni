@@ -1,6 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Wraps the database functions to be easier to work with
+ * @author BobbShields
  */
 package com.teamglokk.muni;
 

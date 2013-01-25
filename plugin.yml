@@ -4,7 +4,7 @@ version: 0.1.ALPHA
 authors: [BobbShields]
 commands:
     town:
-        description: Shopping goes through here!
+        description: Town administration commands
         aliases: []
         usage: /town [params]
 permissions:
@@ -16,19 +16,27 @@ permissions:
             muni.deputy: true
             muni.town: true
     muni.admin:
-        description: Gives access to mayor abilities with no cost
+        description: Gives access to all abilities with no costs
         default: false
     muni.mayor:
-        description: Grants ability to become a mayor
+        description: Grants access to mayor and deputy commands.  Required to start a town
         default: true
         children:
             muni.deputy: true
             muni.town: true
+            muni.mayor.remove: true
+    muni.mayor.remove:
+        description: The ability to delete the mayor's town
+        default: false
     muni.deputy:
-        description: Grants ability to become a deputy
+        description: Grants access to deputy commands
         default: false
         children:
             muni.town: true
+            muni.deputy.changetax: true    
+    muni.deputy.changetax:
+        description: This allows the deputies to change tax rates
+        default: false
     muni.town:
         description: Gives access to town commands
-        default: false
+        default: true

@@ -1,8 +1,72 @@
+# Muni configuration file
+# Authored by bobbshields
+#
+#####
+# Descriptions of certain nodes
+# config_version: not to be changed except by the dev
+# debug: true will output more to the console
+#
+# database #
+# use-mysql: false means Muni will use SQL-lite
+#
+# townsGlobal #
+# maxTaxRate: town officials can't set a higher rate, set to -1 for no limit
+# rankupItemID: defaults to 19 = sponges, set to -1 for no item cost for rankup
+# maxTownBankBalance: set to -1 for no limit
+# maxRanks: set this to the number of townRanks nodes that you have defined
+#
+# townRanks #
+# title: server admin can change the display names (the plugin uses the integer of the rank)
+# minCitizens: you must have this number of citizens to progress to the next rank, -1 for no min
+# maxCitizens: the max your town will accept until the next rank, -l for no max
+#####
 
-configversion: .01
+config_version: .01
+debug: false
 database:
+    use-mysql: false  
     host: localhost
     user: minecraft
     password: password
     prefix: muni_
-	
+townsGlobal:
+    maxTaxRate: 10000 
+    rankupItemID: 19 
+    maxTownBankBalance: -1 
+    maxRanks: 5 
+townRanks:
+    1: 
+         title: Hamlet 
+         maxDeputies: 1 
+         minCitizens: 2 #how many are needed for the next rankup
+         maxCitizens: 5 #town full message generated 
+         moneyCost: 100
+         itemCost: 10
+    2: 
+         title: Village
+         maxDeputies: 2   
+         minCitizens: 4
+         maxCitizens: 10
+         moneyCost: 100
+         itemCost: 10
+    3: 
+         title: Town
+         maxDeputies: 3
+         minCitizens: 8
+         maxCitizens: 15
+         moneyCost: 100
+         itemCost: 10
+    4: 
+         title: City
+         maxDeputies: 4
+         minCitizens: 12
+         maxCitizens: 20
+         moneyCost: 100
+         itemCost: 10
+    5: 
+         title: Metropolis
+         maxDeputies: 5
+         minCitizens: 16
+         maxCitizens: 25
+         moneyCost: 100
+         itemCost: 10
