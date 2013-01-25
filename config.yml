@@ -1,0 +1,8 @@
+
+configversion: .01
+database:
+    host: localhost
+    user: minecraft
+    password: password
+    prefix: muni_
+	

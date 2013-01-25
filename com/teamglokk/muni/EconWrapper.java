@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.teamglokk.muni;
+package com.teamglokk.muni.EconWrapper;
 
 //import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
