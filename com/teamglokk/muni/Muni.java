@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.permission.Permission;
 
 import com.teamglokk.muni.WGWrapper;
+import com.teamglokk.muni.Town;
 
 /**
  * Sample plugin for Bukkit
@@ -31,6 +32,7 @@ public class Muni extends JavaPlugin {
     protected static EconWrapper econwrapper = null;
     protected static Permission perms = null;
     protected static Economy economy = null;
+    protected Town [] towns = null;
     //private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
     //private static final String MUNI_TEXT_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.txt";
     //private static Config options;
@@ -77,6 +79,20 @@ public class Muni extends JavaPlugin {
 
     public void setDebugging(final Player player, final boolean value) {
         debugees.put(player, value);
+    }
+    * 
+    * /* If you're having these methods in your plugin's main class (which extends JavaPlugin), you can remove parameters plugin from them,
+    * and in the FixedMetadataValue constructor and getMetadata method, use "this" instead* /
+    public void setMetadata(Player player, String key, Object value, Plugin plugin){
+      player.setMetadata(key,new FixedMetadataValue(plugin,value));
+    }
+    public Object getMetadata(Player player, String key, Plugin plugin){
+      List<MetadataValue> values = player.getMetadata(key);  
+      for(MetadataValue value : values){
+         if(value.getOwningPlugin().getDescription().getName().equals(plugin.getDescription().getName())){
+            return value.value();
+         }
+      }
     }
     */
     private void hookInDependencies() {
