@@ -14,11 +14,14 @@ public class Town {
     
     private static Muni plugin;
     
+	// Stored in (prefix)_towns
     private String townName;
     private Location townCenter;   
     private double townBankBal;
     private double taxRate;
-        
+    private int townRank;
+     
+	// Stored in (prefix)_citizens	
     private String townMayor;
     private int maxDeputies = 5;
     private Set<String> townDeputies = null;
@@ -26,11 +29,9 @@ public class Town {
     private Set<String> invitees;
     private Set<String> applicants;
     
-    private int townRank;
-    //private double [] rankupMoneyCost;
-    //private int [] rankupItemCost;
-    private int rankupItemID = 19;
-    
+    //private int rankupItemID = 19;
+    //use plugin.rankupItemID instead
+	
     public Town (Muni instance){
         plugin = instance;
         
@@ -79,13 +80,13 @@ public class Town {
         } else {return false;}
     }
     public boolean rankup(Player player){
-        /*double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
-        //int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
+        double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
+        int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
-        if ( rankCost > townBankBal ){
-            if (plugin.econwrapper.pay_item( player, rankupItemID, rankCostItem ) ) {
+        if ( rankCost >= townBankBal ){
+            if (plugin.econwrapper.pay_item( player, plugin.rankupItemID, rankCostItem ) ) {
                 player.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
-                return true;
+                return payFromTB(rankCost); //Payment of money taken after sponges are confirmed
             } else{ 
                 player.sendMessage("You do not have enough "+"Sponges"+" in your inventory to rank up "+ townName);
                 return false;
@@ -93,7 +94,15 @@ public class Town {
         }else {
             player.sendMessage("You need to depsoit "+ (rankCost-townBankBal) +" into the town bank to rank up "+ townName);
             return false;
-        } */ return true;
+        }  
+    }
+    public boolean payFromTB (Double amount){
+        if ( townBankBal >= amount ){
+                townBankBal = townBankBal - amount;
+            return true;
+        }else{
+            return false;
+        }
     }
     public int getRank(){
         return townRank;

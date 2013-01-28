@@ -18,11 +18,11 @@ public class EconWrapper extends Muni {
     private Economy econ = null;
     private EconomyResponse er = null;
     
-    protected EconWrapper(Muni instance) {
+    public EconWrapper(Muni instance) {
         plugin = instance;
         econ = plugin.economy;
     }
-    boolean pay( Player PLAYER, double amount){ 
+    public boolean pay( Player PLAYER, double amount){ 
         er = econ.withdrawPlayer(PLAYER.getName(), amount );
             if(er.transactionSuccess()) {
                 return true;
@@ -30,7 +30,7 @@ public class EconWrapper extends Muni {
                 return false;
             } 
     }
-    boolean pay_item( Player PLAYER, int ITEM_NUMBER, int amount){ 
+    public boolean pay_item( Player PLAYER, int ITEM_NUMBER, int amount){ 
         if (PLAYER.getInventory().contains(ITEM_NUMBER,amount) ){
             
             PLAYER.getInventory().removeItem(new ItemStack[] {
@@ -40,11 +40,11 @@ public class EconWrapper extends Muni {
             return false;
         }
     }
-    double getBalance(Player PLAYER){
+    public double getBalance(Player PLAYER){
         return econ.getBalance(PLAYER.getName() );
     }
             
-    boolean giveMoney( Player PLAYER, double amount){ 
+    public boolean giveMoney( Player PLAYER, double amount){ 
         er = econ.depositPlayer(PLAYER.getName(), amount );
             if(er.transactionSuccess()) {
                 return true;
@@ -52,11 +52,17 @@ public class EconWrapper extends Muni {
                 return false;
             } 
     }
-    boolean hasPerm (Player player, String perm){
+    public boolean hasPerm (Player player, String perm){
         if ( player.hasPermission(perm) ){
             return true;
         } else{
             return false;
         }
+    }
+    public String getCurrNameSingular(){
+        return econ.currencyNameSingular();
+    }
+    public String getCurrNamePlural(){
+        return econ.currencyNamePlural();
     }
 }

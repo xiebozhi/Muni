@@ -4,9 +4,21 @@ version: 0.1.ALPHA
 authors: [BobbShields]
 commands:
     town:
-        description: Town administration commands
+        description: Town creation, taxes, and info
         aliases: []
         usage: /town [params]
+    mayor:
+        description: For mayors to administer their towns
+        aliases: []
+        usage: /mayor [params]
+    deputy:
+        description: So deputies may work with towns
+        aliases: []
+        usage: /deputy [params]
+    townadmin:
+        description: For server staff, overrides cost and some checks
+        aliases: []
+        usage: /townadmin [params]
 permissions:
     muni.*:
         description: Gives access to all Muni permissions
