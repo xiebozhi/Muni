@@ -48,6 +48,9 @@ permissions:
             muni.deputy.changetax: true    
     muni.deputy.changetax:
         description: This allows the deputies to change tax rates
+        default: false    
+    muni.deputy.pushborder:
+        description: This allows the deputies to change tax rates
         default: false
     muni.town:
         description: Gives access to town commands

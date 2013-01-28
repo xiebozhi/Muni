@@ -49,11 +49,11 @@ public class Muni extends JavaPlugin {
     protected String db_prefix = "defaultpass"; 
     
     protected double maxTaxRate = 10000;
-    protected double rankupItemID = 19;
+    protected int rankupItemID = 19;
     protected double maxTBbal = -1;
     protected int totalTownRanks = 5;
     
-    private TownRank [] townRanks;
+    protected TownRank [] townRanks;
     protected Set<Town> towns = null;
 
     @Override
@@ -168,7 +168,7 @@ public class Muni extends JavaPlugin {
         
             
         maxTaxRate = this.getConfig().getDouble("townsGlobal.maxTaxRate"); 
-        rankupItemID = this.getConfig().getDouble("townsGlobal.rankupItemID");    
+        rankupItemID = this.getConfig().getInt("townsGlobal.rankupItemID");    
         maxTBbal = this.getConfig().getDouble("townsGlobal.maxTownBankBalance");  
         totalTownRanks = this.getConfig().getInt("townsGlobal.maxRanks"); 
 
