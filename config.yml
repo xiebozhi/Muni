@@ -35,7 +35,7 @@ townsGlobal:
     rankupItemID: 19 
     maxTownBankBalance: -1 
     maxRanks: 5 
-townRanks:"
+townRanks:
     1: 
          title: Hamlet 
          maxDeputies: 1 
