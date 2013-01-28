@@ -1,7 +1,8 @@
 Muni
 ====
-
 A town management plugin for Bukkit Minecraft servers
+
+http://dev.bukkit.org/server-mods/muni
 
 Development Roadmap
 ===================
