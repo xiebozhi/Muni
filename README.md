@@ -6,11 +6,13 @@ A town management plugin for Bukkit Minecraft servers
 Development Roadmap
 ===================
 First Alpha
-1) Command executor responds with messages
-2) Town class stores and changes the town data and can read/write into a sql flat file 
-3) Format costs into arrays [{Money, 10000},{19:0,100}] to cost 10,000 money and 100 sponges.
-4) Proof of working with economy (perhaps a special chest where item payments can be taken)
-5) Reads and writes global variables to config.yml
+1) Command executors responds with messages (Done a few days ago - 27 Jan) 
+2) Town class stores and changes the town data and can read/write into a sql flat file ( Class created, needs to read / write to database - 27 Jan ) 
+3) Proof of working with economy (items taken directly from player's inventory) (Working and somewhat tested - 27 Jan )
+4) Reads and writes global variables to config.yml (Done but needs testing - 27 Jan)
+5) Command Executors work for everything but world guard region functionality
+6) Town Bank
+7) Taxes working in a basic fashion
 
 Second Alpha
 Add World Guard Region functionality
@@ -23,9 +25,8 @@ Add World Guard Region functionality
 First Beta
 1) Voting system
 2) Democracy vs. Dictatorship 
-3) Town Bank
-4) Taxes
-5) Rank Up system
+3) Taxes
+4) Rank Up system
 
 Possibilities
 1) Dynmap Marker integration
