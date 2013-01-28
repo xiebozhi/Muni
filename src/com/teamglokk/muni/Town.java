@@ -1,7 +1,3 @@
-/**
- * Town.java: defines the Town class
- * @author bobbshields
- */
 package com.teamglokk.muni;
 
 import java.util.Arrays;
@@ -11,8 +7,8 @@ import java.util.Set;
 import java.util.Iterator;
 
 /**
- *
- * @author Bobb
+ * Town.java: defines the Town class
+ * @author bobbshields
  */
 public class Town {
     
@@ -38,6 +34,16 @@ public class Town {
     public Town (Muni instance){
         plugin = instance;
         
+    }
+    public Town (Muni instance, Player player, String townName, double townBankBal ){
+        plugin = instance;
+        
+    }
+    public boolean addTown(){
+        
+        
+        
+        return true;
     }
     public boolean setMaxDeputies(int max){
         maxDeputies = max;
@@ -73,8 +79,8 @@ public class Town {
         } else {return false;}
     }
     public boolean rankup(Player player){
-        double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
-        int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
+        /*double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
+        //int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
         if ( rankCost > townBankBal ){
             if (plugin.econwrapper.pay_item( player, rankupItemID, rankCostItem ) ) {
@@ -87,7 +93,7 @@ public class Town {
         }else {
             player.sendMessage("You need to depsoit "+ (rankCost-townBankBal) +" into the town bank to rank up "+ townName);
             return false;
-        }
+        } */ return true;
     }
     public int getRank(){
         return townRank;
@@ -105,7 +111,7 @@ public class Town {
         } else {return false; }
     }
     public boolean tb_withdrawl(Player player, double amount){
-        if (plugin.econwrapper.payItem(player,rankupItemID,amount) ) {
+        if (plugin.econwrapper.giveMoney(player,amount) ) {
             townBankBal = townBankBal - amount;
             return true;
         } else { return false; }

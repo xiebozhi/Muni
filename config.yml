@@ -26,6 +26,7 @@ debug: false
 database:
     use-mysql: false  
     host: localhost
+    database: minecraft
     user: minecraft
     password: password
     prefix: muni_
@@ -34,7 +35,7 @@ townsGlobal:
     rankupItemID: 19 
     maxTownBankBalance: -1 
     maxRanks: 5 
-townRanks:
+townRanks:"
     1: 
          title: Hamlet 
          maxDeputies: 1 

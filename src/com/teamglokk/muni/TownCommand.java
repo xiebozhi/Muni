@@ -1,4 +1,3 @@
-
 package com.teamglokk.muni;
 
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
@@ -12,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import com.teamglokk.muni.WGWrapper;
 import com.teamglokk.muni.EconWrapper;
-import com.teamglokk.muni.DatabaseFunctions;
+import com.teamglokk.muni.dbWrapper;
 /**
  * Handler for the /town command.
  * @author BobbShields
@@ -20,6 +19,7 @@ import com.teamglokk.muni.DatabaseFunctions;
 public class TownCommand implements CommandExecutor {
     private Muni plugin;
     private Player player;
+    private boolean console = false;
     
     public TownCommand (Muni instance){
         plugin = instance;
@@ -27,7 +27,7 @@ public class TownCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (!(sender instanceof Player)) {
-            return false;
+            console = true;
         }
         player = (Player) sender;
 

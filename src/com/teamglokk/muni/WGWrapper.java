@@ -1,8 +1,4 @@
-/**
- * Makes the World Guard Commands easier to work with
- * @author BobbShields
- */
-package com.teamglokk.muni.WGWrapper;
+package com.teamglokk.muni;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -17,8 +13,8 @@ import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 /**
- *
- * @author Bobb
+ * Makes the World Guard Commands easier to work with
+ * @author BobbShields
  */
 public class WGWrapper extends Muni {
     private final Muni plugin;

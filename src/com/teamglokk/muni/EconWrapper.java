@@ -1,8 +1,4 @@
-/**
- * Makes the Vault and Bukkit perm commands easier to work with
- * @author BobbShields
- */
-package com.teamglokk.muni.EconWrapper;
+package com.teamglokk.muni;
 
 //import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -12,9 +8,10 @@ import org.bukkit.Material;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
 /**
- *
- * @author Bobb
+ * Makes the Vault and Bukkit perm commands easier to work with
+ * @author BobbShields
  */
 public class EconWrapper extends Muni {
     private Muni plugin = null;
@@ -54,5 +51,12 @@ public class EconWrapper extends Muni {
             } else {
                 return false;
             } 
+    }
+    boolean hasPerm (Player player, String perm){
+        if ( player.hasPermission(perm) ){
+            return true;
+        } else{
+            return false;
+        }
     }
 }

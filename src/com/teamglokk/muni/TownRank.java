@@ -1,3 +1,4 @@
+package com.teamglokk.muni;
 /**
  * TownRanks is used by the Towns class for informational purposes
  * @author shieldsr
