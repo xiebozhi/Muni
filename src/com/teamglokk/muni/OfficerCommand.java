@@ -33,7 +33,36 @@ public class OfficerCommand implements CommandExecutor {
         }
         player = (Player) sender;
 
-        if (split[0].equalsIgnoreCase("help") || split[0].isEmpty() ) {
+        if (split.length == 0){
+            displayHelp(player);
+            return false;
+        } else if (split[0].equalsIgnoreCase("help")  ) {
+            displayHelp(player);
+            return true;
+        } else if (split[0].equalsIgnoreCase("found") ||split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
+            player.sendMessage("Adding a town.");
+            plugin.towns.add(new Town (plugin) );
+            if (plugin.towns.iterator().next().addTown(player, split[1]) ){
+                return true;
+            } else { return false; }
+        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
+            player.sendMessage("The command was: "+command.toString() );
+            return true;
+        } else if (split[0].equalsIgnoreCase("invite")) {
+            player.sendMessage("Inviting citizens not yet added.");
+            return true;
+        } else if (split[0].equalsIgnoreCase("remove") ||split[0].equalsIgnoreCase("disband")) {
+            player.sendMessage("Removing a town is not yet added.");
+            return true;
+        }  else if (split[0].equalsIgnoreCase("checkTaxes")) {
+            player.sendMessage("Checking taxes in time.");
+            return true;
+        } else {
+            displayHelp(player);
+            return true;
+        }
+    }
+    private void displayHelp(Player player){ 
             player.sendMessage("Deputy command help.  You can do these commands:");
             player.sendMessage("/deputy invite");
             player.sendMessage("/deputy accept");
@@ -51,29 +80,7 @@ public class OfficerCommand implements CommandExecutor {
             player.sendMessage("/mayor deputize");
             player.sendMessage("/mayor resign");
             player.sendMessage("/mayor rankup");
-            return true;
-        } else if (split[0].equalsIgnoreCase("found") ||split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
-            //Location location = player.getLocation();
-            // split.length == 0
-            player.sendMessage("Adding a town.");
-            return true;
-        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            player.sendMessage("The command was: "+command.toString() );
-            return true;
-        } else if (split[0].equalsIgnoreCase("invite")) {
-            player.sendMessage("Inviting citizens not yet added.");
-            return true;
-        } else if (split[0].equalsIgnoreCase("remove") ||split[0].equalsIgnoreCase("disband")) {
-            player.sendMessage("Removing a town is not yet added.");
-            return true;
-        }  else if (split[0].equalsIgnoreCase("checkTaxes")) {
-            player.sendMessage("Checking taxes in time.");
-            return true;
-        }  
-        else {
-            return false;
-        }
     }
-    
+        
    
 }

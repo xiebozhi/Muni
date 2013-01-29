@@ -16,7 +16,7 @@ public class Town {
     
 	// Stored in (prefix)_towns
     private String townName;
-    private Location townCenter;   
+    //private Location townCenter;   
     private double townBankBal;
     private double taxRate;
     private int townRank;
@@ -31,20 +31,40 @@ public class Town {
     
     //private int rankupItemID = 19;
     //use plugin.rankupItemID instead
+    
+    public String toString_dbCols(){
+        return "townName,townRank,bankBal,taxRate";
+    }
+    public String toString_dbVals(){
+        return townName+ Integer.toString(townRank)+
+               Double.toString(townBankBal)+Double.toString(taxRate);
+    }
 	
     public Town (Muni instance){
         plugin = instance;
         
     }
-    public Town (Muni instance, Player player, String townName, double townBankBal ){
+    public Town (Muni instance, Player player, String townName ){
         plugin = instance;
         
+        
     }
-    public boolean addTown(){
+    public boolean addTown(Player mayor, String town_Name){
+        if ( !plugin.econwrapper.pay(mayor,1000) ){
+            mayor.sendMessage("Not enough money to found the town");
+            return false;
+        }
+        townName = town_Name;
+        townMayor = mayor.getName();
+        townBankBal = 0;
+        taxRate = 10;
         
-        
-        
+        if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
+        plugin.dbwrapper.db_insert("towns",toString_dbCols(),toString_dbVals() );
         return true;
+        } else {
+            return false;
+        }
     }
     public boolean setMaxDeputies(int max){
         maxDeputies = max;
@@ -140,15 +160,6 @@ public class Town {
             return false;
         }
     }
-    public Location getCenter (){
-        return townCenter;
-    }
-    public boolean setCenter (Location center ){
-        if (center != null) {
-            townCenter = center;
-            return true;
-        } else {return false;}
-    }       
     public String getName(){
         return townName;
     }
@@ -157,6 +168,15 @@ public class Town {
         return true;
     }
         /*
+        public Location getCenter (){
+        return townCenter;
+    }
+    public boolean setCenter (Location center ){
+        if (center != null) {
+            townCenter = center;
+            return true;
+        } else {return false;}
+    }  
     public boolean setRankupMoneyCosts(double [] costs){
         rankupMoneyCost = costs;
         return true;

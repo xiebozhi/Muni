@@ -6,9 +6,6 @@ CREATE TABLE IF NOT EXISTS muni_towns (
     townRank INTEGER,
     bankBal DOUBLE,
     taxRate DOUBLE,
-    townCenterX DOUBLE,
-    townCenterY DOUBLE,
-    townCenterZ DOUBLE,
     PRIMARY KEY (townName)
 );
 
@@ -16,6 +13,7 @@ CREATE TABLE IF NOT EXISTS muni_citizens (
     playerName VARCHAR(16),
     townName VARCHAR(25),
     mayor BINARY,
+	citizen BINARY,
     deputy BINARY,
     applicant BINARY,
     invitee BINARY,

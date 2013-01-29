@@ -23,30 +23,30 @@ import java.io.InputStream;
  * @author bobbshields
  */
 public class Muni extends JavaPlugin {
-    //private final SamplePlayerListener playerListener = new SamplePlayerListener(this);
-    //private final SampleBlockListener blockListener = new SampleBlockListener();
-    //private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
+    
     protected static WorldGuardPlugin wgp;
     protected static WGWrapper wgwrapper = null;
             
     protected static Economy economy = null;
     protected static EconWrapper econwrapper = null;
+    
+    protected dbWrapper dbwrapper = null;
 
     //Config file path
     private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
     private static final String MUNI_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.yml";
-    //private static Config options;
-
+   
     //Global options to be pulled from config
     private static double CONFIG_VERSION = .01;
     private static boolean DEBUG = true;
     
-    protected boolean useMYSQL = false;
-    protected String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
-    protected String db_database = "defaultdatabase";
+    private boolean useMYSQL = false;
+    private String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
+    private String db_database = "defaultdatabase";
     protected String db_user = "defaultuser";
     protected String db_pass = "defaultpass"; 
     protected String db_prefix = "defaultpass"; 
+    protected String db_URL = null;
     
     protected double maxTaxRate = 10000;
     protected int rankupItemID = 19;
@@ -54,7 +54,7 @@ public class Muni extends JavaPlugin {
     protected int totalTownRanks = 5;
     
     protected TownRank [] townRanks;
-    protected Set<Town> towns = null;
+    protected Town towns = null;
 
     @Override
     public void onDisable() {
@@ -78,7 +78,7 @@ public class Muni extends JavaPlugin {
         
         //Load the configuration file
         this.saveDefaultConfig();
-        loadConfigSettings();
+        //loadConfigSettings();
         
         // Register a new listener
         /*
@@ -129,16 +129,19 @@ public class Muni extends JavaPlugin {
             this.getPluginLoader().disablePlugin(this);
         }
 
-            try {
-                boolean Econ_success = setupEconomy();
-                if (!Econ_success) {
-                    getLogger().severe( "Muni: Unable to hook-in to Vault (Econ)!");
-                }
-            } catch (Exception e) {
-                getLogger().severe( "Muni: Unable to hook-in to Vault.");
-                getLogger().severe("[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
-                this.getPluginLoader().disablePlugin(this);
+        try {
+            boolean Econ_success = setupEconomy();
+            if (!Econ_success) {
+                getLogger().severe( "Muni: Unable to hook-in to Vault (Econ)!");
             }
+        } catch (Exception e) {
+            getLogger().severe( "Muni: Unable to hook-in to Vault.");
+            getLogger().severe("[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
+            this.getPluginLoader().disablePlugin(this);
+        }
+        
+        dbwrapper = new dbWrapper(this);
+        
         if ( DEBUG ) { getLogger().info( "Dependancies Hooked"); }
     }
     
@@ -156,7 +159,9 @@ public class Muni extends JavaPlugin {
     }
 
    protected void loadConfigSettings(){
-        CONFIG_VERSION = this.getConfig().getDouble("config_version");
+        if (CONFIG_VERSION != this.getConfig().getDouble("config_version") ){
+            getLogger().warning("Config version does not match software requirements.");
+        }
         DEBUG = this.getConfig().getBoolean("debug");
         
         useMYSQL = this.getConfig().getBoolean("database.use-mysql");
@@ -166,7 +171,10 @@ public class Muni extends JavaPlugin {
         db_pass = this.getConfig().getString("database.password");
         db_prefix = this.getConfig().getString("database.prefix");
         
-            
+        // Format the URL from the private variables
+        db_URL = useMYSQL ? "jdbc:mysql" : "jdbc:sqlite";
+        db_URL = db_URL + db_host + db_database;
+                    
         maxTaxRate = this.getConfig().getDouble("townsGlobal.maxTaxRate"); 
         rankupItemID = this.getConfig().getInt("townsGlobal.rankupItemID");    
         maxTBbal = this.getConfig().getDouble("townsGlobal.maxTownBankBalance");  
@@ -180,12 +188,12 @@ public class Muni extends JavaPlugin {
                     this.getConfig().getInt("townRanks"+ (i+1)+"minCitizens"),
                     this.getConfig().getInt("townRanks"+ (i+1)+"maxCitizens"),
                     this.getConfig().getDouble("townRanks"+ (i+1)+"moneyCost"),
-                    this.getConfig().getInt("townRanks"+ (i+1)+"itemCost") 
-                    );
+                    this.getConfig().getInt("townRanks"+ (i+1)+"itemCost") );
         }
    }
    
    public boolean isDebug() { return DEBUG; }
-   public boolean isMySQL() { return useMYSQL; }
+   public void setDebug(boolean value){ DEBUG = value;  }
+   //public boolean isMySQL() { return useMYSQL; }
     
 }

@@ -30,17 +30,12 @@ public class TownCommand implements CommandExecutor {
             console = true;
         }
         player = (Player) sender;
-
-        if (split[0].equalsIgnoreCase("help") || split[0].isEmpty() ) {
-            player.sendMessage("Muni Help.  You can do these commands:");
-            player.sendMessage("/muni list");
-            player.sendMessage("/muni info");
-            player.sendMessage("/muni join");
-            player.sendMessage("/muni add");
-            player.sendMessage("/muni remove");
-            player.sendMessage("/muni sethome");
-            player.sendMessage("/muni vote");
-            player.sendMessage("/muni payTaxes");
+        
+        if (split.length == 0){
+            displayHelp(player);
+            return false;
+        } else if (split[0].equalsIgnoreCase("help") ) {
+            displayHelp(player);
             return true;
         } else if (split[0].equalsIgnoreCase("payTaxes")) {
             player.sendMessage("Preparing to pay taxes.");
@@ -73,10 +68,20 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Charters not yet accepted ");
             return true;
         } else {
+            displayHelp(player);
             return false;
         }
-        //return false;
     }
-    
+    private void displayHelp(Player player){
+        player.sendMessage("Muni Help.  You can do these commands:");
+            player.sendMessage("/town list");
+            player.sendMessage("/town info");
+            player.sendMessage("/town join");
+            player.sendMessage("/town add");
+            player.sendMessage("/town remove");
+            player.sendMessage("/town sethome");
+            player.sendMessage("/town vote");
+            player.sendMessage("/town payTaxes");
+    }
    
 }
