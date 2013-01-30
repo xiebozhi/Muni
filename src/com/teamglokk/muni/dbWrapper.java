@@ -29,12 +29,12 @@ public class dbWrapper extends Muni {
         plugin = instance;
     }
     
-    public boolean checkExistence (String table, String pk, Object value){
+    public boolean checkExistence (String table, String pk, String value){
         boolean rtn = true;
         try {
             db_open();
-            rs = stmt.executeQuery("SELECT "+pk+" FROM "+table+" WHERE"+pk+"="+value.toString() ); //not sure if need ; in SQL
-            rtn = rs.getObject(0).toString().equals(value.toString()) ? true:false ;
+            rs = stmt.executeQuery("SELECT "+pk+" FROM "+table+" WHERE "+pk+"="+value ); //not sure if need ; in SQL
+            rtn = rs.getObject(0).toString().equals(value) ? true:false ;
         } catch (SQLException ex){
             plugin.getLogger().severe( ex.getMessage() ); 
             rtn = false;
@@ -117,7 +117,60 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-    
+    public boolean createDB (boolean drops) { 
+        boolean rtn = false;
+        String prefix = plugin.db_prefix;
+        String DROP = "DROP TABLE "+prefix+"towns;"+
+            "DROP TABLE "+prefix+"citizens;"+
+            "DROP TABLE "+prefix+"transactions;";
+        String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;"+
+            "GRANT ALL PRIVILEGES ON minecraft.* TO user@host BY 'password';";
+        String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
+            "townName VARCHAR(25), " + 
+            "townRank INTEGER, " + 
+            "bankBal DOUBLE, " + 
+            "taxRate DOUBLE, " + 
+            "PRIMARY KEY (townName) ); "; 
+        String SQL2 = "CREATE TABLE IF NOT EXISTS muni_citizens ( " +
+            "playerName VARCHAR(16), " +
+            "townName VARCHAR(25), " +
+            "mayor BINARY, " +
+            "citizen BINARY, " +
+            "deputy BINARY, " +
+            "applicant BINARY, " +
+            "invitee BINARY, " +
+            "PRIMARY KEY (playerName) ); " ;
+        String SQL3 = "CREATE TABLE IF NOT EXISTS muni_transactions ( " +
+            "id INT AUTO_INCREMENT, " +
+            "playerName VARCHAR(16), " +
+            "townName VARCHAR(25), " +
+            "trans_date DATE,  " +
+            "trans_time TIME, " +
+            "trans_type VARCHAR(30), " +
+            "trans_amount DOUBLE, " +
+            "notes VARCHAR(350), " +
+            "PRIMARY KEY (id) ); " ; 
+        try {
+            db_open();
+            if (drops){ rs = stmt.executeQuery(DROP); }
+            rs = stmt.executeQuery(SQL0);
+            rs = stmt.executeQuery(SQL1);
+            rs = stmt.executeQuery(SQL2);
+            rs = stmt.executeQuery(SQL3);
+            rtn = true;
+        } catch (SQLException ex){
+            plugin.getLogger().severe( ex.getMessage() );
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( ex.getMessage() );
+                rtn = false;
+            } finally{}
+        }
+        return rtn;
+    }
+        
     public void MySQL(String[] args) {
 
         Connection con = null;

@@ -78,7 +78,7 @@ public class Muni extends JavaPlugin {
         
         //Load the configuration file
         this.saveDefaultConfig();
-        //loadConfigSettings();
+        loadConfigSettings();
         
         // Register a new listener
         /*
@@ -107,6 +107,7 @@ public class Muni extends JavaPlugin {
         // TownRank (int id, String name, int max_Deputies, int min_Citizens, int max_Citizens, double money_Cost, int item_Cost )
         // for each of the town ranks
 
+        towns = new Town(this);
         //Load the towns into memory from the database 
         // for (database results) {add all town data to the towns set} 
         /* townname
@@ -165,30 +166,36 @@ public class Muni extends JavaPlugin {
         DEBUG = this.getConfig().getBoolean("debug");
         
         useMYSQL = this.getConfig().getBoolean("database.use-mysql");
-        db_host = this.getConfig().getString("database.url");
+        db_host = this.getConfig().getString("database.host");
         db_database = this.getConfig().getString("database.database");
         db_user = this.getConfig().getString("database.user");
         db_pass = this.getConfig().getString("database.password");
         db_prefix = this.getConfig().getString("database.prefix");
         
         // Format the URL from the private variables
-        db_URL = useMYSQL ? "jdbc:mysql" : "jdbc:sqlite";
-        db_URL = db_URL + db_host + db_database;
+        db_URL = useMYSQL ? "jdbc:mysql"+"://"+ db_host +":3306/"+db_database 
+                : "jdbc:sqlite:"+db_database+".db";
+        //db_URL = db_URL +"://"+ db_host +"/"+db_database;
+        
+        if (true /*DEBUG*/) {getLogger().info("dbURL = " + db_URL); }
                     
         maxTaxRate = this.getConfig().getDouble("townsGlobal.maxTaxRate"); 
         rankupItemID = this.getConfig().getInt("townsGlobal.rankupItemID");    
         maxTBbal = this.getConfig().getDouble("townsGlobal.maxTownBankBalance");  
         totalTownRanks = this.getConfig().getInt("townsGlobal.maxRanks"); 
 
+        if (true /*DEBUG*/) {getLogger().info( maxTaxRate + " " + rankupItemID +
+                " " + maxTBbal + " " + totalTownRanks ); }
+        
         townRanks = new TownRank [totalTownRanks+1];
-        for ( int i=0; i <= totalTownRanks; i++ ){
-            townRanks[i+1] = new TownRank( i+1,
-                    this.getConfig().getString("townRanks"+ (i+1)+"title"),
-                    this.getConfig().getInt("townRanks"+ (i+1)+"maxDeputies"),
-                    this.getConfig().getInt("townRanks"+ (i+1)+"minCitizens"),
-                    this.getConfig().getInt("townRanks"+ (i+1)+"maxCitizens"),
-                    this.getConfig().getDouble("townRanks"+ (i+1)+"moneyCost"),
-                    this.getConfig().getInt("townRanks"+ (i+1)+"itemCost") );
+        for ( int i=1; i <= totalTownRanks; i++ ){
+            townRanks[i] = new TownRank( i,
+                    this.getConfig().getString("townRanks."+(i)+".title"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".maxDeputies"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".minCitizens"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".maxCitizens"),
+                    this.getConfig().getDouble("townRanks."+(i)+".moneyCost"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".itemCost") );
         }
    }
    

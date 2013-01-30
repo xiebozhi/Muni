@@ -36,8 +36,8 @@ public class Town {
         return "townName,townRank,bankBal,taxRate";
     }
     public String toString_dbVals(){
-        return townName+ Integer.toString(townRank)+
-               Double.toString(townBankBal)+Double.toString(taxRate);
+        return townName +","+ Integer.toString(townRank) +","+
+               Double.toString(townBankBal) +","+ Double.toString(taxRate);
     }
 	
     public Town (Muni instance){

@@ -39,6 +39,13 @@ public class TownAdminCommand implements CommandExecutor {
         } else if (split[0].equalsIgnoreCase("help")  ) {
             displayHelp(player);
             return true;
+        } else if (split[0].equalsIgnoreCase("start")  ) {
+            if (plugin.dbwrapper.createDB(false) ){
+                player.sendMessage("You created the database");
+                return true;
+            } else {
+                player.sendMessage("");
+                return false;   }
         } else if (split[0].equalsIgnoreCase("reload") ) {
             player.sendMessage("Reloading config");
             plugin.reloadConfig();

@@ -39,8 +39,8 @@ townRanks:
     1: 
          title: Hamlet 
          maxDeputies: 1 
-         minCitizens: 2 #how many are needed for the next rankup
-         maxCitizens: 5 #town full message generated 
+         minCitizens: 2 
+         maxCitizens: 5 
          moneyCost: 100
          itemCost: 10
     2: 
