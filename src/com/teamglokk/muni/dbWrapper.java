@@ -120,40 +120,37 @@ public class dbWrapper extends Muni {
     public boolean createDB (boolean drops) { 
         boolean rtn = false;
         String prefix = plugin.db_prefix;
-        String DROP = "DROP TABLE "+prefix+"towns;"+
-            "DROP TABLE "+prefix+"citizens;"+
-            "DROP TABLE "+prefix+"transactions;";
-        String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;"+
-            "GRANT ALL PRIVILEGES ON minecraft.* TO user@host BY 'password';";
+        String DROP1 = "DROP TABLE IF EXISTS "+prefix+"towns;";
+        String DROP2 = "DROP TABLE IF EXISTS "+prefix+"citizens;";
+        String DROP3 = "DROP TABLE IF EXISTS "+prefix+"transactions;";
+        String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;";
+        String SQL00= "GRANT ALL PRIVILEGES ON minecraft.* TO user@host BY 'password';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
-            "townName VARCHAR(25), " + 
-            "townRank INTEGER, " + 
-            "bankBal DOUBLE, " + 
-            "taxRate DOUBLE, " + 
+            "townName VARCHAR(25), " +  "townRank INTEGER, " + 
+            "bankBal DOUBLE, " +  "taxRate DOUBLE, " + 
             "PRIMARY KEY (townName) ); "; 
         String SQL2 = "CREATE TABLE IF NOT EXISTS muni_citizens ( " +
-            "playerName VARCHAR(16), " +
-            "townName VARCHAR(25), " +
-            "mayor BINARY, " +
-            "citizen BINARY, " +
-            "deputy BINARY, " +
-            "applicant BINARY, " +
-            "invitee BINARY, " +
-            "PRIMARY KEY (playerName) ); " ;
+            "playerName VARCHAR(16), " +"townName VARCHAR(25), " +
+            "mayor BINARY, " + "citizen BINARY, " +
+            "deputy BINARY, " + "applicant BINARY, " +
+            "invitee BINARY, " + "PRIMARY KEY (playerName) ); " ;
         String SQL3 = "CREATE TABLE IF NOT EXISTS muni_transactions ( " +
-            "id INT AUTO_INCREMENT, " +
-            "playerName VARCHAR(16), " +
-            "townName VARCHAR(25), " +
-            "trans_date DATE,  " +
-            "trans_time TIME, " +
-            "trans_type VARCHAR(30), " +
-            "trans_amount DOUBLE, " +
-            "notes VARCHAR(350), " +
+            "id INT AUTO_INCREMENT, " + "playerName VARCHAR(16), " +
+            "townName VARCHAR(25), " + "trans_date DATE,  " +
+            "trans_time TIME, " + "trans_type VARCHAR(30), " +
+            "trans_amount DOUBLE, " + "notes VARCHAR(350), " +
             "PRIMARY KEY (id) ); " ; 
         try {
             db_open();
-            if (drops){ rs = stmt.executeQuery(DROP); }
-            rs = stmt.executeQuery(SQL0);
+            if (drops){ 
+                rs = stmt.executeQuery(DROP1); 
+                rs = stmt.executeQuery(DROP2);
+                rs = stmt.executeQuery(DROP3);
+            }
+            if (plugin.useMYSQL){ 
+                rs = stmt.executeQuery(SQL0); 
+                rs = stmt.executeQuery(SQL00); 
+            }
             rs = stmt.executeQuery(SQL1);
             rs = stmt.executeQuery(SQL2);
             rs = stmt.executeQuery(SQL3);

@@ -40,7 +40,7 @@ public class Muni extends JavaPlugin {
     private static double CONFIG_VERSION = .01;
     private static boolean DEBUG = true;
     
-    private boolean useMYSQL = false;
+    protected boolean useMYSQL = false;
     private String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
     private String db_database = "defaultdatabase";
     protected String db_user = "defaultuser";
@@ -55,6 +55,7 @@ public class Muni extends JavaPlugin {
     
     protected TownRank [] townRanks;
     protected Town towns = null;
+//    protected List<Town> towns = null;
 
     @Override
     public void onDisable() {
