@@ -4,7 +4,8 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.milkbowl.vault.economy.Economy;
 
 import java.io.File;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -54,8 +55,8 @@ public class Muni extends JavaPlugin {
     protected int totalTownRanks = 5;
     
     protected TownRank [] townRanks;
-    protected Town towns = null;
-//    protected List<Town> towns = null;
+    //protected Town towns = null;
+    protected  ArrayList<Town> towns = new ArrayList<Town>() ;
 
     @Override
     public void onDisable() {
@@ -104,11 +105,26 @@ public class Muni extends JavaPlugin {
         getCommand("mayor"     ).setExecutor(new OfficerCommand(this) );
         getCommand("townadmin" ).setExecutor(new TownAdminCommand(this) );
         
-        //parse the config files for the town rank definitions and push to 
-        // TownRank (int id, String name, int max_Deputies, int min_Citizens, int max_Citizens, double money_Cost, int item_Cost )
-        // for each of the town ranks
-
-        towns = new Town(this);
+        this.getLogger().info ("Here 1");
+        Town temp = new Town(this,"bobbshields","test");
+        this.getLogger().info ("Here 2");
+        try{
+            towns.add( temp );
+            this.getLogger().info ("Here 3" );
+            Iterator itr = dbwrapper.getTowns().iterator();
+            this.getLogger().info ("Here 3.5" );
+            while ( itr.hasNext() ){
+                towns.add( new Town(this,itr.next().toString() ) );
+            }
+        } catch (NullPointerException ex){
+            this.getLogger().severe("Initalize error: "+ex.getMessage() );
+        }
+            this.getLogger().info ("Here 4" );
+            /*Plannnnnn
+             * pull a list of town names from the database
+             * make a Town constructor to load from database
+             * for (results:
+             */
         //Load the towns into memory from the database 
         // for (database results) {add all town data to the towns set} 
         /* townname
@@ -141,10 +157,8 @@ public class Muni extends JavaPlugin {
             getLogger().severe("[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
             this.getPluginLoader().disablePlugin(this);
         }
-        
         dbwrapper = new dbWrapper(this);
-        
-        if ( DEBUG ) { getLogger().info( "Dependancies Hooked"); }
+        if ( isDebug() ) { getLogger().info( "Dependancies Hooked"); }
     }
     
     private boolean setupEconomy() {
@@ -157,7 +171,7 @@ public class Muni extends JavaPlugin {
         }
         economy = rsp.getProvider();
         econwrapper = new EconWrapper(this);
-        return economy != null;
+        return (economy != null );
     }
 
    protected void loadConfigSettings(){
@@ -175,17 +189,16 @@ public class Muni extends JavaPlugin {
         
         // Format the URL from the private variables
         db_URL = useMYSQL ? "jdbc:mysql"+"://"+ db_host +":3306/"+db_database 
-                : "jdbc:sqlite:"+db_database+".db";
-        //db_URL = db_URL +"://"+ db_host +"/"+db_database;
+                : "jdbc:sqlite:plugins/muni/"+db_database+".db";
         
-        if (true /*DEBUG*/) {getLogger().info("dbURL = " + db_URL); }
+        if ( isDebug() ) {getLogger().info("dbURL = " + db_URL); }
                     
         maxTaxRate = this.getConfig().getDouble("townsGlobal.maxTaxRate"); 
         rankupItemID = this.getConfig().getInt("townsGlobal.rankupItemID");    
         maxTBbal = this.getConfig().getDouble("townsGlobal.maxTownBankBalance");  
         totalTownRanks = this.getConfig().getInt("townsGlobal.maxRanks"); 
 
-        if (true /*DEBUG*/) {getLogger().info( maxTaxRate + " " + rankupItemID +
+        if ( isDebug() ) {getLogger().info( maxTaxRate + " " + rankupItemID +
                 " " + maxTBbal + " " + totalTownRanks ); }
         
         townRanks = new TownRank [totalTownRanks+1];
@@ -197,11 +210,16 @@ public class Muni extends JavaPlugin {
                     this.getConfig().getInt   ("townRanks."+(i)+".maxCitizens"),
                     this.getConfig().getDouble("townRanks."+(i)+".moneyCost"),
                     this.getConfig().getInt   ("townRanks."+(i)+".itemCost") );
+                    if ( isDebug() ) { getLogger().info( townRanks[i].getName()+
+                            " config settings were loaded"); }
         }
    }
    
    public boolean isDebug() { return DEBUG; }
-   public void setDebug(boolean value){ DEBUG = value;  }
+   public void setDebug(boolean value){ 
+       DEBUG = value; 
+       this.getLogger().info("Debug changed to: " + String.valueOf(value) );
+   }
    //public boolean isMySQL() { return useMYSQL; }
     
 }

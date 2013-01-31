@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.Set;
+import java.util.List;
+import java.util.Arrays;
 
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
@@ -25,50 +27,85 @@ public class dbWrapper extends Muni {
     private Statement stmt = null;
     public ResultSet rs = null;
     
-    public dbWrapper(Muni instance){
+    public dbWrapper( Muni instance ){
         plugin = instance;
-    }
+    }                                
     
-    public boolean checkExistence (String table, String pk, String value){
+    public boolean checkExistence ( String table, String pk, String value ){
         boolean rtn = true;
+        String SQL = "SELECT "+pk+" FROM "+plugin.db_prefix+table+
+                    " WHERE "+pk+"='"+value +"';";
+        if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
         try {
+            
             db_open();
-            rs = stmt.executeQuery("SELECT "+pk+" FROM "+table+" WHERE "+pk+"="+value ); //not sure if need ; in SQL
-            rtn = rs.getObject(0).toString().equals(value) ? true:false ;
+            rs = stmt.executeQuery(SQL); 
+            if (value.equalsIgnoreCase(rs.getString(1) ) ){
+            rtn = true ;
+            } else {return false;}
         } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() ); 
+            plugin.getLogger().severe( "checkExistence: "+ex.getMessage() ); 
             rtn = false;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() ); 
+                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
                 rtn = false;
+            } finally{}
+        }
+        return rtn;
+    } 
+    public List<String> getTowns (){
+        List<String> rtn = null;
+        String SQL = "SELECT townName FROM "+plugin.db_prefix+"towns;";
+        if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+        try {
+            
+            db_open();
+            rs = stmt.executeQuery(SQL); 
+            
+           while ( rs.next() ){
+               rtn.add( rs.getString("townName") );
+           }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "checkExistence: "+ex.getMessage() ); 
+            rtn = null;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
+                rtn = null;
             } finally{}
         }
         return rtn;
     }
     public void db_open() throws SQLException {
+        if(plugin.isDebug()){plugin.getLogger().info("Starting DB");}
         conn = DriverManager.getConnection(plugin.db_URL,plugin.db_user,plugin.db_pass);
         stmt = conn.createStatement();
     }
     public void db_close() throws SQLException {
+        if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
         if ( conn != null ) {
-        conn.close();
+            conn.close();
         }
     }
     public boolean db_insert(String table, String cols, String values) {
-        
         boolean rtn = true;
+        String SQL = "INSERT INTO "+plugin.db_prefix+table+" ("+cols+
+                ") VALUES ("+values+");";
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
         try {
             db_open();
-            rs = stmt.executeQuery("INSERT INTO "+table+" ("+cols+") VALUES ("+values+")"); //not sure if need ; in SQL
+            stmt.executeUpdate(SQL); //not sure if need ; in SQL
         } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() ); 
+            plugin.getLogger().severe( "dbInsert: "+ex.getMessage() ); 
             rtn = false;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() ); 
+                plugin.getLogger().warning( "dbInsert: "+ex.getMessage() ); 
                 rtn = false;
             } finally{}
         }
@@ -86,7 +123,7 @@ public class dbWrapper extends Muni {
         boolean rtn = true;
         try {
             db_open();
-            rs = stmt.executeQuery("UPDATE "+table+" SET "+col+"="+value+" WHERE "
+            rs = stmt.executeQuery("UPDATE "+plugin.db_prefix+table+" SET "+col+"="+value+" WHERE "
                 +key_col+"="+key); //not sure if need ; in SQL
         } catch (SQLException ex){
             plugin.getLogger().severe( ex.getMessage() ); 
@@ -129,12 +166,12 @@ public class dbWrapper extends Muni {
             "townName VARCHAR(25), " +  "townRank INTEGER, " + 
             "bankBal DOUBLE, " +  "taxRate DOUBLE, " + 
             "PRIMARY KEY (townName) ); "; 
-        String SQL2 = "CREATE TABLE IF NOT EXISTS muni_citizens ( " +
+        String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " +
             "playerName VARCHAR(16), " +"townName VARCHAR(25), " +
             "mayor BINARY, " + "citizen BINARY, " +
             "deputy BINARY, " + "applicant BINARY, " +
             "invitee BINARY, " + "PRIMARY KEY (playerName) ); " ;
-        String SQL3 = "CREATE TABLE IF NOT EXISTS muni_transactions ( " +
+        String SQL3 = "CREATE TABLE IF NOT EXISTS "+prefix+"transactions ( " +
             "id INT AUTO_INCREMENT, " + "playerName VARCHAR(16), " +
             "townName VARCHAR(25), " + "trans_date DATE,  " +
             "trans_time TIME, " + "trans_type VARCHAR(30), " +
@@ -143,25 +180,31 @@ public class dbWrapper extends Muni {
         try {
             db_open();
             if (drops){ 
-                rs = stmt.executeQuery(DROP1); 
-                rs = stmt.executeQuery(DROP2);
-                rs = stmt.executeQuery(DROP3);
+                if(plugin.isDebug()){plugin.getLogger().info("DroppingDB");}
+                stmt.executeUpdate(DROP1); 
+                stmt.executeUpdate(DROP2);
+                stmt.executeUpdate(DROP3);
             }
             if (plugin.useMYSQL){ 
-                rs = stmt.executeQuery(SQL0); 
-                rs = stmt.executeQuery(SQL00); 
+                stmt.executeUpdate(SQL0); 
+                stmt.executeUpdate(SQL00); 
+                if(plugin.isDebug()){plugin.getLogger().info("Made the DB (mysql)");}
             }
-            rs = stmt.executeQuery(SQL1);
-            rs = stmt.executeQuery(SQL2);
-            rs = stmt.executeQuery(SQL3);
+            if(plugin.isDebug()){plugin.getLogger().info("Making towns table");}
+            stmt.executeUpdate(SQL1);
+            if(plugin.isDebug()){plugin.getLogger().info("Making citizens table");}
+            stmt.executeUpdate(SQL2);
+            if(plugin.isDebug()){plugin.getLogger().info("Making transactions table");}
+            stmt.executeUpdate(SQL3);
             rtn = true;
+            
         } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() );
+            plugin.getLogger().severe( "createDB: "+ex.getMessage() );
             rtn = false;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() );
+                plugin.getLogger().warning( "createDB: "+ex.getMessage() );
                 rtn = false;
             } finally{}
         }

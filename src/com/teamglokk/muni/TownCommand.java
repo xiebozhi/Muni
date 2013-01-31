@@ -12,6 +12,8 @@ import org.bukkit.entity.Player;
 import com.teamglokk.muni.WGWrapper;
 import com.teamglokk.muni.EconWrapper;
 import com.teamglokk.muni.dbWrapper;
+
+import java.util.Iterator;
 /**
  * Handler for the /town command.
  * @author BobbShields
@@ -41,11 +43,25 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Preparing to pay taxes.");
             return true;
         } else if (split[0].equalsIgnoreCase("list")) {
-            player.sendMessage("List.");
+            player.sendMessage("List of towns:");
+            // iteration will be required here
+            Iterator<Town> itr = plugin.towns.iterator();
+            while (itr.hasNext() ){
+                Town next = itr.next();
+                player.sendMessage(next.getName() ) ;
+            }
             return true;
         } else if (split[0].equalsIgnoreCase("info")) {
             player.sendMessage("Info.");
-            return true;
+            Iterator<Town> itr = plugin.towns.iterator();
+            while (itr.hasNext() ){
+                Town next = itr.next();
+                if (next.getName().equals(split[1] ) ){
+                    player.sendMessage(next.toString_dbVals() ) ;
+                    return true;
+                } else { return false; }
+            }
+            return false;
         } else if (split[0].equalsIgnoreCase("apply")) {
             player.sendMessage("Apply to a town... but not yet");
             return true;

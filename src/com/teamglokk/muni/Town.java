@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import java.util.Set;
 import java.util.Iterator;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Town.java: defines the Town class
@@ -14,7 +15,8 @@ public class Town {
     
     private static Muni plugin;
     
-	// Stored in (prefix)_towns
+    // Database table is $db_prefix_ towns
+    private int db_pk;
     private String townName;
     //private Location townCenter;   
     private double townBankBal;
@@ -29,24 +31,63 @@ public class Town {
     private Set<String> invitees;
     private Set<String> applicants;
     
-    //private int rankupItemID = 19;
-    //use plugin.rankupItemID instead
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(7, 31). // two randomly chosen prime numbers
+            // if deriving: appendSuper(super.hashCode()).
+            append(townName).
+            toHashCode();
+    }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null){
+            return false;
+        } else if ( toString().equals(obj.toString() ) ) {
+            return true;
+        } else if(obj.getClass() != getClass()){
+            return false;
+        } else { return false;}
+    }
+    @Override
+    public String toString(){
+        return townName;
+    }
     public String toString_dbCols(){
         return "townName,townRank,bankBal,taxRate";
     }
     public String toString_dbVals(){
-        return townName +","+ Integer.toString(townRank) +","+
-               Double.toString(townBankBal) +","+ Double.toString(taxRate);
+        return "'"+townName +"','"+ Integer.toString(townRank) +"','"+
+               Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
     }
-	
+
     public Town (Muni instance){
         plugin = instance;
         
     }
-    public Town (Muni instance, Player player, String townName ){
-        plugin = instance;
+    public Town (Muni instance, String player, String town_Name ){
         
+        plugin = instance;
+        plugin.getLogger().warning("Begin Muni Constructor: "+player+", "+town_Name);
+        townName = town_Name;
+        townMayor = player; 
+        townRank = 1;
+        townBankBal = 5;
+        taxRate = 10;
+        plugin.getLogger().warning("End Muni Constructor: "+toString_dbVals() );
+        
+    }
+    public Town (Muni instance, String town_Name ){
+        
+        plugin = instance;
+        plugin.getLogger().warning("Begin Muni Constructor: ");
+        townName = town_Name;
+        townMayor = "nobody"; 
+        townRank = 1;
+        townBankBal = 5;
+        taxRate = 10;
+        plugin.getLogger().warning("End Muni Constructor: " );
+        //This function will soon autoload from the database
         
     }
     public boolean addTown(Player mayor, String town_Name){
@@ -55,7 +96,7 @@ public class Town {
             return false;
         }
         townName = town_Name;
-        townMayor = mayor.getName();
+        townMayor = mayor.getName(); 
         townBankBal = 0;
         taxRate = 10;
         

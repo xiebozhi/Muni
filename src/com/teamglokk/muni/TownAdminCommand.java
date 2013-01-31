@@ -57,16 +57,15 @@ public class TownAdminCommand implements CommandExecutor {
         } else if (split[0].equalsIgnoreCase("addTown")) {
             player.sendMessage("Admin adding of towns is not yet enabled");
             if (split.length != 3) {
-                player.sendMessage("incorrect number of parameters");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            player.sendMessage(split[1]+", "+split[2]);
             //plugin.towns.add(new Town (plugin) );
             //if (plugin.towns.iterator().next().addTown(
             Player temp = null;
-            temp = plugin.getServer().getPlayer(split[2]);
+            temp = plugin.getServer().getPlayer(split[2]);            
             if (temp != null){
-                    plugin.towns.addTown( temp, split[1]);//{ //need to verify this player is online
+                   plugin.towns.add( new Town (plugin,split[2],split[1] ) ) ;//{ //need to verify this player is online
                 return true; // or override the addTown method for using a string
             } else {return false;}
             //} else { return false; }

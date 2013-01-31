@@ -41,10 +41,11 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("found") ||split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
             player.sendMessage("Adding a town.");
-            plugin.towns.add(new Town (plugin) );
-            if (plugin.towns.iterator().next().addTown(player, split[1]) ){
-                return true;
-            } else { return false; }
+           //plugin.towns.add(new Town (plugin) );
+           // if (plugin.towns.iterator().next().addTown(player, split[1]) ){
+           //    return true;
+           // } else { return false; }
+            return true;
         } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
             player.sendMessage("The command was: "+command.toString() );
             return true;
