@@ -90,7 +90,7 @@ public class Town {
         //This function will soon autoload from the database
         
     }
-    public boolean addTown(Player mayor, String town_Name){
+    public boolean db_addTown(Player mayor, String town_Name){
         if ( !plugin.econwrapper.pay(mayor,1000) ){
             mayor.sendMessage("Not enough money to found the town");
             return false;
@@ -101,8 +101,16 @@ public class Town {
         taxRate = 10;
         
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-        plugin.dbwrapper.db_insert("towns",toString_dbCols(),toString_dbVals() );
-        return true;
+            plugin.dbwrapper.db_insert("towns",toString_dbCols(),toString_dbVals() );
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public boolean db_addTown(){
+        if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
+            plugin.dbwrapper.db_insert("towns",toString_dbCols(),toString_dbVals() );
+            return true;
         } else {
             return false;
         }

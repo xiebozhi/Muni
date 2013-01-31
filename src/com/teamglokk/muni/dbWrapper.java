@@ -7,8 +7,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.Set;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
+
+//import org.sqlite.JDBC;
+//import com.mysql.jdbc.Driver;
 
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
@@ -29,20 +32,46 @@ public class dbWrapper extends Muni {
     
     public dbWrapper( Muni instance ){
         plugin = instance;
-    }                                
-    
+    }
+    public void db_open() throws SQLException {
+        if(plugin.isDebug()){plugin.getLogger().info("Starting DB");}
+        if (plugin.useMYSQL){  //Using MySQL
+            try {
+            Class.forName("org.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException ex){
+                plugin.getLogger().severe("db_open: "+ ex.getMessage() );
+            }
+            conn = DriverManager.getConnection(plugin.db_URL,plugin.db_user,plugin.db_pass);
+            // MySQL is not yet tested!!! 31 Jan 2013 RJS
+        } else { //Using SQLite
+            try {
+            Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException ex){
+                plugin.getLogger().severe("db_open: "+ ex.getMessage() );
+            }
+            conn = DriverManager.getConnection(plugin.db_URL);
+        }
+        stmt = conn.createStatement();
+    }
+    public void db_close() throws SQLException {
+        if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
+        if ( rs != null) { rs.close(); }
+        if ( conn != null ) { conn.close();}
+    }
     public boolean checkExistence ( String table, String pk, String value ){
-        boolean rtn = true;
+        boolean rtn = false;
         String SQL = "SELECT "+pk+" FROM "+plugin.db_prefix+table+
                     " WHERE "+pk+"='"+value +"';";
-        if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
         try {
             
             db_open();
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
-            if (value.equalsIgnoreCase(rs.getString(1) ) ){
+            String temp = rs.getString(1);
+            if (value.equalsIgnoreCase(temp) ){
             rtn = true ;
-            } else {return false;}
+            if(this.isDebug() ){plugin.getLogger().info("cE: value = "+temp);}
+            } 
         } catch (SQLException ex){
             plugin.getLogger().severe( "checkExistence: "+ex.getMessage() ); 
             rtn = false;
@@ -55,17 +84,19 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     } 
-    public List<String> getTowns (){
-        List<String> rtn = null;
+    public ArrayList<String> getTowns (){
+        ArrayList<String> rtn = new ArrayList<String>();
         String SQL = "SELECT townName FROM "+plugin.db_prefix+"towns;";
-        if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
         try {
             
             db_open();
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
             
-           while ( rs.next() ){
-               rtn.add( rs.getString("townName") );
+            while ( rs.next() ){
+               String temp = rs.getString("townName");
+               rtn.add( temp );
+               if (plugin.isDebug()) {plugin.getLogger().info("getTowns getting: "+temp);}
            }
             
         } catch (SQLException ex){
@@ -80,25 +111,16 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-    public void db_open() throws SQLException {
-        if(plugin.isDebug()){plugin.getLogger().info("Starting DB");}
-        conn = DriverManager.getConnection(plugin.db_URL,plugin.db_user,plugin.db_pass);
-        stmt = conn.createStatement();
-    }
-    public void db_close() throws SQLException {
-        if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
-        if ( conn != null ) {
-            conn.close();
-        }
-    }
+
     public boolean db_insert(String table, String cols, String values) {
         boolean rtn = true;
         String SQL = "INSERT INTO "+plugin.db_prefix+table+" ("+cols+
                 ") VALUES ("+values+");";
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            
         try {
             db_open();
-            stmt.executeUpdate(SQL); //not sure if need ; in SQL
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            stmt.executeUpdate(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe( "dbInsert: "+ex.getMessage() ); 
             rtn = false;
@@ -121,10 +143,12 @@ public class dbWrapper extends Muni {
     public boolean db_update(String table, String key_col, String key, String col, String value) {
         
         boolean rtn = true;
+        String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+col+"="+value+" WHERE "
+                +key_col+"="+key;
         try {
             db_open();
-            rs = stmt.executeQuery("UPDATE "+plugin.db_prefix+table+" SET "+col+"="+value+" WHERE "
-                +key_col+"="+key); //not sure if need ; in SQL
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe( ex.getMessage() ); 
             rtn = false;
@@ -180,8 +204,9 @@ public class dbWrapper extends Muni {
         try {
             db_open();
             if (drops){ 
-                if(plugin.isDebug()){plugin.getLogger().info("DroppingDB");}
-                stmt.executeUpdate(DROP1); 
+                plugin.getLogger().warning("Dropping all tables");
+                stmt.executeUpdate(DROP1);
+                this.getLogger().info(stmt.getWarnings().toString() );
                 stmt.executeUpdate(DROP2);
                 stmt.executeUpdate(DROP3);
             }

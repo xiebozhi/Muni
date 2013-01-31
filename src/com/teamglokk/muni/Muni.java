@@ -12,7 +12,11 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-//import net.milkbowl.vault.permission.Permission;
+//import net.milkbowl.vault.permission.Permission
+;import org.bukkit.event.Listener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerLoginEvent;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -83,21 +87,14 @@ public class Muni extends JavaPlugin {
         loadConfigSettings();
         
         // Register a new listener
-        /*
         getServer().getPluginManager().registerEvents(new Listener() {
  
             @EventHandler
-            public playerJoin(PlayerJoinEvent event) {
+            public void playerJoin(PlayerLoginEvent event) {
                 // On player join send them the message from config.yml
-                event.getPlayer().sendMessage(SimpleMOTD.this.getConfig().getString("message"));
+                event.getPlayer().sendMessage("Login Message: "+event.getEventName() );
             }
         }, this);
-        */
-        
-        // Register our events
-        //PluginManager pm = getServer().getPluginManager();
-        //pm.registerEvents(playerListener, this);
-        //pm.registerEvents(blockListener, this);
 
         // Register Muni commands
         getCommand( "town"     ).setExecutor(new TownCommand(this));
@@ -107,17 +104,24 @@ public class Muni extends JavaPlugin {
         
         this.getLogger().info ("Here 1");
         Town temp = new Town(this,"bobbshields","test");
+        temp.db_addTown();
+        
         this.getLogger().info ("Here 2");
         try{
             towns.add( temp );
             this.getLogger().info ("Here 3" );
+            
             Iterator itr = dbwrapper.getTowns().iterator();
-            this.getLogger().info ("Here 3.5" );
+            this.getLogger().info ("Here 3.5");
+            
             while ( itr.hasNext() ){
-                towns.add( new Town(this,itr.next().toString() ) );
+                String current = itr.next().toString();
+                if ( isDebug() ) { this.getLogger().info(current); }
+                towns.add( new Town( this, current ) );
+                this.getLogger().info ("Here 3.9" );
             }
         } catch (NullPointerException ex){
-            this.getLogger().severe("Initalize error: "+ex.getMessage() );
+            this.getLogger().severe("Adding Towns error: "+ex.getMessage() );
         }
             this.getLogger().info ("Here 4" );
             /*Plannnnnn
@@ -153,7 +157,7 @@ public class Muni extends JavaPlugin {
                 getLogger().severe( "Muni: Unable to hook-in to Vault (Econ)!");
             }
         } catch (Exception e) {
-            getLogger().severe( "Muni: Unable to hook-in to Vault.");
+            getLogger().severe( "Muni: Unable to hook-in to Vault: "+e.getMessage());
             getLogger().severe("[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
             this.getPluginLoader().disablePlugin(this);
         }
@@ -189,7 +193,7 @@ public class Muni extends JavaPlugin {
         
         // Format the URL from the private variables
         db_URL = useMYSQL ? "jdbc:mysql"+"://"+ db_host +":3306/"+db_database 
-                : "jdbc:sqlite:plugins/muni/"+db_database+".db";
+                : "jdbc:sqlite:plugins/Muni/"+db_database+".db";
         
         if ( isDebug() ) {getLogger().info("dbURL = " + db_URL); }
                     
