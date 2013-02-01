@@ -60,7 +60,7 @@ public class TownCommand implements CommandExecutor {
             while (itr.hasNext() ){
                 Town current = itr.next();
                 if (current.getName().equals(split[1] ) ){
-                    player.sendMessage(current.toString_dbVals() ) ;
+                    player.sendMessage(current.toDB_Vals() ) ;
                     return true;
                 } else { return false; }
             }

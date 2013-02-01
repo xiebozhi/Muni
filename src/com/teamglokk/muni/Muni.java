@@ -21,6 +21,14 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.InputStream;
+import java.util.Calendar;
+import org.bukkit.event.Listener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import java.io.InputStream;
 
 /**
  * Muni.java: Startup and shutdown for the Muni plugin
@@ -37,9 +45,9 @@ public class Muni extends JavaPlugin {
     
     protected dbWrapper dbwrapper = null;
 
-    //Config file path
-    private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
-    private static final String MUNI_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.yml";
+    //Config file path  (Believe this is not needed, testing)
+    //private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
+    //private static final String MUNI_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.yml";
    
     //Global options to be pulled from config
     private static double CONFIG_VERSION = .01;
@@ -60,7 +68,8 @@ public class Muni extends JavaPlugin {
     
     protected TownRank [] townRanks;
     //protected Town towns = null;
-    protected  ArrayList<Town> towns = new ArrayList<Town>() ;
+    protected ArrayList<Town> towns = new ArrayList<Town>();
+    protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
     @Override
     public void onDisable() {
@@ -88,11 +97,10 @@ public class Muni extends JavaPlugin {
         
         // Register a new listener
         getServer().getPluginManager().registerEvents(new Listener() {
- 
             @EventHandler
             public void playerJoin(PlayerLoginEvent event) {
-                // On player join send them the message from config.yml
-                event.getPlayer().sendMessage("Login Message: "+event.getEventName() );
+                // Will get changed to updating last login for citizens
+                event.getPlayer().sendMessage("[Muni] Login Message: "+event.getEventName() );
             }
         }, this);
 
@@ -101,6 +109,8 @@ public class Muni extends JavaPlugin {
         getCommand("deputy"    ).setExecutor(new OfficerCommand(this) );
         getCommand("mayor"     ).setExecutor(new OfficerCommand(this) );
         getCommand("townadmin" ).setExecutor(new TownAdminCommand(this) );
+        
+        this.getLogger().info( Calendar.getInstance().toString() );
         
         this.getLogger().info ("Here 1");
         //Town temp = new Town(this,"bobbshields","test2");
@@ -139,6 +149,44 @@ public class Muni extends JavaPlugin {
          * invitees
          * applicants
          */
+    }
+    public void loadCitizens(){
+        try{
+            Iterator itr = dbwrapper.getSingleCol("citizens","playerName").iterator();
+            while ( itr.hasNext() ){
+                String current = itr.next().toString();
+                if ( isDebug() ) { this.getLogger().info("Loading citizen: " + current); }
+                citizens.add( new Citizen( this, current ) );
+            }
+        } catch (NullPointerException ex){
+            this.getLogger().severe("Loading Citizens Error: "+ex.getMessage() );
+        }
+    }
+    public void loadTowns(){
+        try{
+            //towns.add( temp );
+            //this.getLogger().info ("Here 3" );
+            
+            Iterator itr = dbwrapper.getTowns().iterator();
+            this.getLogger().info ("Here 3");
+            
+            while ( itr.hasNext() ){
+                String current = itr.next().toString();
+                if ( isDebug() ) { this.getLogger().info("Loading town: " + current); }
+                towns.add( new Town( this, current ) );
+            }
+        } catch (NullPointerException ex){
+            this.getLogger().severe("Adding Towns error: "+ex.getMessage() );
+        }
+    }
+    public void saveCitizens(){
+        
+    }
+    public void saveTowns() {
+        
+    }
+    public void makeTrans(){
+        
     }
 
     private void hookInDependencies() {

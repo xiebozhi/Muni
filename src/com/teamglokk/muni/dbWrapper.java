@@ -111,7 +111,72 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-
+    public ArrayList<String> getSingleCol (String table, String column ){
+        ArrayList<String> rtn = new ArrayList<String>();
+        String SQL = "SELECT "+column+" FROM "+plugin.db_prefix+table+";";
+        try {
+            
+            db_open();
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            
+            while ( rs.next() ){
+               String temp = rs.getString(column);
+               rtn.add( temp );
+               if (plugin.isDebug()) {plugin.getLogger().info("getSingleCol getting: "+temp);}
+           }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "getSingleCol: "+ex.getMessage() ); 
+            rtn = null;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
+                rtn = null;
+            } finally{}
+        }
+        return rtn;
+    }
+    public Town getTown(String townName){
+        Town temp = null;
+        String SQL = "SELECT "+temp.toDB_Cols()+" WHERE townName='"+townName+"';";
+        try {
+            db_open();
+            if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
+            rs = stmt.executeQuery(SQL);
+            temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"),
+                    rs.getInt("townRank"),rs.getDouble("bankBal"),rs.getDouble("taxRate") );
+        } catch (SQLException ex){
+            plugin.getLogger().severe( ex.getMessage() );
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( ex.getMessage() );
+            } finally{}
+        }
+        return temp;
+    }
+    public Citizen getCitizen(String playerName){
+        Citizen temp = null;
+        String SQL = "SELECT "+temp.toDB_Cols()+" WHERE playerName='"+playerName+"';";
+        try {
+            db_open();
+            rs = stmt.executeQuery(SQL);
+            if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
+            temp = new Citizen(plugin, rs.getString("townName"), rs.getString("playerName"),
+                    rs.getBoolean("mayor"), rs.getBoolean("deputy"), rs.getBoolean("applicant"),
+                    rs.getBoolean("invitee"),rs.getString("invitedBy"),rs.getDate("date") );
+        } catch (SQLException ex){
+            plugin.getLogger().severe( ex.getMessage() );
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( ex.getMessage() );
+            } finally{}
+        }
+        return temp;
+    }
     public boolean db_insert(String table, String cols, String values) {
         boolean rtn = true;
         String SQL = "INSERT INTO "+plugin.db_prefix+table+" ("+cols+
@@ -187,20 +252,20 @@ public class dbWrapper extends Muni {
         String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;";
         String SQL00= "GRANT ALL PRIVILEGES ON minecraft.* TO user@host BY 'password';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
-            "townName VARCHAR(25), " +  "townRank INTEGER, " + 
+            "townName VARCHAR(30), mayor VARCHAR(16), townRank INTEGER, " + 
             "bankBal DOUBLE, " +  "taxRate DOUBLE, " + 
             "PRIMARY KEY (townName) ); "; 
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " +
             "playerName VARCHAR(16), " +"townName VARCHAR(25), " +
-            "mayor BINARY, " + "citizen BINARY, " +
-            "deputy BINARY, " + "applicant BINARY, " +
-            "invitee BINARY, " + "PRIMARY KEY (playerName) ); " ;
+            "mayor BINARY, deputy BINARY, applicant BINARY, " +
+            "invitee BINARY, invitedBy VARCHAR(16), sentDate DATETIME, lastLogin DATETIME, "+
+            "PRIMARY KEY (playerName) ); " ;
         String SQL3 = "CREATE TABLE IF NOT EXISTS "+prefix+"transactions ( " +
             "id INT AUTO_INCREMENT, " + "playerName VARCHAR(16), " +
-            "townName VARCHAR(25), " + "trans_date DATE,  " +
-            "trans_time TIME, " + "trans_type VARCHAR(30), " +
-            "trans_amount DOUBLE, " + "notes VARCHAR(350), " +
-            "PRIMARY KEY (id) ); " ; 
+            "townName VARCHAR(30), " + "date DATE,  " +
+            "time TIME, " + "type VARCHAR(30), " +
+            "amount DOUBLE, " + "item_amount INTEGER, " +
+            "notes VARCHAR(350), " + "PRIMARY KEY (id) ); " ; 
         try {
             db_open();
             if (drops){ 

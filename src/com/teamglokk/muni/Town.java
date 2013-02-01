@@ -31,6 +31,45 @@ public class Town {
     private ArrayList<String> invitees;
     private ArrayList<String> applicants;
     
+    public Town (Muni instance){
+        plugin = instance;
+    }
+    public Town (Muni instance, String player, String town_Name ){
+        
+        plugin = instance;
+        plugin.getLogger().warning("Begin Muni Constructor: "+player+", "+town_Name);
+        townName = town_Name;
+        townMayor = player; 
+        townRank = 1;
+        townBankBal = 5;
+        taxRate = 10;
+        plugin.getLogger().warning("End Muni Constructor: "+toDB_Vals() );
+        
+    }
+    public Town (Muni instance, String town_Name, String mayor,
+            int rank, double bankBal, double tax){
+        
+        plugin = instance;
+        plugin.getLogger().warning("Begin Muni Constructor: "+mayor+", "+town_Name);
+        townName = town_Name;
+        townMayor = mayor; 
+        townRank = rank;
+        townBankBal = bankBal;
+        taxRate = tax;
+        plugin.getLogger().warning("End Muni Constructor: "+toDB_Vals() );
+        
+    }
+    public Town (Muni instance, String town_Name ){
+        
+        plugin = instance;
+        loadFromDB(town_Name);
+        
+    }    
+    public boolean loadFromDB(String town_Name){
+        
+        
+        return true;
+    }
     @Override
     public int hashCode() {
         return new HashCodeBuilder(7, 31). 
@@ -51,62 +90,14 @@ public class Town {
     public String toString(){
         return townName;
     }
-    public String toString_dbCols(){
+    public String toDB_Cols(){
         return "townName,townRank,bankBal,taxRate";
     }
-    public String toString_dbVals(){
+    public String toDB_Vals(){
         return "'"+townName +"','"+ Integer.toString(townRank) +"','"+
                Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
     }  
-    public boolean addCitizen(String player, boolean invitee, boolean applicant ) {
-        if (invitee){ 
-            invitees.add(player);
-            return true;
-        } else if (applicant){
-            applicants.add(player);
-            return true;
-        } else {
-            citizens.add(player) ;
-            return true;
-        }
-    } 
-    public String todb_CitCols(){
-        return "townName,townRank,bankBal,taxRate";
-    }
-    public String todb_CitVals(){
-        return "'"+townName +"','"+ Integer.toString(townRank) +"','"+
-               Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
-    }
 
-    public Town (Muni instance){
-        plugin = instance;
-        
-    }
-    public Town (Muni instance, String player, String town_Name ){
-        
-        plugin = instance;
-        plugin.getLogger().warning("Begin Muni Constructor: "+player+", "+town_Name);
-        townName = town_Name;
-        townMayor = player; 
-        townRank = 1;
-        townBankBal = 5;
-        taxRate = 10;
-        plugin.getLogger().warning("End Muni Constructor: "+toString_dbVals() );
-        
-    }
-    public Town (Muni instance, String town_Name ){
-        
-        plugin = instance;
-        plugin.getLogger().warning("Begin Muni Constructor: ");
-        townName = town_Name;
-        townMayor = "nobody"; 
-        townRank = 1;
-        townBankBal = 5;
-        taxRate = 10;
-        plugin.getLogger().warning("End Muni Constructor: " );
-        //This function will soon autoload from the database
-        
-    }
     public boolean db_addTown(Player mayor, String town_Name){
         if ( !plugin.econwrapper.pay(mayor,1000) ){
             mayor.sendMessage("Not enough money to found the town");
@@ -118,7 +109,7 @@ public class Town {
         taxRate = 10;
         
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-            plugin.dbwrapper.db_insert("towns",toString_dbCols(),toString_dbVals() );
+            plugin.dbwrapper.db_insert("towns",toDB_Cols(),toDB_Vals() );
             return true;
         } else {
             return false;
@@ -126,7 +117,7 @@ public class Town {
     }
     public boolean db_addTown(){
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-            plugin.dbwrapper.db_insert("towns",toString_dbCols(),toString_dbVals() );
+            plugin.dbwrapper.db_insert("towns",toDB_Cols(),toDB_Vals() );
             return true;
         } else {
             return false;
