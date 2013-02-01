@@ -3,7 +3,7 @@ package com.teamglokk.muni;
 import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -26,17 +26,15 @@ public class Town {
 	// Stored in (prefix)_citizens	
     private String townMayor;
     private int maxDeputies = 5;
-    private Set<String> townDeputies = null;
-    private Set<String> citizens;  
-    private Set<String> invitees;
-    private Set<String> applicants;
+    private ArrayList<String> townDeputies = null;
+    private ArrayList<String> citizens;  
+    private ArrayList<String> invitees;
+    private ArrayList<String> applicants;
     
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(7, 31). // two randomly chosen prime numbers
-            // if deriving: appendSuper(super.hashCode()).
-            append(townName).
-            toHashCode();
+        return new HashCodeBuilder(7, 31). 
+            append(townName).toHashCode();
     }
     
     @Override
@@ -57,6 +55,25 @@ public class Town {
         return "townName,townRank,bankBal,taxRate";
     }
     public String toString_dbVals(){
+        return "'"+townName +"','"+ Integer.toString(townRank) +"','"+
+               Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
+    }  
+    public boolean addCitizen(String player, boolean invitee, boolean applicant ) {
+        if (invitee){ 
+            invitees.add(player);
+            return true;
+        } else if (applicant){
+            applicants.add(player);
+            return true;
+        } else {
+            citizens.add(player) ;
+            return true;
+        }
+    } 
+    public String todb_CitCols(){
+        return "townName,townRank,bankBal,taxRate";
+    }
+    public String todb_CitVals(){
         return "'"+townName +"','"+ Integer.toString(townRank) +"','"+
                Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
     }
@@ -131,7 +148,7 @@ public class Town {
     }
     public String getDeputies(){
         String temp = null;
-        Iterator<String> itr = townDeputies.iterator();
+        Iterator itr = townDeputies.iterator();
          while(itr.hasNext() ){
              temp = temp + itr.next() +", ";
          }

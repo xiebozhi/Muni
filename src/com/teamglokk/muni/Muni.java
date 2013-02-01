@@ -103,22 +103,22 @@ public class Muni extends JavaPlugin {
         getCommand("townadmin" ).setExecutor(new TownAdminCommand(this) );
         
         this.getLogger().info ("Here 1");
-        Town temp = new Town(this,"bobbshields","test");
-        temp.db_addTown();
+        //Town temp = new Town(this,"bobbshields","test2");
+        //temp.db_addTown();
         
         this.getLogger().info ("Here 2");
         try{
-            towns.add( temp );
-            this.getLogger().info ("Here 3" );
+            //towns.add( temp );
+            //this.getLogger().info ("Here 3" );
             
             Iterator itr = dbwrapper.getTowns().iterator();
-            this.getLogger().info ("Here 3.5");
+            this.getLogger().info ("Here 3");
             
             while ( itr.hasNext() ){
                 String current = itr.next().toString();
                 if ( isDebug() ) { this.getLogger().info(current); }
                 towns.add( new Town( this, current ) );
-                this.getLogger().info ("Here 3.9" );
+                this.getLogger().info ("Here 3.5" );
             }
         } catch (NullPointerException ex){
             this.getLogger().severe("Adding Towns error: "+ex.getMessage() );

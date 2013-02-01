@@ -52,12 +52,15 @@ public class TownCommand implements CommandExecutor {
             }
             return true;
         } else if (split[0].equalsIgnoreCase("info")) {
-            player.sendMessage("Info.");
+            if(split.length!=2){player.sendMessage("Not the right number of parameters"); 
+            return false;
+            }
+            player.sendMessage( "Info on: " + split[1] );
             Iterator<Town> itr = plugin.towns.iterator();
             while (itr.hasNext() ){
-                Town next = itr.next();
-                if (next.getName().equals(split[1] ) ){
-                    player.sendMessage(next.toString_dbVals() ) ;
+                Town current = itr.next();
+                if (current.getName().equals(split[1] ) ){
+                    player.sendMessage(current.toString_dbVals() ) ;
                     return true;
                 } else { return false; }
             }
