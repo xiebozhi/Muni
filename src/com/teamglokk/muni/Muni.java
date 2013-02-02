@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.ChatColor;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -80,7 +81,7 @@ public class Muni extends JavaPlugin {
         // Save the config to file
         // this.saveConfig();
         
-        getLogger().info("Shut Down sequence ended");
+        getLogger().info("Shut Down sequence complete");
     }
 
     @Override
@@ -89,7 +90,12 @@ public class Muni extends JavaPlugin {
         
         // Hooks in Vault Economy regions
         // Hooks in World Guard
+        // Initializes Muni wrappers
         hookInDependencies();
+        
+        // Always make sure a database is there.  
+        // Passing true drops the db first, normally false
+        dbwrapper.createDB(false);
         
         //Load the configuration file
         this.saveDefaultConfig();
@@ -101,6 +107,8 @@ public class Muni extends JavaPlugin {
             public void playerJoin(PlayerLoginEvent event) {
                 // Will get changed to updating last login for citizens
                 event.getPlayer().sendMessage("[Muni] Login Message: "+event.getEventName() );
+                // if town mayor, show applicants
+                // if invitee, display
             }
         }, this);
 
@@ -112,14 +120,18 @@ public class Muni extends JavaPlugin {
         
         this.getLogger().info( Calendar.getInstance().toString() );
         
-        this.getLogger().info ("Here 1");
+        this.getLogger().info (ChatColor.AQUA+"Here 1");
         //Town temp = new Town(this,"bobbshields","test2");
         //temp.db_addTown();
+        loadTowns();
         
         this.getLogger().info ("Here 2");
+        loadCitizens();
+        /*
         try{
             //towns.add( temp );
             //this.getLogger().info ("Here 3" );
+            
             
             Iterator itr = dbwrapper.getTowns().iterator();
             this.getLogger().info ("Here 3");
@@ -133,42 +145,41 @@ public class Muni extends JavaPlugin {
         } catch (NullPointerException ex){
             this.getLogger().severe("Adding Towns error: "+ex.getMessage() );
         }
-            this.getLogger().info ("Here 4" );
-            /*Plannnnnn
-             * pull a list of town names from the database
-             * make a Town constructor to load from database
-             * for (results:
-             */
-        //Load the towns into memory from the database 
-        // for (database results) {add all town data to the towns set} 
-        /* townname
-         * tax rate
-         * mayor
-         * deputies
-         * citizens
-         * invitees
-         * applicants
-         */
+            */
+        this.getLogger().info ("Loaded and Ready for Town administration" );
     }
+    /**
+     * Queries DB for player names then constructor each loads db at array addition
+     * 
+     * @author bobbshields
+     */
     public void loadCitizens(){
         try{
             Iterator itr = dbwrapper.getSingleCol("citizens","playerName").iterator();
+            if ( isDebug() ) { this.getLogger().info(" Loading Citizens. " ); }
             while ( itr.hasNext() ){
                 String current = itr.next().toString();
-                if ( isDebug() ) { this.getLogger().info("Loading citizen: " + current); }
+                if ( isDebug() ) { this.getLogger().info("Loading citizens: " + current); }
                 citizens.add( new Citizen( this, current ) );
             }
         } catch (NullPointerException ex){
-            this.getLogger().severe("Loading Citizens Error: "+ex.getMessage() );
+            this.getLogger().severe("Loading citizens: "+ex.getMessage() );
+        } finally {
+            if ( isDebug() ) { this.getLogger().info("Finshed loading Citizens"); }
         }
     }
+    /**
+     * Queries DB for town names then town constructor loads itself 
+     * 
+     * @author bobbshields
+     */
     public void loadTowns(){
         try{
             //towns.add( temp );
             //this.getLogger().info ("Here 3" );
             
             Iterator itr = dbwrapper.getTowns().iterator();
-            this.getLogger().info ("Here 3");
+            if ( isDebug() ) { this.getLogger().info("Towns Loading. " ); }
             
             while ( itr.hasNext() ){
                 String current = itr.next().toString();
@@ -176,7 +187,9 @@ public class Muni extends JavaPlugin {
                 towns.add( new Town( this, current ) );
             }
         } catch (NullPointerException ex){
-            this.getLogger().severe("Adding Towns error: "+ex.getMessage() );
+            this.getLogger().severe("Loading towns: "+ex.getMessage() );
+        } finally {
+            if ( isDebug() ) { this.getLogger().info("Finshed loading Towns"); }
         }
     }
     public void saveCitizens(){
@@ -187,6 +200,26 @@ public class Muni extends JavaPlugin {
     }
     public void makeTrans(){
         
+    }
+    public Town getTown(String town_Name){
+        Town temp = null;
+        
+        return temp;
+    }
+    public Citizen getCitizen(String player){
+        Citizen temp = null;
+        
+        return temp;
+    }
+    public String getAllTowns(){
+        String temp = null;
+        
+        return temp;
+    }
+    public String getAllCitizens(){
+        String temp = null;
+        
+        return temp;
     }
 
     private void hookInDependencies() {

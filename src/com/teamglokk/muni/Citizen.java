@@ -51,12 +51,35 @@ public class Citizen {
         this.invited = invited;
         this.invitedBy = invitedBy;
         this.sentDate = sentDate;
+    }    
+    public Citizen (Citizen cit){
+        //this.plugin = cit.plugin;
+        this.name = cit.getName();
+        this.townName = cit.getTown();
+        this.deputy = cit.getDeputy();
+        this.applied = cit.getApplicant();
+        this.invited = cit.getInvitee();
+        this.invitedBy = cit.getInviteOfficer();
+        //this.sentDate = cit;
     }
     public boolean loadFromDB(String player){
+        Citizen cit = plugin.dbwrapper.getCitizen(player);
         
+        //this.plugin = cit.plugin;
+        this.name = cit.getName();
+        this.townName = cit.getTown();
+        this.deputy = cit.getDeputy();
+        this.applied = cit.getApplicant();
+        this.invited = cit.getInvitee();
+        this.invitedBy = cit.getInviteOfficer();
+        //this.sentDate = cit;
         
         return true;
     }
+    public boolean getApplicant(){ return applied;}
+    public boolean getInvitee() {return invited;}
+    public String getInviteOfficer() {return invitedBy;}
+    //public getSentDate ();
     @Override
     public String toString(){
         return name;
@@ -100,6 +123,7 @@ public class Citizen {
             return false;
         }
     }
+    public boolean getDeputy(){return deputy; }
     public boolean isDeputy(String town_Name){
         if (townName.equals(town_Name) ){
             return deputy;

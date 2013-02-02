@@ -66,8 +66,13 @@ public class Town {
         
     }    
     public boolean loadFromDB(String town_Name){
-        
-        
+        Town copy = plugin.dbwrapper.getTown(town_Name);
+        //plugin = copy.plugin;
+        townName = copy.getName();
+        townMayor = copy.getMayor(); 
+        townRank = copy.getRank();
+        townBankBal = copy.getBankBal();
+        taxRate = copy.getTaxRate();
         return true;
     }
     @Override
@@ -202,7 +207,7 @@ public class Town {
             return true;
         } else { return false; }
     }
-    public double tb_balance (){
+    public double getBankBal (){
         return townBankBal;
     }
     public double getTaxRate(){

@@ -34,12 +34,15 @@ public class dbWrapper extends Muni {
         plugin = instance;
     }
     public void db_open() throws SQLException {
-        if(plugin.isDebug()){plugin.getLogger().info("Starting DB");}
+        if(plugin.isDebug()){
+            String temp = plugin.useMYSQL ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
+            plugin.getLogger().info(temp);
+        }
         if (plugin.useMYSQL){  //Using MySQL
             try {
             Class.forName("org.mysql.jdbc.Driver");
             } catch (ClassNotFoundException ex){
-                plugin.getLogger().severe("db_open: "+ ex.getMessage() );
+                plugin.getLogger().severe("db_open (db driver not found): "+ ex.getMessage() );
             }
             conn = DriverManager.getConnection(plugin.db_URL,plugin.db_user,plugin.db_pass);
             // MySQL is not yet tested!!! 31 Jan 2013 RJS
@@ -47,7 +50,7 @@ public class dbWrapper extends Muni {
             try {
             Class.forName("org.sqlite.JDBC");
             } catch (ClassNotFoundException ex){
-                plugin.getLogger().severe("db_open: "+ ex.getMessage() );
+                plugin.getLogger().severe("db_open (db driver not found): "+ ex.getMessage() );
             }
             conn = DriverManager.getConnection(plugin.db_URL);
         }
@@ -56,6 +59,7 @@ public class dbWrapper extends Muni {
     public void db_close() throws SQLException {
         if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
         if ( rs != null) { rs.close(); }
+        if ( stmt != null) { rs.close(); }
         if ( conn != null ) { conn.close();}
     }
     public boolean checkExistence ( String table, String pk, String value ){
@@ -107,7 +111,7 @@ public class dbWrapper extends Muni {
             } catch (SQLException ex) {
                 plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
                 rtn = null;
-            } finally{}
+            } 
         }
         return rtn;
     }
@@ -148,11 +152,11 @@ public class dbWrapper extends Muni {
             temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"),
                     rs.getInt("townRank"),rs.getDouble("bankBal"),rs.getDouble("taxRate") );
         } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() );
+            plugin.getLogger().severe( "getTown: "+ ex.getMessage() );
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() );
+                plugin.getLogger().warning( "getTown: "+ ex.getMessage() );
             } finally{}
         }
         return temp;
@@ -168,11 +172,11 @@ public class dbWrapper extends Muni {
                     rs.getBoolean("mayor"), rs.getBoolean("deputy"), rs.getBoolean("applicant"),
                     rs.getBoolean("invitee"),rs.getString("invitedBy"),rs.getDate("date") );
         } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() );
+            plugin.getLogger().severe( "getCitzien: "+ ex.getMessage() );
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() );
+                plugin.getLogger().warning( "getCitzien: "+ ex.getMessage() );
             } finally{}
         }
         return temp;
@@ -226,23 +230,7 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-    public ResultSet runSQL (String SQL) throws SQLException { 
-        ResultSet rtn = null;
-        
-        try {
-            db_open();
-            rs = stmt.executeQuery(SQL);
-          rtn = rs;
-        } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() );
-        } finally {
-            try { db_close();
-            } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() );
-            } finally{}
-        }
-        return rtn;
-    }
+
     public boolean createDB (boolean drops) { 
         boolean rtn = false;
         String prefix = plugin.db_prefix;
@@ -271,21 +259,24 @@ public class dbWrapper extends Muni {
             if (drops){ 
                 plugin.getLogger().warning("Dropping all tables");
                 stmt.executeUpdate(DROP1);
-                this.getLogger().info(stmt.getWarnings().toString() );
                 stmt.executeUpdate(DROP2);
                 stmt.executeUpdate(DROP3);
             }
             if (plugin.useMYSQL){ 
                 stmt.executeUpdate(SQL0); 
+                if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
                 stmt.executeUpdate(SQL00); 
                 if(plugin.isDebug()){plugin.getLogger().info("Made the DB (mysql)");}
             }
             if(plugin.isDebug()){plugin.getLogger().info("Making towns table");}
             stmt.executeUpdate(SQL1);
+            if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             if(plugin.isDebug()){plugin.getLogger().info("Making citizens table");}
             stmt.executeUpdate(SQL2);
+            if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             if(plugin.isDebug()){plugin.getLogger().info("Making transactions table");}
             stmt.executeUpdate(SQL3);
+            if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             rtn = true;
             
         } catch (SQLException ex){
@@ -300,7 +291,8 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-        
+    
+    /*
     public void MySQL(String[] args) {
 
         Connection con = null;
@@ -389,5 +381,5 @@ public class dbWrapper extends Muni {
             plugin.getLogger().warning( ex.getMessage() );
           }
         }
-    }
+    } */
 }

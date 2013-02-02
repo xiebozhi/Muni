@@ -46,9 +46,13 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("List of towns:");
             // iteration will be required here
             Iterator<Town> itr = plugin.towns.iterator();
+            if (!itr.hasNext() ){
+                plugin.getLogger().info("/town list: No towns to check");
+                return false;
+            }
             while (itr.hasNext() ){
-                Town next = itr.next();
-                player.sendMessage(next.getName() ) ;
+                Town current = itr.next();
+                player.sendMessage(current.getName() ) ;
             }
             return true;
         } else if (split[0].equalsIgnoreCase("info")) {
