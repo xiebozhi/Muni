@@ -76,10 +76,12 @@ public class Muni extends JavaPlugin {
     public void onDisable() {
         getLogger().info("Shutting Down");
         
-        //save all towns to database 
+        //Save Citizens and towns
+        saveCitizens();
+        saveTowns();
         
         // Save the config to file
-        // this.saveConfig();
+        saveConfig();
         
         getLogger().info("Shut Down sequence complete");
     }
@@ -93,9 +95,6 @@ public class Muni extends JavaPlugin {
         // Initializes Muni wrappers
         hookInDependencies();
         
-        // Always make sure a database is there.  
-        // Passing true drops the db first, normally false
-        dbwrapper.createDB(false);
         
         //Load the configuration file
         this.saveDefaultConfig();
@@ -118,8 +117,17 @@ public class Muni extends JavaPlugin {
         getCommand("mayor"     ).setExecutor(new OfficerCommand(this) );
         getCommand("townadmin" ).setExecutor(new TownAdminCommand(this) );
         
-        this.getLogger().info( Calendar.getInstance().toString() );
+        //Just testing
+        this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
+        //makeDefaultTowns();
+        
+        // Make sure the database tables are there.  
+        // Passing true drops the db first, normally false
+        //this.getLogger().warning("Dropping database!");
+        //dbwrapper.createDB(false);
+        
+        this.getLogger().info ("Here 1");
         this.getLogger().info (ChatColor.AQUA+"Here 1");
         //Town temp = new Town(this,"bobbshields","test2");
         //temp.db_addTown();
@@ -168,24 +176,49 @@ public class Muni extends JavaPlugin {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Citizens"); }
         }
     }
+    /* For testing only, will be deleted closer to the beta
+     * 
+     */
+    public void makeDefaultTowns(){
+        Town maker = new Town(this);
+        maker = new Town (this,"TestTown","bobbshields");
+        maker.setMaxDeputies(5); maker.setRank(0);
+        maker.setTaxRate(10.5);
+        
+        maker.saveToDB();
+        
+        maker = new Town (this,"SecondTest","bobbshields",2,1000,100);
+        maker.db_addTown();
+        
+        maker.loadFromDB("TestTown");
+        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
+        
+        maker = new Town (this,"SecondTest");
+        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
+    }
     /**
      * Queries DB for town names then town constructor loads itself 
      * 
      * @author bobbshields
      */
     public void loadTowns(){
+            Town copyTown = new Town (this);
         try{
-            //towns.add( temp );
-            //this.getLogger().info ("Here 3" );
-            
-            Iterator itr = dbwrapper.getTowns().iterator();
             if ( isDebug() ) { this.getLogger().info("Towns Loading. " ); }
             
-            while ( itr.hasNext() ){
-                String current = itr.next().toString();
-                if ( isDebug() ) { this.getLogger().info("Loading town: " + current); }
-                towns.add( new Town( this, current ) );
+            for (String curr : dbwrapper.getSingleCol("towns", "townName") ){
+                if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
+                //Town copyTown = new Town (this);
+                copyTown.loadFromDB( curr );
+                towns.add( new Town ( copyTown ) );
             }
+           /* while ( itr.hasNext() ){
+                String curr = itr.next().toString();
+                if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
+                Town copyTown = new Town (this);
+                copyTown.loadFromDB( curr );
+                towns.add( copyTown );
+            }*/
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading towns: "+ex.getMessage() );
         } finally {
@@ -193,32 +226,48 @@ public class Muni extends JavaPlugin {
         }
     }
     public void saveCitizens(){
-        
+        for (Citizen curr : citizens){
+            curr.saveToDB();
+        }
     }
     public void saveTowns() {
-        
+        for (Town curr: towns) {
+            curr.saveToDB();
+        }
     }
     public void makeTrans(){
         
     }
     public Town getTown(String town_Name){
         Town temp = null;
-        
+        for (Town curr: towns) {
+            if (curr.getName().equals(town_Name) ){
+                temp = curr;
+            } 
+        }
         return temp;
     }
     public Citizen getCitizen(String player){
         Citizen temp = null;
-        
+        for (Citizen curr: citizens){
+            if (curr.getName().equals(player) ){
+                temp = curr;
+            }
+        }
         return temp;
     }
     public String getAllTowns(){
-        String temp = null;
-        
+        String temp = "";
+        for (Town curr: towns) {
+            temp = temp + curr.getName() +", ";
+        }
         return temp;
     }
     public String getAllCitizens(){
         String temp = null;
-        
+        for (Citizen curr: citizens){
+            temp = temp + curr.getName() +", ";
+        }
         return temp;
     }
 
@@ -245,7 +294,11 @@ public class Muni extends JavaPlugin {
         dbwrapper = new dbWrapper(this);
         if ( isDebug() ) { getLogger().info( "Dependancies Hooked"); }
     }
-    
+    public String getItemName(int itemNumber ){
+        String rtn = "";
+        
+        return rtn;
+    }
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
@@ -298,6 +351,8 @@ public class Muni extends JavaPlugin {
                     if ( isDebug() ) { getLogger().info( townRanks[i].getName()+
                             " config settings were loaded"); }
         }
+        if ( isDebug() ) {getLogger().info("Config settings loaded"); }
+        
    }
    
    public boolean isDebug() { return DEBUG; }

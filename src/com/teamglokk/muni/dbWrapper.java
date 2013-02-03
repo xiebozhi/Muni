@@ -59,7 +59,7 @@ public class dbWrapper extends Muni {
     public void db_close() throws SQLException {
         if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
         if ( rs != null) { rs.close(); }
-        if ( stmt != null) { rs.close(); }
+        if ( stmt != null) { stmt.close(); }
         if ( conn != null ) { conn.close();}
     }
     public boolean checkExistence ( String table, String pk, String value ){
@@ -87,7 +87,8 @@ public class dbWrapper extends Muni {
             } finally{}
         }
         return rtn;
-    } 
+    }
+    /*
     public ArrayList<String> getTowns (){
         ArrayList<String> rtn = new ArrayList<String>();
         String SQL = "SELECT townName FROM "+plugin.db_prefix+"towns;";
@@ -114,7 +115,7 @@ public class dbWrapper extends Muni {
             } 
         }
         return rtn;
-    }
+    }*/
     public ArrayList<String> getSingleCol (String table, String column ){
         ArrayList<String> rtn = new ArrayList<String>();
         String SQL = "SELECT "+column+" FROM "+plugin.db_prefix+table+";";
@@ -143,8 +144,8 @@ public class dbWrapper extends Muni {
         return rtn;
     }
     public Town getTown(String townName){
-        Town temp = null;
-        String SQL = "SELECT "+temp.toDB_Cols()+" WHERE townName='"+townName+"';";
+        Town temp = new Town (plugin) ;
+        String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.db_prefix+"towns WHERE townName='"+townName+"';";
         try {
             db_open();
             if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
@@ -163,7 +164,7 @@ public class dbWrapper extends Muni {
     }
     public Citizen getCitizen(String playerName){
         Citizen temp = null;
-        String SQL = "SELECT "+temp.toDB_Cols()+" WHERE playerName='"+playerName+"';";
+        String SQL = "SELECT "+temp.toDB_Cols() +" FROM "+plugin.db_prefix+"citizens WHERE playerName='"+playerName+"';";
         try {
             db_open();
             rs = stmt.executeQuery(SQL);
@@ -213,20 +214,41 @@ public class dbWrapper extends Muni {
         
         boolean rtn = true;
         String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+col+"="+value+" WHERE "
-                +key_col+"="+key;
+                +key_col+"='"+key+"';";
         try {
             db_open();
             if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
-            rs = stmt.executeQuery(SQL); 
+            stmt.executeQuery(SQL); 
         } catch (SQLException ex){
-            plugin.getLogger().severe( ex.getMessage() ); 
+            plugin.getLogger().severe("db_update: "+ ex.getMessage() ); 
             rtn = false;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() ); 
+                plugin.getLogger().warning("db_update: "+ ex.getMessage() ); 
                 rtn = false;
-            } finally{}
+            } 
+        }
+        return rtn;
+    }
+        public boolean db_updateRow(String table, String key_col, String key, String colsANDvals) {
+        
+        boolean rtn = true;
+        String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+colsANDvals+" WHERE "
+                +key_col+"='"+key+"';";
+        try {
+            db_open();
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            stmt.executeQuery(SQL); 
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_updateRow: "+ ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_updateRow: "+ ex.getMessage() ); 
+                rtn = false;
+            } 
         }
         return rtn;
     }
@@ -270,13 +292,13 @@ public class dbWrapper extends Muni {
             }
             if(plugin.isDebug()){plugin.getLogger().info("Making towns table");}
             stmt.executeUpdate(SQL1);
-            if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
+            //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             if(plugin.isDebug()){plugin.getLogger().info("Making citizens table");}
             stmt.executeUpdate(SQL2);
-            if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
+            //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             if(plugin.isDebug()){plugin.getLogger().info("Making transactions table");}
             stmt.executeUpdate(SQL3);
-            if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
+            //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             rtn = true;
             
         } catch (SQLException ex){

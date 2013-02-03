@@ -40,7 +40,8 @@ public class TownAdminCommand implements CommandExecutor {
             displayHelp(player);
             return true;
         } else if (split[0].equalsIgnoreCase("start")  ) {
-            if (plugin.dbwrapper.createDB(false) ){
+            boolean test = split[1].equalsIgnoreCase("drop") ? true : false;
+            if (plugin.dbwrapper.createDB(test) ){
                 player.sendMessage("You created the database");
                 return true;
             } else {
@@ -54,20 +55,30 @@ public class TownAdminCommand implements CommandExecutor {
             player.sendMessage("Saving config");
             plugin.saveConfig();
             return true;
+        } else if (split[0].equalsIgnoreCase("debug")) {
+            if (split[1].equalsIgnoreCase("on") ){
+                plugin.setDebug(true);
+            } else if (split[1].equalsIgnoreCase("off") ){
+                plugin.setDebug(false);
+            }
+            player.sendMessage("Debug changed to "+split[1]+", remember to /townadmin save!");
+            return true;
         } else if (split[0].equalsIgnoreCase("addTown")) {
-            player.sendMessage("Admin adding of towns is not yet enabled");
             if (split.length != 3) {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            //plugin.towns.add(new Town (plugin) );
-            //if (plugin.towns.iterator().next().addTown(
+            // Check to see of the player is real and connected
             Player temp = null;
             temp = plugin.getServer().getPlayer(split[2]);            
             if (temp != null){
-                   plugin.towns.add( new Town (plugin,split[2],split[1] ) ) ;//{ //need to verify this player is online
-                return true; // or override the addTown method for using a string
-            } else {return false;}
+                   plugin.towns.add( new Town (plugin,split[1],split[2] ) ) ;
+                   player.sendMessage("Added the town: "+split[2]);
+                return true; 
+            } else {
+                player.sendMessage("Could not add the town, check the logs");
+                return false;
+            }
             //} else { return false; }
         } else if (split[0].equalsIgnoreCase("addCitizen")) {
             player.sendMessage("Admin adding of citizens is not yet enabled");
@@ -79,14 +90,30 @@ public class TownAdminCommand implements CommandExecutor {
             player.sendMessage("Admin removing of citizens is not yet enabled");
             return true;
         } else if (split[0].equalsIgnoreCase("checkBal")) {
-            
+            // Check to see of the player is real and connected
+            Player temp = null;
+            temp = plugin.getServer().getPlayer(split[1]);            
+            if (temp != null){
+                if (split[1].equalsIgnoreCase(player.getName() ) ) {
+                    player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance(player));
+                } else {
+                    player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance( temp ));
+                }
+            } else {
+                player.sendMessage("Could not check the offline player's balance");
+            }
             player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance(player));
             
             return true;
         } else if (split[0].equalsIgnoreCase("pay")) {
             double amount = Double.parseDouble(split[1]) ;
-            if (plugin.econwrapper.pay(player, amount)){
-                player.sendMessage("You paid " + amount  );
+            if (plugin.econwrapper.payR( player, amount,"Test" ) ){
+                return true;
+            } else {return false;}
+            
+        } else if (split[0].equalsIgnoreCase("payItem")) {
+            int amount = Integer.parseInt( split[1] ) ;
+            if (plugin.econwrapper.payItemR( player, plugin.rankupItemID, amount,"Test" )){
                 return true;
             } else {return false;}
             

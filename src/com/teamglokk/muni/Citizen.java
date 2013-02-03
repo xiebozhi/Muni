@@ -56,6 +56,7 @@ public class Citizen {
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
+        this.mayor = cit.getMayor();
         this.deputy = cit.getDeputy();
         this.applied = cit.getApplicant();
         this.invited = cit.getInvitee();
@@ -75,10 +76,26 @@ public class Citizen {
         //this.sentDate = cit;
         
         return true;
+    }    
+    public boolean saveToDB(){
+        // if exists, update; else insert
+        //db_updateRow(String table, String key_col, String key, String colsANDvals
+        if ( plugin.dbwrapper.checkExistence("towns", "townName", townName) ){
+            return plugin.dbwrapper.db_updateRow("towns", "townName", townName, toDB_UpdateRowVals());
+        } else {
+            return plugin.dbwrapper.db_insert("towns", toDB_Cols(), toDB_Vals() );
+        }
+    }
+    public String toDB_UpdateRowVals(){
+        return "playerName='"+name+"', townName='"+townName+"', mayor='"+
+                mayor +"', deputy='"+deputy+"', applicant='"+applied+
+                "', invitee='"+invited+"', invitedBy='"+invitedBy+"' ";
+        // this is missing the sentDate and lastLogin SQL fields
     }
     public boolean getApplicant(){ return applied;}
     public boolean getInvitee() {return invited;}
     public String getInviteOfficer() {return invitedBy;}
+    public boolean getMayor() { return mayor;}
     //public getSentDate ();
     @Override
     public String toString(){
@@ -100,11 +117,11 @@ public class Citizen {
         //sentDate = Calendar.getInstance();
     }
     public String toDB_Cols(){
-        return "playerName,townName,mayor,deputy,applicant,invitee,sentDate,lastLogin";
+        return "playerName,townName,mayor,deputy,applicant,invitee"; //,sentDate,lastLogin";
     }
     public String toDB_Vals(){
         return name+", "+townName+", "+mayor+", "+deputy+", "+applied+", "+
-                invited+", "+sentDate+", "+lastLogin;
+                invited; //+", "+sentDate+", "+lastLogin;
     }
     public boolean isMayor(String town_Name){
         if (townName.equals(town_Name) ){

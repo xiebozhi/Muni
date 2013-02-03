@@ -3,7 +3,6 @@ package com.teamglokk.muni;
 import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -13,10 +12,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class Town {
     
+    // Gives access to global vars and functions
     private static Muni plugin;
     
     // Database table is $db_prefix_ towns
-    private int db_pk;
+    //private int db_pk;
     private String townName;
     //private Location townCenter;   
     private double townBankBal;
@@ -26,39 +26,51 @@ public class Town {
 	// Stored in (prefix)_citizens	
     private String townMayor;
     private int maxDeputies = 5;
-    private ArrayList<String> townDeputies = null;
-    private ArrayList<String> citizens;  
-    private ArrayList<String> invitees;
-    private ArrayList<String> applicants;
     
     public Town (Muni instance){
         plugin = instance;
     }
-    public Town (Muni instance, String player, String town_Name ){
+    public Town (Town copy){
+        townName = copy.getName();
+        townMayor = copy.getMayor(); 
+        townRank = copy.getRank();
+        townBankBal = copy.getBankBal();
+        taxRate = copy.getTaxRate();
+    }
+   public Town (Muni instance, String town_Name, String player ){
         
         plugin = instance;
-        plugin.getLogger().warning("Begin Muni Constructor: "+player+", "+town_Name);
+        if (plugin.isDebug() ) plugin.getLogger().info("Town with mayor: "+town_Name+", "+player);
         townName = town_Name;
         townMayor = player; 
         townRank = 1;
         townBankBal = 5;
         taxRate = 10;
-        plugin.getLogger().warning("End Muni Constructor: "+toDB_Vals() );
+        if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }
+    /**
+     * Full data constructor
+     * 
+     * @author bobbshields
+     */
     public Town (Muni instance, String town_Name, String mayor,
             int rank, double bankBal, double tax){
         
         plugin = instance;
-        plugin.getLogger().warning("Begin Muni Constructor: "+mayor+", "+town_Name);
+        if (plugin.isDebug() ) plugin.getLogger().info("Begin Muni Constructor: "+mayor+", "+town_Name);
         townName = town_Name;
         townMayor = mayor; 
         townRank = rank;
         townBankBal = bankBal;
         taxRate = tax;
-        plugin.getLogger().warning("End Muni Constructor: "+toDB_Vals() );
+        if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }
+    /* Loads the class instance variables from the database using the passed town name.
+     * 
+     * @author bobbshields
+     */
     public Town (Muni instance, String town_Name ){
         
         plugin = instance;
@@ -74,6 +86,15 @@ public class Town {
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
         return true;
+    }    
+    public boolean saveToDB(){
+        // if exists, update; else insert
+        //db_updateRow(String table, String key_col, String key, String colsANDvals
+        if ( plugin.dbwrapper.checkExistence("towns", "townName", townName) ){
+            return plugin.dbwrapper.db_updateRow("towns", "townName", townName, toDB_UpdateRowVals());
+        } else {
+            return plugin.dbwrapper.db_insert("towns", toDB_Cols(), toDB_Vals() );
+        }
     }
     @Override
     public int hashCode() {
@@ -96,12 +117,17 @@ public class Town {
         return townName;
     }
     public String toDB_Cols(){
-        return "townName,townRank,bankBal,taxRate";
+        return "townName,mayor, townRank,bankBal,taxRate";
     }
     public String toDB_Vals(){
-        return "'"+townName +"','"+ Integer.toString(townRank) +"','"+
+        return "'"+townName +"','"+townMayor+"','"+
+               Integer.toString(townRank) +"','"+
                Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
     }  
+    public String toDB_UpdateRowVals(){
+        return "townName='"+townName+"', townRank='"+townRank+"', bankBal='"+
+                Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+"' ";
+    }
 
     public boolean db_addTown(Player mayor, String town_Name){
         if ( !plugin.econwrapper.pay(mayor,1000) ){
@@ -142,6 +168,7 @@ public class Town {
         townMayor = mayor;
         return true;
     }
+    /*
     public String getDeputies(){
         String temp = null;
         Iterator itr = townDeputies.iterator();
@@ -161,12 +188,13 @@ public class Town {
             return true;
         } else {return false;}
     }
+    */
     public boolean rankup(Player player){
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
         if ( rankCost >= townBankBal ){
-            if (plugin.econwrapper.pay_item( player, plugin.rankupItemID, rankCostItem ) ) {
+            if (plugin.econwrapper.payItemR( player, plugin.rankupItemID, rankCostItem,"Rankup" ) ) {
                 player.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
                 return payFromTB(rankCost); //Payment of money taken after sponges are confirmed
             } else{ 

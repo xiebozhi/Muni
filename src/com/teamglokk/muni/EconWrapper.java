@@ -22,30 +22,63 @@ public class EconWrapper extends Muni {
         plugin = instance;
         econ = plugin.economy;
     }
-    public boolean pay( Player PLAYER, double amount){ 
-        er = econ.withdrawPlayer(PLAYER.getName(), amount );
+    public boolean checkBal (Player player, double amount) {
+        
+        return false;
+    }
+    public boolean checkItem (Player player, int ItemID, double amount) {
+        
+        return false;
+    }
+    public boolean pay( Player player, double amount){ 
+        er = econ.withdrawPlayer(player.getName(), amount );
             if(er.transactionSuccess()) {
                 return true;
             } else {
                 return false;
             } 
     }
-    public boolean pay_item( Player PLAYER, int ITEM_NUMBER, int amount){ 
-        if (PLAYER.getInventory().contains(ITEM_NUMBER,amount) ){
-            
-            PLAYER.getInventory().removeItem(new ItemStack[] {
-          new ItemStack(Material.getMaterial(ITEM_NUMBER),amount ) } );    
+    public boolean payR(Player player, double amount, String reason){
+        if ( pay(player,amount) ){
+            player.sendMessage("You paid "+amount+" "+econ.currencyNamePlural()+
+                    " for "+reason);
+            // make a new transaction here
             return true;
-        } else{
+        } else { 
+            
             return false;
         }
     }
-    public double getBalance(Player PLAYER){
-        return econ.getBalance(PLAYER.getName() );
+    
+    public boolean payItemR(Player player, int ItemID, int amount, String reason){
+        if ( payItem(player,ItemID,amount) ){
+            player.sendMessage("You paid "+amount+" of "+ItemID+
+                    " for "+reason);
+            // make a new transaction here
+            return true;
+        } else { 
+            
+            return false;
+        }
+    }
+    public boolean payItem( Player player, int ItemID, int amount){ 
+        if (player.getInventory().contains(ItemID,amount) ){
+            
+            player.getInventory().removeItem(new ItemStack[] {
+          new ItemStack(Material.getMaterial(ItemID),amount ) } );   
+            // Log a transaction here
+            return true;
+        } else{
+            player.sendMessage("You did not have enough "+ItemID );
+            return false;
+        }
+    }
+    public double getBalance(Player player){
+        return econ.getBalance(player.getName() );
     }
             
-    public boolean giveMoney( Player PLAYER, double amount){ 
-        er = econ.depositPlayer(PLAYER.getName(), amount );
+    public boolean giveMoney( Player player, double amount){ 
+        er = econ.depositPlayer(player.getName(), amount );
             if(er.transactionSuccess()) {
                 return true;
             } else {

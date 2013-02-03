@@ -13,6 +13,8 @@ import com.teamglokk.muni.WGWrapper;
 import com.teamglokk.muni.EconWrapper;
 import com.teamglokk.muni.dbWrapper;
 
+import org.bukkit.ChatColor;
+
 import java.util.Iterator;
 /**
  * Handler for the /town command.
@@ -59,7 +61,7 @@ public class TownCommand implements CommandExecutor {
             if(split.length!=2){player.sendMessage("Not the right number of parameters"); 
             return false;
             }
-            player.sendMessage( "Info on: " + split[1] );
+            player.sendMessage( ChatColor.DARK_BLUE+ "Info on: " + split[1] );
             Iterator<Town> itr = plugin.towns.iterator();
             while (itr.hasNext() ){
                 Town current = itr.next();
@@ -85,7 +87,7 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Voting not yet added.");
             return true;
         } else if (split[0].equalsIgnoreCase("checkBank")) {
-            player.sendMessage("The bank balance is ");
+            player.sendMessage("The bank balance is "+plugin.getTown(player));
             return true;
         }  else if (split[0].equalsIgnoreCase("signCharter")) {
             player.sendMessage("Charters not yet accepted ");
@@ -96,7 +98,7 @@ public class TownCommand implements CommandExecutor {
         }
     }
     private void displayHelp(Player player){
-        player.sendMessage("Muni Help.  You can do these commands:");
+        player.sendMessage(ChatColor.DARK_PURPLE+"Muni Help.  You can do these commands:");
             player.sendMessage("/town list");
             player.sendMessage("/town info");
             player.sendMessage("/town join");
