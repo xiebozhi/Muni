@@ -132,6 +132,8 @@ public class Muni extends JavaPlugin {
             makeDefaultTowns();
             makeDefaultCitizens();
         }
+        // Ensure the database is there
+        dbwrapper.createDB(false);
         
         this.getLogger().info ("Loading Towns from database");
         loadTowns();
@@ -229,8 +231,23 @@ public class Muni extends JavaPlugin {
             curr.saveToDB();
         }
     }
-    public void makeTrans(){
-        
+    public void addTown( Town addition ) {
+        towns.add(addition);
+    }
+    public void addCtizien (Citizen addition) {
+        citizens.add(addition);
+    }
+    public void removeTown(String town_Name){
+        Town temp = new Town (this,town_Name);
+        if (towns.contains(temp) ){
+            towns.remove(temp);
+        }
+    }
+    public void removeCitizen(String player){
+        Citizen temp = new Citizen (this, player);
+        if (citizens.contains(temp) ) {
+            citizens.remove(temp);
+        }
     }
     public Town getTown(String town_Name){
         Town temp = null;
@@ -297,11 +314,6 @@ public class Muni extends JavaPlugin {
         }
         dbwrapper = new dbWrapper(this);
         if ( isDebug() ) { getLogger().info( "Dependancies Hooked"); }
-    }
-    public String getItemName(int itemNumber ){
-        String rtn = "";
-        
-        return rtn;
     }
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {

@@ -78,7 +78,7 @@ public class dbWrapper extends Muni {
             if(this.isDebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
             } 
         } catch (SQLException ex){
-            plugin.getLogger().severe( "checkExistence: "+ex.getMessage() ); 
+            plugin.getLogger().info( "checkExistence: Value not found: "+table+"."+pk+"="+value ); 
             rtn = false;
         } finally {
             try { db_close();
@@ -91,7 +91,7 @@ public class dbWrapper extends Muni {
     }
     public ArrayList<String> getSingleCol (String table, String column ){
         ArrayList<String> rtn = new ArrayList<String>();
-        String SQL = "SELECT "+column+" FROM "+plugin.db_prefix+table+";";
+        String SQL = "SELECT "+column+" FROM "+plugin.db_prefix+table+" ORDER BY "+column+";";
         try {
             
             db_open();
