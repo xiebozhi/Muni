@@ -56,11 +56,11 @@ public class Citizen {
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
-        this.mayor = cit.getMayor();
-        this.deputy = cit.getDeputy();
-        this.applied = cit.getApplicant();
-        this.invited = cit.getInvitee();
-        this.invitedBy = cit.getInviteOfficer();
+        this.mayor = cit.isMayor();
+        this.deputy = cit.isDeputy();
+        this.applied = cit.isApplicant();
+        this.invited = cit.isInvited();
+        this.invitedBy = cit.isInviteOfficer();
         //this.sentDate = cit;
     }
     public boolean loadFromDB(String player){
@@ -69,10 +69,10 @@ public class Citizen {
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
-        this.deputy = cit.getDeputy();
-        this.applied = cit.getApplicant();
-        this.invited = cit.getInvitee();
-        this.invitedBy = cit.getInviteOfficer();
+        this.deputy = cit.isDeputy();
+        this.applied = cit.isApplicant();
+        this.invited = cit.isInvited();
+        this.invitedBy = cit.isInviteOfficer();
         //this.sentDate = cit;
         
         return true;
@@ -92,10 +92,16 @@ public class Citizen {
                 "', invitee='"+invited+"', invitedBy='"+invitedBy+"' ";
         // this is missing the sentDate and lastLogin SQL fields
     }
-    public boolean getApplicant(){ return applied;}
-    public boolean getInvitee() {return invited;}
-    public String getInviteOfficer() {return invitedBy;}
-    public boolean getMayor() { return mayor;}
+    public boolean isApplicant(){ return applied;}
+    public boolean isInvited() {return invited;}
+    public String isInviteOfficer() {return invitedBy;}
+    public boolean isMayor() { return mayor;}
+    
+    public boolean makeMember () {
+        applied = false;
+        invited = false;
+        return true;
+    }
     //public getSentDate ();
     @Override
     public String toString(){
@@ -140,7 +146,7 @@ public class Citizen {
             return false;
         }
     }
-    public boolean getDeputy(){return deputy; }
+    public boolean isDeputy(){return deputy; }
     public boolean isDeputy(String town_Name){
         if (townName.equals(town_Name) ){
             return deputy;

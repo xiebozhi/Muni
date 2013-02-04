@@ -247,6 +247,16 @@ public class Muni extends JavaPlugin {
         }
         return temp;
     }
+    public Town getTown(Player player){
+        Town temp = null;
+        String search = getCitizen(player.getName() ).getTown();
+        for (Town curr: towns) {
+            if (curr.getName().equals(search) ){
+                temp = curr;
+            } 
+        }
+        return temp;
+    }
     public Citizen getCitizen(String player){
         Citizen temp = null;
         for (Citizen curr: citizens){

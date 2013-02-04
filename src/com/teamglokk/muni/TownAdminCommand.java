@@ -113,7 +113,7 @@ public class TownAdminCommand implements CommandExecutor {
             
         } else if (split[0].equalsIgnoreCase("payItem")) {
             int amount = Integer.parseInt( split[1] ) ;
-            if (plugin.econwrapper.payItemR( player, plugin.rankupItemID, amount,"Test" )){
+            if (plugin.econwrapper.payItemR( player, plugin.rankupItemID, amount,"Test" ) ){
                 return true;
             } else {return false;}
             
@@ -152,7 +152,10 @@ public class TownAdminCommand implements CommandExecutor {
                 player.sendMessage("Given location is invalid");
                 return false;
             }
-        }  else {
+        }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
+            player.sendMessage("The command was: "+command.toString() );
+            return true;
+        } else {
             displayHelp(player);
             return true;
         }

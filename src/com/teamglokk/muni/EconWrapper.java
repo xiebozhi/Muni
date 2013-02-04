@@ -63,9 +63,11 @@ public class EconWrapper extends Muni {
     }
     public boolean payItem( Player player, int ItemID, int amount){ 
         if (player.getInventory().contains(ItemID,amount) ){
+            player.sendMessage("Taking "+amount+" items");
             
-            player.getInventory().removeItem(new ItemStack[] {
-          new ItemStack(Material.getMaterial(ItemID),amount ) } );   
+            player.getInventory().removeItem( new ItemStack[] {
+                new ItemStack( Material.getMaterial(ItemID),amount ) } );
+            
             // Log a transaction here
             return true;
         } else{

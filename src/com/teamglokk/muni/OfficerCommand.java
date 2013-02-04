@@ -46,11 +46,15 @@ public class OfficerCommand implements CommandExecutor {
            //    return true;
            // } else { return false; }
             return true;
-        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            player.sendMessage("The command was: "+command.toString() );
-            return true;
         } else if (split[0].equalsIgnoreCase("invite")) {
-            player.sendMessage("Inviting citizens not yet added.");
+            if (split.length != 2) {
+                player.sendMessage("Not enough parameters;");
+                return false;
+            }
+            Citizen temp = new Citizen( plugin, "test" ) ;
+            temp.apply4Citizenship(split[1], player.getName() );
+            plugin.citizens.add( temp );
+            player.sendMessage("Invitation to "+temp.getTown()+" was sent.");
             return true;
         } else if (split[0].equalsIgnoreCase("remove") ||split[0].equalsIgnoreCase("disband")) {
             player.sendMessage("Removing a town is not yet added.");

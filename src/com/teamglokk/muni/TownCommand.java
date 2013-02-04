@@ -42,9 +42,21 @@ public class TownCommand implements CommandExecutor {
             displayHelp(player);
             return true;
         } else if (split[0].equalsIgnoreCase("payTaxes")) {
-            player.sendMessage("Preparing to pay taxes.");
-            return true;
+            
+            Town temp = plugin.getTown(player);
+            if (split.length == 2 ) {
+                Double amount = Double.parseDouble(split[1]);
+                player.sendMessage("Paying taxes: "+amount+" to "+temp.getName()+"." );
+                return temp.tb_deposit(player, amount );
+                 
+            } else if ( split.length == 1 ){
+                return temp.tb_deposit(player, temp.getTaxRate() );
+            } else { return false; }
         } else if (split[0].equalsIgnoreCase("list")) {
+            if (split.length != 1) {
+                player.sendMessage("Not enough parameters;");
+                return false;
+            }
             player.sendMessage("List of towns:");
             // iteration will be required here
             Iterator<Town> itr = plugin.towns.iterator();
@@ -58,8 +70,9 @@ public class TownCommand implements CommandExecutor {
             }
             return true;
         } else if (split[0].equalsIgnoreCase("info")) {
-            if(split.length!=2){player.sendMessage("Not the right number of parameters"); 
-            return false;
+            if(split.length!=2){
+                player.sendMessage("Not the right number of parameters"); 
+                return false;
             }
             player.sendMessage( ChatColor.DARK_BLUE+ "Info on: " + split[1] );
             Iterator<Town> itr = plugin.towns.iterator();
@@ -72,13 +85,29 @@ public class TownCommand implements CommandExecutor {
             }
             return false;
         } else if (split[0].equalsIgnoreCase("apply")) {
-            player.sendMessage("Apply to a town... but not yet");
+            if (split.length != 2) {
+                player.sendMessage("Not enough parameters;");
+                return false;
+            }
+            Citizen temp = new Citizen( plugin ) ;
+            temp.apply4Citizenship(split[1], player.getName() );
+            plugin.citizens.add( temp );
+            player.sendMessage("Application to "+temp.getTown()+" was sent.");
             return true;
         } else if (split[0].equalsIgnoreCase("accept")) {
-            player.sendMessage("Accept an invite to a town... but not yet");
+            if (split.length != 2) {
+                player.sendMessage("Not enough parameters;");
+                return false;
+            }
+            Citizen temp = plugin.getCitizen( plugin.getServer().getPlayer(split[1]).getName() );
+            if ( temp.isInvited() ){
+                temp.makeMember();
+            }
+            
+            player.sendMessage("Accept an invite from " + temp.getTown() );
             return true;
         } else if (split[0].equalsIgnoreCase("leave")) {
-            player.sendMessage("Leaving town.");
+            player.sendMessage("Leaving town not yet possible.");
             return true;
         }else if (split[0].equalsIgnoreCase("sethome")) {
             player.sendMessage("Sethome not yet added.");
@@ -87,10 +116,11 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Voting not yet added.");
             return true;
         } else if (split[0].equalsIgnoreCase("checkBank")) {
-            player.sendMessage("The bank balance is "+plugin.getTown(player));
+            Town temp = new Town( plugin.getTown(player) );
+            player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal());
             return true;
         }  else if (split[0].equalsIgnoreCase("signCharter")) {
-            player.sendMessage("Charters not yet accepted ");
+            player.sendMessage("Charters not yet enabled ");
             return true;
         } else {
             displayHelp(player);
