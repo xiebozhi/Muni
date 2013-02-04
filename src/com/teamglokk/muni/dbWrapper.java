@@ -228,6 +228,16 @@ public class dbWrapper extends Muni {
 
     public boolean createDB (boolean drops) { 
         boolean rtn = false;
+        String serial;
+        String mpk = "";
+        String spk = "";
+        if (plugin.useMYSQL){
+            serial = "AUTO_INCREMENT " ;
+            mpk = ", Primary Key (id) " ;
+        } else{
+            serial = "AUTOINCREMENT " ;
+            spk = "Primary Key ";
+        }
         String prefix = plugin.db_prefix;
         String DROP1 = "DROP TABLE IF EXISTS "+prefix+"towns;";
         String DROP2 = "DROP TABLE IF EXISTS "+prefix+"citizens;";
@@ -235,20 +245,24 @@ public class dbWrapper extends Muni {
         String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;";
         String SQL00= "GRANT ALL PRIVILEGES ON minecraft.* TO user@host BY 'password';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
-            "townName VARCHAR(30), mayor VARCHAR(16), townRank INTEGER, " + 
-            "bankBal DOUBLE, " +  "taxRate DOUBLE, " + 
-            "PRIMARY KEY (townName) ); "; 
-        String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " +
-            "playerName VARCHAR(16), " +"townName VARCHAR(25), " +
+            "id INTEGER "+ spk + serial +", " + 
+            "townName VARCHAR(30) UNIQUE, mayor VARCHAR(16), townRank INTEGER, " + 
+            "bankBal DOUBLE, taxRate DOUBLE "+ mpk + ");";
+            //, PRIMARY KEY (townName) ); "; 
+        String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
+            "id INTEGER "+ spk + serial +", " + 
+            "playerName VARCHAR(16) UNIQUE, " +"townName VARCHAR(25), " +
             "mayor BINARY, deputy BINARY, applicant BINARY, " +
-            "invitee BINARY, invitedBy VARCHAR(16), sentDate DATETIME, lastLogin DATETIME, "+
-            "PRIMARY KEY (playerName) ); " ;
-        String SQL3 = "CREATE TABLE IF NOT EXISTS "+prefix+"transactions ( " +
-            "id INT AUTO_INCREMENT, " + "playerName VARCHAR(16), " +
-            "townName VARCHAR(30), " + "date DATE,  " +
-            "time TIME, " + "type VARCHAR(30), " +
-            "amount DOUBLE, " + "item_amount INTEGER, " +
-            "notes VARCHAR(350), " + "PRIMARY KEY (id) ); " ; 
+            "invitee BINARY, invitedBy VARCHAR(16), "+
+            "sentDate DATETIME, lastLogin DATETIME "+ mpk +");";
+                //, PRIMARY KEY (playerName) ); " ;
+        String SQL3 = "CREATE TABLE IF NOT EXISTS "+prefix+"transactions ( "  + 
+            "id INTEGER "+ spk + serial +", " + 
+            "playerName VARCHAR(16), " +
+            "townName VARCHAR(30), timestamp DATETIME,  " +
+            "type VARCHAR(30), amount DOUBLE, item_amount INTEGER, " +
+            "notes VARCHAR(350) "+ mpk +");";
+            //, PRIMARY KEY (id) ); " ; 
         try {
             db_open();
             if (drops){ 

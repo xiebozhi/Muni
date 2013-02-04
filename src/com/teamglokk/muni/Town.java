@@ -107,7 +107,7 @@ public class Town implements Comparable<Town> {
     }
 
     public boolean db_addTown(Player mayor, String town_Name){
-        if ( !plugin.econwrapper.pay(mayor,1000) ){
+        if ( !plugin.econwrapper.payMoney(mayor,1000) ){
             mayor.sendMessage("Not enough money to found the town");
             return false;
         }
@@ -180,7 +180,7 @@ public class Town implements Comparable<Town> {
         }else{ return false; }
     }
     public boolean tb_deposit(Player player, double amount){
-        if ( plugin.econwrapper.pay(player,amount) ){
+        if ( plugin.econwrapper.payMoney(player,amount) ){
             townBankBal = townBankBal + amount;
             return true;
         } else {return false; }

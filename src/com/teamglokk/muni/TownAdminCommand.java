@@ -107,7 +107,12 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("pay")) {
             double amount = Double.parseDouble(split[1]) ;
-            if (plugin.econwrapper.payR( player, amount,"Test" ) ){
+            if (plugin.econwrapper.payMoneyR( player, amount,"Test" ) ){
+                return true;
+            } else {return false;}
+            
+        } else if (split[0].equalsIgnoreCase("payTest")) {
+            if (plugin.econwrapper.pay( player, 10.0, 16,"Test" ) ){
                 return true;
             } else {return false;}
             

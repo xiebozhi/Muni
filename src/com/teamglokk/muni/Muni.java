@@ -215,7 +215,7 @@ public class Muni extends JavaPlugin {
         maker.saveToDB();
         maker = new Citizen(this,"TestTown","themoltenangel",false, false, false, true,"bobbshields");
         maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","asickynote", true, false, false, false, null);
+        maker = new Citizen(this,"SecondTest","astickynote", true, false, false, false, null);
         maker.saveToDB();
         
     }
