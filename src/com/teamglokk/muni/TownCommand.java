@@ -46,11 +46,12 @@ public class TownCommand implements CommandExecutor {
             Town temp = plugin.getTown(player);
             if (split.length == 2 ) {
                 Double amount = Double.parseDouble(split[1]);
-                player.sendMessage("Paying taxes: "+amount+" to "+temp.getName()+"." );
-                return temp.tb_deposit(player, amount );
+                //player.sendMessage("Paying taxes: "+amount+" to "+temp.getName()+"." );
+                return temp.payTaxes(player, amount );
                  
             } else if ( split.length == 1 ){
-                return temp.tb_deposit(player, temp.getTaxRate() );
+                return temp.payTaxes(player);
+                
             } else { return false; }
         } else if (split[0].equalsIgnoreCase("list")) {
             if (split.length != 1) {
@@ -74,16 +75,10 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("Not the right number of parameters"); 
                 return false;
             }
-            player.sendMessage( ChatColor.DARK_BLUE+ "Info on: " + split[1] );
-            Iterator<Town> itr = plugin.towns.iterator();
-            while (itr.hasNext() ){
-                Town current = itr.next();
-                if (current.getName().equals(split[1] ) ){
-                    player.sendMessage(current.toDB_Vals() ) ;
-                    return true;
-                } else { return false; }
-            }
-            return false;
+            player.sendMessage( ChatColor.BLUE+ "Info on: " + split[1] );
+            player.sendMessage( plugin.getTown( split[1] ).info() );
+            
+            return true;
         } else if (split[0].equalsIgnoreCase("apply")) {
             if (split.length != 2) {
                 player.sendMessage("Not enough parameters;");
@@ -99,15 +94,17 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen temp = plugin.getCitizen( plugin.getServer().getPlayer(split[1]).getName() );
+            Citizen temp = plugin.getCitizen( player.getName() );
             if ( temp.isInvited() ){
                 temp.makeMember();
             }
             
-            player.sendMessage("Accept an invite from " + temp.getTown() );
+            player.sendMessage("Accepted an invite from " + temp.getTown() );
             return true;
         } else if (split[0].equalsIgnoreCase("leave")) {
-            player.sendMessage("Leaving town not yet possible.");
+            String temptown = plugin.getTown(player).getName();
+            plugin.removeCitizen( player.getName() );
+            player.sendMessage("You have left " + temptown);
             return true;
         }else if (split[0].equalsIgnoreCase("sethome")) {
             player.sendMessage("Sethome not yet added.");

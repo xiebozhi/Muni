@@ -41,6 +41,10 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("found") ||split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
             player.sendMessage("Adding a town.");
+            if (plugin.econwrapper.pay(player, plugin.townRanks[0].getMoneyCost(),
+                    plugin.townRanks[0].getItemCost(), "Founding a town" ) ){
+                
+            }
            //plugin.towns.add(new Town (plugin) );
            // if (plugin.towns.iterator().next().addTown(player, split[1]) ){
            //    return true;
@@ -51,16 +55,23 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen temp = new Citizen( plugin, "test" ) ;
-            temp.apply4Citizenship(split[1], player.getName() );
+            Citizen temp = plugin.getCitizen(player.getName() ) ;
+            temp.inviteCitizen(temp.getTown(), split[1], player.getName() ); 
             plugin.citizens.add( temp );
             player.sendMessage("Invitation to "+temp.getTown()+" was sent.");
             return true;
         } else if (split[0].equalsIgnoreCase("remove") ||split[0].equalsIgnoreCase("disband")) {
-            player.sendMessage("Removing a town is not yet added.");
+            Town temp = plugin.getTown(player);
+            plugin.removeTown(temp.getName() );
+            player.sendMessage("Removed: "+ temp.getName() );
             return true;
         }  else if (split[0].equalsIgnoreCase("checkTaxes")) {
-            player.sendMessage("Checking taxes in time.");
+            player.sendMessage("Checking taxes in time.  Use the DB for now");
+            return true;
+        }  else if (split[0].equalsIgnoreCase("setTax")) {
+            Town temp = plugin.getTown(player);
+            temp.setTaxRate(Double.parseDouble(split[1]) );
+            player.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ split[1] );
             return true;
         } else {
             displayHelp(player);

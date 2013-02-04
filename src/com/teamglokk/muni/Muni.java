@@ -242,12 +242,14 @@ public class Muni extends JavaPlugin {
         if (towns.contains(temp) ){
             towns.remove(temp);
         }
+        // if in database, remove from database
     }
     public void removeCitizen(String player){
         Citizen temp = new Citizen (this, player);
         if (citizens.contains(temp) ) {
             citizens.remove(temp);
         }
+        // if in database, remove from database
     }
     public Town getTown(String town_Name){
         Town temp = null;

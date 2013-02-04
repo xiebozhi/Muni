@@ -273,17 +273,16 @@ public class dbWrapper extends Muni {
             } // could do an else: check existence here
             if (plugin.useMYSQL){ 
                 stmt.executeUpdate(SQL0); 
-                if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
                 stmt.executeUpdate(SQL00); 
                 if(plugin.isDebug()){plugin.getLogger().info("Made the DB (mysql)");}
             }
-            if(plugin.isDebug()){plugin.getLogger().info("Making towns table");}
+            if(plugin.isDebug()){plugin.getLogger().info("Making towns table if doesn't exist. ");}
             stmt.executeUpdate(SQL1);
             //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
-            if(plugin.isDebug()){plugin.getLogger().info("Making citizens table");}
+            if(plugin.isDebug()){plugin.getLogger().info("Making citizens table if doesn't exist. ");}
             stmt.executeUpdate(SQL2);
             //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
-            if(plugin.isDebug()){plugin.getLogger().info("Making transactions table");}
+            if(plugin.isDebug()){plugin.getLogger().info("Making transactions table if doesn't exist. ");}
             stmt.executeUpdate(SQL3);
             //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             rtn = true;

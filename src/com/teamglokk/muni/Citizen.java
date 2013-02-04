@@ -1,6 +1,6 @@
 package com.teamglokk.muni;
 
-import java.util.Calendar;
+import java.sql.Timestamp;
 import java.util.Date;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -25,10 +25,10 @@ public class Citizen implements Comparable<Citizen> {
     private boolean applied = false;  
     private boolean invited = false;
     private String invitedBy = null;
-    private Date sentDate = null;
+    private Timestamp sentDate = null;
     
     //Not really needed yet but may be added in future
-    private String lastLogin = null;
+    private Timestamp lastLogin = null;
     
     public Citizen (Muni instance){
         plugin = instance;
@@ -99,6 +99,9 @@ public class Citizen implements Comparable<Citizen> {
     public String toDB_Vals(){
         return "'"+name+"', '"+townName+"', '"+mayor+"', '"+deputy+"', '"+applied+"', '"+
                 invited+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
+    }
+    public String info(){
+        return toDB_Vals();
     }
     public boolean isApplicant(){ return applied;}
     public boolean isInvited() {return invited;}

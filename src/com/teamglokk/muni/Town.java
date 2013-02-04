@@ -1,5 +1,6 @@
 package com.teamglokk.muni;
 
+import java.sql.Timestamp;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -23,6 +24,8 @@ public class Town implements Comparable<Town> {
 	// Stored in (prefix)_citizens	
     private String townMayor;
     private int maxDeputies = 5;
+    
+    private Timestamp createdDate;
     
     public Town (Muni instance){
         plugin = instance;
@@ -105,7 +108,9 @@ public class Town implements Comparable<Town> {
         return "townName='"+townName+"', townRank='"+townRank+"', bankBal='"+
                 Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+"' ";
     }
-
+    public String info(){
+        return toDB_Vals();
+    }
     public boolean db_addTown(Player mayor, String town_Name){
         if ( !plugin.econwrapper.payMoney(mayor,1000) ){
             mayor.sendMessage("Not enough money to found the town");
@@ -186,8 +191,23 @@ public class Town implements Comparable<Town> {
         } else {return false; }
     }
     public boolean tb_withdrawl(Player player, double amount){
-        if (plugin.econwrapper.giveMoney(player,amount) ) {
-            townBankBal = townBankBal - amount;
+        if ( townBankBal >= amount ){
+            if (plugin.econwrapper.giveMoney(player,amount) ) {
+                townBankBal = townBankBal - amount;
+                return true;
+            } else { return false; }
+        } else { return false; }
+    }
+    public boolean payTaxes(Player player){
+        if (payTaxes(player, taxRate ) ){
+            return true;
+        } else { return false; }
+    }
+    public boolean payTaxes(Player player, Double amount){
+        if ( plugin.econwrapper.pay(player, amount, 0, "Taxes for "+townName ) ){
+            townBankBal = townBankBal + amount;
+            //player.sendMessage("You have paid your taxes to "+townName+" of amount "+ amount+" "+plugin.econwrapper.getCurrName(amount) );
+            //Transaction t = new Transaction ( )
             return true;
         } else { return false; }
     }
