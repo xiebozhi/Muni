@@ -81,7 +81,7 @@ public class Muni extends JavaPlugin {
         saveTowns();
         
         // Save the config to file
-        saveConfig();
+        this.saveConfig();
         
         getLogger().info("Shut Down sequence complete");
     }
@@ -95,10 +95,9 @@ public class Muni extends JavaPlugin {
         // Initializes Muni wrappers
         hookInDependencies();
         
-        
         //Load the configuration file
         this.saveDefaultConfig();
-        loadConfigSettings();
+        this.loadConfigSettings();
         
         // Register a new listener
         getServer().getPluginManager().registerEvents(new Listener() {
@@ -120,42 +119,25 @@ public class Muni extends JavaPlugin {
         //Just testing
         this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
-        //makeDefaultTowns();
+        boolean runTest = false;
+        if (runTest){ // this is for testing purposes only, will be deleted soon 
+            // Make sure the database tables are there.  
+            // Passing true drops the db first, normally false
+            this.getLogger().warning("Dropping database!");
+            dbwrapper.createDB(true);
+            makeDefaultTowns();
+            makeDefaultCitizens();
+        }
         
-        // Make sure the database tables are there.  
-        // Passing true drops the db first, normally false
-        //this.getLogger().warning("Dropping database!");
-        //dbwrapper.createDB(false);
-        
-        this.getLogger().info ("Here 1");
-        this.getLogger().info (ChatColor.AQUA+"Here 1");
-        //Town temp = new Town(this,"bobbshields","test2");
-        //temp.db_addTown();
+        this.getLogger().info ("Loading Towns from database");
         loadTowns();
         
-        this.getLogger().info ("Here 2");
+        this.getLogger().info ("Loading Citizens from database");
         loadCitizens();
-        /*
-        try{
-            //towns.add( temp );
-            //this.getLogger().info ("Here 3" );
-            
-            
-            Iterator itr = dbwrapper.getTowns().iterator();
-            this.getLogger().info ("Here 3");
-            
-            while ( itr.hasNext() ){
-                String current = itr.next().toString();
-                if ( isDebug() ) { this.getLogger().info(current); }
-                towns.add( new Town( this, current ) );
-                this.getLogger().info ("Here 3.5" );
-            }
-        } catch (NullPointerException ex){
-            this.getLogger().severe("Adding Towns error: "+ex.getMessage() );
-        }
-            */
+
         this.getLogger().info ("Loaded and Ready for Town administration" );
-    }
+    }// end: onEnable()
+    
     /**
      * Queries DB for player names then constructor each loads db at array addition
      * 
@@ -169,32 +151,12 @@ public class Muni extends JavaPlugin {
                 String current = itr.next().toString();
                 if ( isDebug() ) { this.getLogger().info("Loading citizens: " + current); }
                 citizens.add( new Citizen( this, current ) );
-            }
+          }
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading citizens: "+ex.getMessage() );
         } finally {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Citizens"); }
         }
-    }
-    /* For testing only, will be deleted closer to the beta
-     * 
-     */
-    public void makeDefaultTowns(){
-        Town maker = new Town(this);
-        maker = new Town (this,"TestTown","bobbshields");
-        maker.setMaxDeputies(5); maker.setRank(0);
-        maker.setTaxRate(10.5);
-        
-        maker.saveToDB();
-        
-        maker = new Town (this,"SecondTest","bobbshields",2,1000,100);
-        maker.db_addTown();
-        
-        maker.loadFromDB("TestTown");
-        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
-        
-        maker = new Town (this,"SecondTest");
-        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
     }
     /**
      * Queries DB for town names then town constructor loads itself 
@@ -212,18 +174,46 @@ public class Muni extends JavaPlugin {
                 copyTown.loadFromDB( curr );
                 towns.add( new Town ( copyTown ) );
             }
-           /* while ( itr.hasNext() ){
-                String curr = itr.next().toString();
-                if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
-                Town copyTown = new Town (this);
-                copyTown.loadFromDB( curr );
-                towns.add( copyTown );
-            }*/
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading towns: "+ex.getMessage() );
         } finally {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Towns"); }
         }
+    }
+    /* For testing only, will be deleted closer to the beta
+     * 
+     */
+    public void makeDefaultTowns(){
+        this.getLogger().info ("Making test towns");
+        Town maker = new Town(this);
+        maker = new Town (this,"TestTown","bobbshields");
+        maker.setMaxDeputies(5); maker.setRank(0);
+        maker.setTaxRate(10.5);
+        
+        maker.saveToDB();
+        
+        maker = new Town (this,"SecondTest","astickynote",2,1000,100);
+        maker.db_addTown();
+        
+        maker.loadFromDB("TestTown");
+        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
+        
+        maker = new Town (this,"SecondTest");
+        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
+    }
+    
+    public void makeDefaultCitizens(){
+        this.getLogger().info ("Making test citizens");
+        Citizen maker = new Citizen(this);
+        maker = new Citizen(this,"TestTown","bobbshields",true, false, false, false,null);
+        maker.saveToDB();
+        maker = new Citizen(this,"TestTown","tlunarrune",false, false, true, false,null);
+        maker.saveToDB();
+        maker = new Citizen(this,"TestTown","themoltenangel",false, false, false, true,"bobbshields");
+        maker.saveToDB();
+        maker = new Citizen(this,"SecondTest","asickynote", true, false, false, false, null);
+        maker.saveToDB();
+        
     }
     public void saveCitizens(){
         for (Citizen curr : citizens){

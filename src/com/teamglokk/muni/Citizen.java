@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * Town.java: defines the Town class
  * @author bobbshields
  */
-public class Citizen {
+public class Citizen implements Comparable<Citizen> {
     
     private static Muni plugin;
     
@@ -43,9 +43,10 @@ public class Citizen {
         addCitizen (town_Name,player);
     }
     public Citizen (Muni instance, String town_Name, String player, boolean mayor,
-            boolean deputy, boolean applied, boolean invited, String invitedBy, Date sentDate){
+            boolean deputy, boolean applied, boolean invited, String invitedBy) { //, Date sentDate){
         plugin = instance;
         addCitizen (town_Name,player);
+        this.mayor = mayor;
         this.deputy = deputy;
         this.applied = applied;
         this.invited = invited;
@@ -80,10 +81,10 @@ public class Citizen {
     public boolean saveToDB(){
         // if exists, update; else insert
         //db_updateRow(String table, String key_col, String key, String colsANDvals
-        if ( plugin.dbwrapper.checkExistence("towns", "townName", townName) ){
-            return plugin.dbwrapper.db_updateRow("towns", "townName", townName, toDB_UpdateRowVals());
+        if ( plugin.dbwrapper.checkExistence("citizens", "playerName", name) ){
+            return plugin.dbwrapper.updateRow("citizens", "playerName", name, toDB_UpdateRowVals());
         } else {
-            return plugin.dbwrapper.db_insert("towns", toDB_Cols(), toDB_Vals() );
+            return plugin.dbwrapper.insert("citizens", toDB_Cols(), toDB_Vals() );
         }
     }
     public String toDB_UpdateRowVals(){
@@ -91,6 +92,13 @@ public class Citizen {
                 mayor +"', deputy='"+deputy+"', applicant='"+applied+
                 "', invitee='"+invited+"', invitedBy='"+invitedBy+"' ";
         // this is missing the sentDate and lastLogin SQL fields
+    }
+    public String toDB_Cols(){
+        return "playerName,townName,mayor,deputy,applicant,invitee,invitedBy"; //,sentDate,lastLogin";
+    }
+    public String toDB_Vals(){
+        return "'"+name+"', '"+townName+"', '"+mayor+"', '"+deputy+"', '"+applied+"', '"+
+                invited+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
     }
     public boolean isApplicant(){ return applied;}
     public boolean isInvited() {return invited;}
@@ -103,10 +111,7 @@ public class Citizen {
         return true;
     }
     //public getSentDate ();
-    @Override
-    public String toString(){
-        return name;
-    }
+    
     public void addCitizen(String town, String player ) {
         name = player;
         townName = town;
@@ -121,13 +126,6 @@ public class Citizen {
         addCitizen(town,player);
         applied = true;
         //sentDate = Calendar.getInstance();
-    }
-    public String toDB_Cols(){
-        return "playerName,townName,mayor,deputy,applicant,invitee"; //,sentDate,lastLogin";
-    }
-    public String toDB_Vals(){
-        return name+", "+townName+", "+mayor+", "+deputy+", "+applied+", "+
-                invited; //+", "+sentDate+", "+lastLogin;
     }
     public boolean isMayor(String town_Name){
         if (townName.equals(town_Name) ){
@@ -191,6 +189,10 @@ public class Citizen {
     }
          
     @Override
+    public String toString(){
+        return name;
+    }
+    @Override
     public int hashCode() {
         return new HashCodeBuilder(11, 13). 
             append(name).append(townName).toHashCode();
@@ -205,4 +207,22 @@ public class Citizen {
             return false;
         } else { return false;}
     }
+    @Override
+    public int compareTo(Citizen c){
+        //Mayors are bigger than deputies,
+        // Failover if everything is equal: return based on the name
+        if (this.isMayor() && !c.isMayor() ){
+            return 1;
+        } else if (c.isMayor() && !this.isMayor() ){
+            return -1;
+        }
+        if (this.isDeputy() && !c.isMayor() && !c.isDeputy() ) {
+            return 1;
+        } else if (c.isDeputy() && !this.isMayor() && !this.isDeputy() ){
+            return -1;
+        } else { 
+            return this.getName().toLowerCase().compareTo( c.getName().toLowerCase() );
+        }
+    }
+    
 }

@@ -1,17 +1,14 @@
 package com.teamglokk.muni;
 
-import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import java.util.Iterator;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Town.java: defines the Town class
  * @author bobbshields
  */
-public class Town {
-    
+public class Town implements Comparable<Town> {
     // Gives access to global vars and functions
     private static Muni plugin;
     
@@ -91,30 +88,10 @@ public class Town {
         // if exists, update; else insert
         //db_updateRow(String table, String key_col, String key, String colsANDvals
         if ( plugin.dbwrapper.checkExistence("towns", "townName", townName) ){
-            return plugin.dbwrapper.db_updateRow("towns", "townName", townName, toDB_UpdateRowVals());
+            return plugin.dbwrapper.updateRow("towns", "townName", townName, toDB_UpdateRowVals());
         } else {
-            return plugin.dbwrapper.db_insert("towns", toDB_Cols(), toDB_Vals() );
+            return plugin.dbwrapper.insert("towns", toDB_Cols(), toDB_Vals() );
         }
-    }
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(7, 31). 
-            append(townName).toHashCode();
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null){
-            return false;
-        } else if ( toString().equals(obj.toString() ) ) {
-            return true;
-        } else if(obj.getClass() != getClass()){
-            return false;
-        } else { return false;}
-    }
-    @Override
-    public String toString(){
-        return townName;
     }
     public String toDB_Cols(){
         return "townName,mayor, townRank,bankBal,taxRate";
@@ -140,7 +117,7 @@ public class Town {
         taxRate = 10;
         
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-            plugin.dbwrapper.db_insert("towns",toDB_Cols(),toDB_Vals() );
+            plugin.dbwrapper.insert("towns",toDB_Cols(),toDB_Vals() );
             return true;
         } else {
             return false;
@@ -148,7 +125,7 @@ public class Town {
     }
     public boolean db_addTown(){
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-            plugin.dbwrapper.db_insert("towns",toDB_Cols(),toDB_Vals() );
+            plugin.dbwrapper.insert("towns",toDB_Cols(),toDB_Vals() );
             return true;
         } else {
             return false;
@@ -168,27 +145,6 @@ public class Town {
         townMayor = mayor;
         return true;
     }
-    /*
-    public String getDeputies(){
-        String temp = null;
-        Iterator itr = townDeputies.iterator();
-         while(itr.hasNext() ){
-             temp = temp + itr.next() +", ";
-         }
-         return temp;
-    }
-    public boolean addDeputy(String deputy){
-        townDeputies.add(deputy);
-        return true;
-    }
-    public boolean checkOfficer (String player) {
-        if (townMayor.equalsIgnoreCase(player) )
-        { return true;
-        } else if (Arrays.asList(townDeputies).contains(player) ){
-            return true;
-        } else {return false;}
-    }
-    */
     public boolean rankup(Player player){
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
@@ -257,8 +213,58 @@ public class Town {
         townName = name;
         return true;
     }
-        /*
-        public Location getCenter (){
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(7, 31). 
+            append(townName).toHashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null){
+            return false;
+        } else if ( toString().equals(obj.toString() ) ) {
+            return true;
+        } else if(obj.getClass() != getClass()){
+            return false;
+        } else { return false;}
+    }
+    @Override
+    public String toString(){
+        return townName;
+    }
+    @Override
+    public int compareTo(Town t){
+        if (this.getRank() < t.getRank() ){
+            return -1;
+        } else if (this.getRank() > t.getRank() ){
+            return 1;
+        } else if (this.getRank() == t.getRank() ){
+            return this.getName().toLowerCase().compareTo( t.getName().toLowerCase() );
+        } else { return 0;}
+    }
+    
+    /*
+    public String getDeputies(){
+        String temp = null;
+        Iterator itr = townDeputies.iterator();
+         while(itr.hasNext() ){
+             temp = temp + itr.next() +", ";
+         }
+         return temp;
+    }
+    public boolean addDeputy(String deputy){
+        townDeputies.add(deputy);
+        return true;
+    }
+    public boolean checkOfficer (String player) {
+        if (townMayor.equalsIgnoreCase(player) )
+        { return true;
+        } else if (Arrays.asList(townDeputies).contains(player) ){
+            return true;
+        } else {return false;}
+    }
+    public Location getCenter (){
         return townCenter;
     }
     public boolean setCenter (Location center ){
@@ -266,26 +272,6 @@ public class Town {
             townCenter = center;
             return true;
         } else {return false;}
-    }  
-    public boolean setRankupMoneyCosts(double [] costs){
-        rankupMoneyCost = costs;
-        return true;
-    }
-    public boolean setRankupItemCosts(int [] costs){
-        rankupItemCost = costs;
-        return true;
-    } */ 
-    /*
-    public double [] getRankupMoneyCosts(){
-        return rankupMoneyCost;
-    }    
-    public double getRankupMoneyCost(int rank){
-        return rankupMoneyCost[rank];
-    }
-    public int [] getRankupItemCosts(){
-        return rankupItemCost;
-    }    
-    public int getRankupItemCost(int rank){
-        return rankupItemCost[rank];
+      
     }*/
 }

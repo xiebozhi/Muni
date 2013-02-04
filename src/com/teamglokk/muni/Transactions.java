@@ -60,7 +60,7 @@ public class Transactions {
                 +", "+amount+", "+item_amount+", "+notes;
     }
     public boolean saveTrans(){
-        if (plugin.dbwrapper.db_insert("transactions", db_Cols(), db_Vals() )){
+        if (plugin.dbwrapper.insert("transactions", db_Cols(), db_Vals() )){
             return true;
         } else {
             plugin.getLogger().severe("Could not insert the transaction into the database:");

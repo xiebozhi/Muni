@@ -71,10 +71,11 @@ public class dbWrapper extends Muni {
             db_open();
             if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
+            //rs.next();
             String temp = rs.getString(1);
             if (value.equalsIgnoreCase(temp) ){
             rtn = true ;
-            if(this.isDebug() ){plugin.getLogger().info("cE: value = "+temp);}
+            if(this.isDebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
             } 
         } catch (SQLException ex){
             plugin.getLogger().severe( "checkExistence: "+ex.getMessage() ); 
@@ -88,34 +89,6 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-    /*
-    public ArrayList<String> getTowns (){
-        ArrayList<String> rtn = new ArrayList<String>();
-        String SQL = "SELECT townName FROM "+plugin.db_prefix+"towns;";
-        try {
-            
-            db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
-            rs = stmt.executeQuery(SQL); 
-            
-            while ( rs.next() ){
-               String temp = rs.getString("townName");
-               rtn.add( temp );
-               if (plugin.isDebug()) {plugin.getLogger().info("getTowns getting: "+temp);}
-           }
-            
-        } catch (SQLException ex){
-            plugin.getLogger().severe( "checkExistence: "+ex.getMessage() ); 
-            rtn = null;
-        } finally {
-            try { db_close();
-            } catch (SQLException ex) {
-                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
-                rtn = null;
-            } 
-        }
-        return rtn;
-    }*/
     public ArrayList<String> getSingleCol (String table, String column ){
         ArrayList<String> rtn = new ArrayList<String>();
         String SQL = "SELECT "+column+" FROM "+plugin.db_prefix+table+";";
@@ -163,7 +136,7 @@ public class dbWrapper extends Muni {
         return temp;
     }
     public Citizen getCitizen(String playerName){
-        Citizen temp = null;
+        Citizen temp = new Citizen (plugin);
         String SQL = "SELECT "+temp.toDB_Cols() +" FROM "+plugin.db_prefix+"citizens WHERE playerName='"+playerName+"';";
         try {
             db_open();
@@ -171,7 +144,7 @@ public class dbWrapper extends Muni {
             if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
             temp = new Citizen(plugin, rs.getString("townName"), rs.getString("playerName"),
                     rs.getBoolean("mayor"), rs.getBoolean("deputy"), rs.getBoolean("applicant"),
-                    rs.getBoolean("invitee"),rs.getString("invitedBy"),rs.getDate("date") );
+                    rs.getBoolean("invitee"),rs.getString("invitedBy") ); //,rs.getDate("sentDate") ); also missing lastLogin
         } catch (SQLException ex){
             plugin.getLogger().severe( "getCitzien: "+ ex.getMessage() );
         } finally {
@@ -182,7 +155,7 @@ public class dbWrapper extends Muni {
         }
         return temp;
     }
-    public boolean db_insert(String table, String cols, String values) {
+    public boolean insert(String table, String cols, String values) {
         boolean rtn = true;
         String SQL = "INSERT INTO "+plugin.db_prefix+table+" ("+cols+
                 ") VALUES ("+values+");";
@@ -210,7 +183,7 @@ public class dbWrapper extends Muni {
      * @param table test test
      * @return 
      */
-    public boolean db_update(String table, String key_col, String key, String col, String value) {
+    public boolean update(String table, String key_col, String key, String col, String value) {
         
         boolean rtn = true;
         String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+col+"="+value+" WHERE "
@@ -231,7 +204,7 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-        public boolean db_updateRow(String table, String key_col, String key, String colsANDvals) {
+        public boolean updateRow(String table, String key_col, String key, String colsANDvals) {
         
         boolean rtn = true;
         String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+colsANDvals+" WHERE "
@@ -283,7 +256,7 @@ public class dbWrapper extends Muni {
                 stmt.executeUpdate(DROP1);
                 stmt.executeUpdate(DROP2);
                 stmt.executeUpdate(DROP3);
-            }
+            } // could do an else: check existence here
             if (plugin.useMYSQL){ 
                 stmt.executeUpdate(SQL0); 
                 if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
@@ -352,56 +325,6 @@ public class dbWrapper extends Muni {
             } catch (SQLException ex) {
                 plugin.getLogger().warning( ex.getMessage() );
             }
-        }
-    }
-    public  void SQLLite(){
-        // load the sqlite-JDBC driver using the current class loader
-        
-        try {
-        Class.forName("org.sqlite.JDBC");
-        }  catch (ClassNotFoundException e)
-        { plugin.getLogger().info("JDBC class not found");}
-
-        
-        Connection connection = null;
-        try
-        {
-          // create a database connection
-          connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
-          Statement statement = connection.createStatement();
-          statement.setQueryTimeout(30);  // set timeout to 30 sec.
-
-          statement.executeUpdate("drop table if exists person");
-          statement.executeUpdate("create table person (id integer, name string)");
-          statement.executeUpdate("insert into person values(1, 'leo')");
-          statement.executeUpdate("insert into person values(2, 'yui')");
-          ResultSet rs = statement.executeQuery("select * from person");
-          while(rs.next())
-          {
-            // read the result set
-            System.out.println("name = " + rs.getString("name"));
-            System.out.println("id = " + rs.getInt("id"));
-          }
-        }
-        catch(SQLException ex)
-        {
-          // if the error message is "out of memory", 
-          // it probably means no database file is found
-            plugin.getLogger().warning( ex.getMessage() );
-        }
-        finally
-        {
-          try
-          {
-            if(connection != null){
-              connection.close();
-            }
-          }
-          catch(SQLException ex)
-          {
-            // connection close failed.
-            plugin.getLogger().warning( ex.getMessage() );
-          }
         }
     } */
 }
