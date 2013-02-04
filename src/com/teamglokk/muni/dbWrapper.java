@@ -191,7 +191,7 @@ public class dbWrapper extends Muni {
         try {
             db_open();
             if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
-            stmt.executeQuery(SQL); 
+            stmt.executeUpdate(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe("db_update: "+ ex.getMessage() ); 
             rtn = false;
@@ -212,7 +212,7 @@ public class dbWrapper extends Muni {
         try {
             db_open();
             if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
-            stmt.executeQuery(SQL); 
+            stmt.executeUpdate(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe("db_updateRow: "+ ex.getMessage() ); 
             rtn = false;

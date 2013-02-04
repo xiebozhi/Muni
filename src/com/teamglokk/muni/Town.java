@@ -235,6 +235,8 @@ public class Town implements Comparable<Town> {
     }
     @Override
     public int compareTo(Town t){
+        return this.getName().toLowerCase().compareTo( t.getName().toLowerCase() );
+        /*
         if (this.getRank() < t.getRank() ){
             return -1;
         } else if (this.getRank() > t.getRank() ){
@@ -242,6 +244,7 @@ public class Town implements Comparable<Town> {
         } else if (this.getRank() == t.getRank() ){
             return this.getName().toLowerCase().compareTo( t.getName().toLowerCase() );
         } else { return 0;}
+        */
     }
     
     /*

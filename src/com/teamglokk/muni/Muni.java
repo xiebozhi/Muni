@@ -5,6 +5,7 @@ import net.milkbowl.vault.economy.Economy;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.Iterator;
 
 import org.bukkit.entity.Player;
@@ -69,8 +70,11 @@ public class Muni extends JavaPlugin {
     
     protected TownRank [] townRanks;
     //protected Town towns = null;
-    protected ArrayList<Town> towns = new ArrayList<Town>();
-    protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
+    
+    protected TreeSet<Town> towns = new TreeSet<Town>();
+    protected TreeSet<Citizen> citizens = new TreeSet<Citizen>();
+    //protected ArrayList<Town> towns = new ArrayList<Town>();
+    //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
     @Override
     public void onDisable() {
@@ -111,10 +115,10 @@ public class Muni extends JavaPlugin {
         }, this);
 
         // Register Muni commands
-        getCommand( "town"     ).setExecutor(new TownCommand(this));
-        getCommand("deputy"    ).setExecutor(new OfficerCommand(this) );
-        getCommand("mayor"     ).setExecutor(new OfficerCommand(this) );
-        getCommand("townadmin" ).setExecutor(new TownAdminCommand(this) );
+        getCommand("town"     ).setExecutor(new TownCommand     (this) );
+        getCommand("deputy"   ).setExecutor(new OfficerCommand  (this) );
+        getCommand("mayor"    ).setExecutor(new OfficerCommand  (this) );
+        getCommand("townadmin").setExecutor(new TownAdminCommand(this) );
         
         //Just testing
         this.getLogger().info( Calendar.getInstance().getTime().toString() );

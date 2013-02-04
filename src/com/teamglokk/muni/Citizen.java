@@ -209,6 +209,8 @@ public class Citizen implements Comparable<Citizen> {
     }
     @Override
     public int compareTo(Citizen c){
+        return this.getName().toLowerCase().compareTo( c.getName().toLowerCase() );
+        /*
         //Mayors are bigger than deputies,
         // Failover if everything is equal: return based on the name
         if (this.isMayor() && !c.isMayor() ){
@@ -223,6 +225,7 @@ public class Citizen implements Comparable<Citizen> {
         } else { 
             return this.getName().toLowerCase().compareTo( c.getName().toLowerCase() );
         }
+        * */
     }
     
 }
