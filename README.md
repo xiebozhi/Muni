@@ -7,6 +7,7 @@ http://dev.bukkit.org/server-mods/muni
 Development Roadmap
 ===================
 First Alpha
+===========
 1) Command executors responds with messages (Done a few days ago - 27 Jan) 
 
 2) Town class stores and changes the town data and can read/write into a sql flat file ( Class created, needs to read / write to database - 27 Jan ) 
@@ -43,6 +44,7 @@ Add World Guard Region functionality
 
 
 First Beta
+==========
 1) Voting system
 
 2) Democracy vs. Dictatorship 
@@ -52,7 +54,7 @@ First Beta
 4) Rank Up system
 
 Possibilities
-
+=============
 1) Dynmap Marker integration
 
 2) Giant Shop Location set as a special region
