@@ -6,7 +6,7 @@ http://dev.bukkit.org/server-mods/muni
 
 Development Roadmap
 ===================
-First Alpha
+First Alpha ( Pre-Alpha 0.2 Released 4 Feb 2013 )
 ===========
 1) Command executors responds with messages (Done a few days ago - 27 Jan) 
 
