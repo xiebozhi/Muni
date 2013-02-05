@@ -42,16 +42,18 @@ public class TownAdminCommand implements CommandExecutor {
         } else if (split[0].equalsIgnoreCase("reload") ) {
             player.sendMessage("Reloading config");
             plugin.reloadConfig();
+            plugin.getLogger().info("Config reloaded");
             return true;
-        }  else if (split[0].equalsIgnoreCase("listCits") ) {
+        } else if (split[0].equalsIgnoreCase("listCits") ) {
             player.sendMessage("Here is the list of citizens: ");
             for (Citizen c : plugin.citizens ){
                 player.sendMessage(c.getName() );
             }
             return true;
         } else if (split[0].equalsIgnoreCase("save")) {
-            player.sendMessage("Saving config - doesn't really do anything!");
-            plugin.saveConfig();
+            player.sendMessage("Saving Towns and Citizens to the database!");
+            plugin.saveCitizens();
+            plugin.saveTowns();
             return true;
         } else if (split[0].equalsIgnoreCase("debug")) {
             if (split.length != 2) {
@@ -188,7 +190,12 @@ public class TownAdminCommand implements CommandExecutor {
                 return false;
             }
         }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            player.sendMessage("The command was: "+command.toString() );
+            player.sendMessage("The command was: "+command.getUsage() );
+            return true;
+        } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
+            for (Citizen c :plugin.citizens){
+                player.sendMessage(c.getName() );
+            }
             return true;
         } else {
             displayHelp(player);
@@ -207,6 +214,7 @@ public class TownAdminCommand implements CommandExecutor {
             player.sendMessage("/townAdmin save");
             player.sendMessage("/townAdmin reload");
             player.sendMessage("/townAdmin checkBal");   
+            player.sendMessage("/townAdmin debug (off/on)");   
     }
    
 }

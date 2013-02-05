@@ -61,7 +61,7 @@ public class Citizen implements Comparable<Citizen> {
         this.deputy = cit.isDeputy();
         this.applied = cit.isApplicant();
         this.invited = cit.isInvited();
-        this.invitedBy = cit.isInviteOfficer();
+        this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
     }
     public boolean loadFromDB(String player){
@@ -73,7 +73,7 @@ public class Citizen implements Comparable<Citizen> {
         this.deputy = cit.isDeputy();
         this.applied = cit.isApplicant();
         this.invited = cit.isInvited();
-        this.invitedBy = cit.isInviteOfficer();
+        this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
         
         return true;
@@ -103,18 +103,6 @@ public class Citizen implements Comparable<Citizen> {
     public String info(){
         return toDB_Vals();
     }
-    public boolean isApplicant(){ return applied;}
-    public boolean isInvited() {return invited;}
-    public String isInviteOfficer() {return invitedBy;}
-    public boolean isMayor() { return mayor;}
-    
-    public boolean makeMember () {
-        applied = false;
-        invited = false;
-        return true;
-    }
-    //public getSentDate ();
-    
     public void addCitizen(String town, String player ) {
         name = player;
         townName = town;
@@ -190,7 +178,36 @@ public class Citizen implements Comparable<Citizen> {
         townName = name;
         return true;
     }
-         
+    
+    public boolean isApplicant(){ return applied;}
+    public boolean isInvited() {return invited;}
+    public String getInviteOfficer() {return invitedBy;}
+    public boolean isMayor() { return mayor;}
+    public boolean makeMember () {
+        applied = false;
+        invited = false;
+        return true;
+    }
+    public boolean isMember() {
+        if (applied ||invited)
+        { return false; }
+        else { return true; }
+    }
+    //public getSentDate ();
+    public boolean isOfficer(String town_Name){
+        if (townName.equals(town_Name) ) {
+            if (isMayor() || isDeputy() ){
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean isOfficer(){
+        if (isMayor() || isDeputy() ){
+            return true;
+        }
+        return false;
+    }
     @Override
     public String toString(){
         return name;
@@ -204,15 +221,15 @@ public class Citizen implements Comparable<Citizen> {
     public boolean equals(Object obj) {
         if (obj == null){
             return false;
-        } else if ( toString().equals(obj.toString() ) ) {
-            return true;
         } else if(obj.getClass() != getClass()){
             return false;
+        } else if ( toString().equals(obj.toString() ) ) {
+            return true;
         } else { return false;}
     }
     @Override
     public int compareTo(Citizen c){
-        return this.getName().toLowerCase().compareTo( c.getName().toLowerCase() );
+        return this.getName().compareToIgnoreCase( c.getName() );
         /*
         //Mayors are bigger than deputies,
         // Failover if everything is equal: return based on the name

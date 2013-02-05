@@ -126,7 +126,7 @@ public class dbWrapper extends Muni {
             temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"),
                     rs.getInt("townRank"),rs.getDouble("bankBal"),rs.getDouble("taxRate") );
         } catch (SQLException ex){
-            plugin.getLogger().severe( "getTown: "+ ex.getMessage() );
+            plugin.getLogger().info ( "getTown: "+ townName+" not found in database" );
         } finally {
             try { db_close();
             } catch (SQLException ex) {
@@ -146,7 +146,7 @@ public class dbWrapper extends Muni {
                     rs.getBoolean("mayor"), rs.getBoolean("deputy"), rs.getBoolean("applicant"),
                     rs.getBoolean("invitee"),rs.getString("invitedBy") ); //,rs.getDate("sentDate") ); also missing lastLogin
         } catch (SQLException ex){
-            plugin.getLogger().severe( "getCitzien: "+ ex.getMessage() );
+            plugin.getLogger().info( "getCitzien: "+playerName+" not found in database" );
         } finally {
             try { db_close();
             } catch (SQLException ex) {

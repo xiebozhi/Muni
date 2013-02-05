@@ -34,7 +34,20 @@ public class TownCommand implements CommandExecutor {
             console = true;
         }
         player = (Player) sender;
-        
+        /*
+          else if (split[0].equalsIgnoreCase("is") ) {
+            boolean say = plugin.isCitizen(split[1] );
+            player.sendMessage("Is a citizen? " + say);
+            return true;
+        }  else if (split[0].equalsIgnoreCase("where") ) {
+            try{
+                String say = plugin.whereCitizen( split[1] );
+                player.sendMessage(split[1]+ " is a citizen of "+ say);
+            } catch (NullPointerException ex) {
+                player.sendMessage("Player "+split[1]+" is not a member of a town (or misspelled)");
+            }
+            return true;
+        } */
         if (split.length == 0){
             displayHelp(player);
             return false;
@@ -84,11 +97,17 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen temp = new Citizen( plugin ) ;
-            temp.apply4Citizenship(split[1], player.getName() );
-            plugin.citizens.add( temp );
-            player.sendMessage("Application to "+temp.getTown()+" was sent.");
-            return true;
+            if (!plugin.isCitizen(player.getName()) ){
+                Citizen temp = new Citizen( plugin ) ;
+                temp.apply4Citizenship(split[1], player.getName() );
+                plugin.citizens.add( temp );
+                player.sendMessage("Application to "+temp.getTown()+" was sent.");
+                return true;
+            } else { 
+                player.sendMessage("You are already engaged with "+plugin.whereCitizen(player.getName() ) );
+                player.sendMessage("To clear your status, do /town leave");
+                return true;
+            }
         } else if (split[0].equalsIgnoreCase("accept")) {
             if (split.length != 2) {
                 player.sendMessage("Not enough parameters;");
@@ -102,10 +121,15 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Accepted an invite from " + temp.getTown() );
             return true;
         } else if (split[0].equalsIgnoreCase("leave")) {
-            String temptown = plugin.getTown(player).getName();
-            plugin.removeCitizen( player.getName() );
-            player.sendMessage("You have left " + temptown);
-            return true;
+            if (plugin.isCitizen(player.getName() ) ){
+                String temptown = plugin.getTown(player).getName();
+                plugin.removeCitizen( player.getName() );
+                player.sendMessage("You have left " + temptown);
+                return true;
+            } else { 
+                player.sendMessage("You are not in a town");
+                return true;
+            }
         }else if (split[0].equalsIgnoreCase("sethome")) {
             player.sendMessage("Sethome not yet added.");
             return true;
@@ -125,15 +149,17 @@ public class TownCommand implements CommandExecutor {
         }
     }
     private void displayHelp(Player player){
-        player.sendMessage(ChatColor.DARK_PURPLE+"Muni Help.  You can do these commands:");
+        player.sendMessage(ChatColor.LIGHT_PURPLE+"Muni Help.  You can do these commands:");
             player.sendMessage("/town list");
             player.sendMessage("/town info");
-            player.sendMessage("/town join");
-            player.sendMessage("/town add");
-            player.sendMessage("/town remove");
-            player.sendMessage("/town sethome");
-            player.sendMessage("/town vote");
+            player.sendMessage("/town apply");
+            player.sendMessage("/town accept");
+            player.sendMessage("/town leave");
+            //player.sendMessage("/town sethome");
+            //player.sendMessage("/town signCharter");
+            //player.sendMessage("/town vote");
             player.sendMessage("/town payTaxes");
+            player.sendMessage("/town checkBank");
     }
    
 }

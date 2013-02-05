@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.Iterator;
+import java.util.Collections;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -85,7 +86,7 @@ public class Muni extends JavaPlugin {
         saveTowns();
         
         // Save the config to file
-        this.saveConfig();
+        //this.saveConfig();
         
         getLogger().info("Shut Down sequence complete");
     }
@@ -123,7 +124,7 @@ public class Muni extends JavaPlugin {
         //Just testing
         this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
-        boolean runTest = false;
+        boolean runTest = true;
         if (runTest){ // this is for testing purposes only, will be deleted soon 
             // Make sure the database tables are there.  
             // Passing true drops the db first, normally false
@@ -278,6 +279,19 @@ public class Muni extends JavaPlugin {
             }
         }
         return temp;
+    }
+    public String whereCitizen( String player ){
+        Citizen temp = new Citizen(this,player );
+        String rtn = null;
+        Citizen rtn2 = citizens.ceiling(temp);
+        if (rtn2.getName().equalsIgnoreCase(player) ) {
+            rtn = rtn2.getTown();
+        } 
+        return rtn;
+    }
+    public boolean isCitizen ( String player ){
+        Citizen temp = new Citizen(this,player );
+        return citizens.contains(temp);
     }
     public String getAllTowns(){
         String temp = "";
