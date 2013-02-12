@@ -1,6 +1,7 @@
-package com.teamglokk.muni;
+package com.teamglokk.muni.utilities;
 
 //import java.util.Calendar;
+import com.teamglokk.muni.Muni;
 import java.sql.Timestamp;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.bukkit.Material;
@@ -76,7 +77,7 @@ public class Transaction {
     public String toString(){
         return "Player "+playerName+" for town "+townName+" made a payment for "+type+" of "+
                 amount+" "+plugin.econwrapper.getCurrName(amount)+" and "+
-                item_amount+" "+Material.getMaterial(plugin.rankupItemID)+" on "+datetime+".";
+                item_amount+" "+Material.getMaterial(plugin.getRankupItemID())+" on "+datetime+".";
                 //+date()+" at "+time()+".";
     }
     /*

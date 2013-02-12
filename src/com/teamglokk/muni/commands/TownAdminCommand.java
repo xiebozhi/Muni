@@ -1,9 +1,10 @@
-package com.teamglokk.muni;
+package com.teamglokk.muni.commands;
 
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.teamglokk.muni.Citizen;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,9 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.teamglokk.muni.Muni;
-import com.teamglokk.muni.WGWrapper;
-import com.teamglokk.muni.EconWrapper;
-import com.teamglokk.muni.dbWrapper;
+import com.teamglokk.muni.Muni;
+import com.teamglokk.muni.Town;
+import com.teamglokk.muni.utilities.WGWrapper;
+import com.teamglokk.muni.utilities.EconWrapper;
+import com.teamglokk.muni.utilities.dbWrapper;
 /**
  * Handler for the /town command.
  * @author BobbShields
@@ -142,7 +145,7 @@ public class TownAdminCommand implements CommandExecutor {
             
         } else if (split[0].equalsIgnoreCase("payItem")) {
             int amount = Integer.parseInt( split[1] ) ;
-            if (plugin.econwrapper.payItemR( player, plugin.rankupItemID, amount,"Test" ) ){
+            if (plugin.econwrapper.payItemR( player, plugin.getRankupItemID(), amount,"Test" ) ){
                 return true;
             } else {return false;}
             

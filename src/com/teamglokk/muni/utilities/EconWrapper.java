@@ -1,6 +1,7 @@
-package com.teamglokk.muni;
+package com.teamglokk.muni.utilities;
 
 //import net.milkbowl.vault.chat.Chat;
+import com.teamglokk.muni.Muni;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
@@ -55,11 +56,11 @@ public class EconWrapper extends Muni {
         // Double check to make sure the player is online
         if (plugin.getServer().getPlayer(player.getName()) != null ){
             // Check to make sure player has enough items to pay
-            if (player.getInventory().contains(plugin.rankupItemID,items) ){
+            if (player.getInventory().contains(plugin.getRankupItemID(),items) ){
                 // then pay money (checks to make sure they have enough)
                 if (payMoney(player,money) ){
                     // then pay items and return the status
-                    boolean rtn = payItem(player,plugin.rankupItemID,items);
+                    boolean rtn = payItem(player,plugin.getRankupItemID(),items);
                     if (rtn) {
                         Transaction t  = new Transaction (plugin,plugin.getTown(player).getName(),
                                 player.getName(),reason,money,items,true);
@@ -136,6 +137,6 @@ public class EconWrapper extends Muni {
         } else { return getCurrNameSingular();}
     }
     public String getItemName(int itemNumber){
-        return Material.getMaterial(plugin.rankupItemID).toString();
+        return Material.getMaterial(plugin.getRankupItemID()).toString();
     }
 }

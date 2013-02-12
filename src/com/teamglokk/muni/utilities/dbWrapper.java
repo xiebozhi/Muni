@@ -1,5 +1,8 @@
-package com.teamglokk.muni;
+package com.teamglokk.muni.utilities;
 
+import com.teamglokk.muni.Citizen;
+import com.teamglokk.muni.Muni;
+import com.teamglokk.muni.Town;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -35,16 +38,16 @@ public class dbWrapper extends Muni {
     }
     public void db_open() throws SQLException {
         if(plugin.isDebug()){
-            String temp = plugin.useMYSQL ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
+            String temp = plugin.useMysql() ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
             plugin.getLogger().info(temp);
         }
-        if (plugin.useMYSQL){  //Using MySQL
+        if (plugin.useMysql()){  //Using MySQL
             try {
             Class.forName("org.mysql.jdbc.Driver");
             } catch (ClassNotFoundException ex){
                 plugin.getLogger().severe("db_open (db driver not found): "+ ex.getMessage() );
             }
-            conn = DriverManager.getConnection(plugin.db_URL,plugin.db_user,plugin.db_pass);
+            conn = DriverManager.getConnection(plugin.getDB_URL(),plugin.getDB_user(),plugin.getDB_pass());
             // MySQL is not yet tested!!! 31 Jan 2013 RJS
         } else { //Using SQLite
             try {
@@ -52,7 +55,7 @@ public class dbWrapper extends Muni {
             } catch (ClassNotFoundException ex){
                 plugin.getLogger().severe("db_open (db driver not found): "+ ex.getMessage() );
             }
-            conn = DriverManager.getConnection(plugin.db_URL);
+            conn = DriverManager.getConnection(plugin.getDB_URL());
         }
         stmt = conn.createStatement();
     }
@@ -64,7 +67,7 @@ public class dbWrapper extends Muni {
     }
     public boolean checkExistence ( String table, String pk, String value ){
         boolean rtn = false;
-        String SQL = "SELECT "+pk+" FROM "+plugin.db_prefix+table+
+        String SQL = "SELECT "+pk+" FROM "+plugin.getDB_prefix()+table+
                     " WHERE "+pk+"='"+value +"';";
         try {
             
@@ -91,7 +94,7 @@ public class dbWrapper extends Muni {
     }
     public ArrayList<String> getSingleCol (String table, String column ){
         ArrayList<String> rtn = new ArrayList<String>();
-        String SQL = "SELECT "+column+" FROM "+plugin.db_prefix+table+" ORDER BY "+column+";";
+        String SQL = "SELECT "+column+" FROM "+plugin.getDB_prefix()+table+" ORDER BY "+column+";";
         try {
             
             db_open();
@@ -118,7 +121,7 @@ public class dbWrapper extends Muni {
     }
     public ArrayList<String> getTownCits ( String townName ){
         ArrayList<String> rtn = new ArrayList<String>();
-        String SQL = "SELECT playerName FROM "+plugin.db_prefix+"citizens WHERE townName='"+townName+"' ORDER BY playerName DESC;";
+        String SQL = "SELECT playerName FROM "+plugin.getDB_prefix()+"citizens WHERE townName='"+townName+"' ORDER BY playerName DESC;";
         try {
             db_open();
             if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
@@ -144,7 +147,7 @@ public class dbWrapper extends Muni {
     }
     public Town getTown(String townName){
         Town temp = new Town (plugin) ;
-        String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.db_prefix+"towns WHERE townName='"+townName+"';";
+        String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"towns WHERE townName='"+townName+"';";
         try {
             db_open();
             if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
@@ -163,7 +166,7 @@ public class dbWrapper extends Muni {
     }
     public Citizen getCitizen(String playerName){
         Citizen temp = new Citizen (plugin);
-        String SQL = "SELECT "+temp.toDB_Cols() +" FROM "+plugin.db_prefix+"citizens WHERE playerName='"+playerName+"';";
+        String SQL = "SELECT "+temp.toDB_Cols() +" FROM "+plugin.getDB_prefix()+"citizens WHERE playerName='"+playerName+"';";
         try {
             db_open();
             rs = stmt.executeQuery(SQL);
@@ -183,7 +186,7 @@ public class dbWrapper extends Muni {
     }
     public boolean insert(String table, String cols, String values) {
         boolean rtn = true;
-        String SQL = "INSERT INTO "+plugin.db_prefix+table+" ("+cols+
+        String SQL = "INSERT INTO "+plugin.getDB_prefix()+table+" ("+cols+
                 ") VALUES ("+values+");";
             
         try {
@@ -212,7 +215,7 @@ public class dbWrapper extends Muni {
     public boolean update(String table, String key_col, String key, String col, String value) {
         
         boolean rtn = true;
-        String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+col+"="+value+" WHERE "
+        String SQL = "UPDATE "+plugin.getDB_prefix()+table+" SET "+col+"="+value+" WHERE "
                 +key_col+"='"+key+"';";
         try {
             db_open();
@@ -233,7 +236,7 @@ public class dbWrapper extends Muni {
         public boolean updateRow(String table, String key_col, String key, String colsANDvals) {
         
         boolean rtn = true;
-        String SQL = "UPDATE "+plugin.db_prefix+table+" SET "+colsANDvals+" WHERE "
+        String SQL = "UPDATE "+plugin.getDB_prefix()+table+" SET "+colsANDvals+" WHERE "
                 +key_col+"='"+key+"';";
         try {
             db_open();
@@ -257,14 +260,14 @@ public class dbWrapper extends Muni {
         String serial;
         String mpk = "";
         String spk = "";
-        if (plugin.useMYSQL){
+        if (plugin.useMysql() ){
             serial = "AUTO_INCREMENT " ;
             mpk = ", Primary Key (id) " ;
         } else{
             serial = "AUTOINCREMENT " ;
             spk = "Primary Key ";
         }
-        String prefix = plugin.db_prefix;
+        String prefix = plugin.getDB_prefix();
         String DROP1 = "DROP TABLE IF EXISTS "+prefix+"towns;";
         String DROP2 = "DROP TABLE IF EXISTS "+prefix+"citizens;";
         String DROP3 = "DROP TABLE IF EXISTS "+prefix+"transactions;";
@@ -297,7 +300,7 @@ public class dbWrapper extends Muni {
                 stmt.executeUpdate(DROP2);
                 stmt.executeUpdate(DROP3);
             } // could do an else: check existence here
-            if (plugin.useMYSQL){ 
+            if (plugin.useMysql() ){ 
                 stmt.executeUpdate(SQL0); 
                 stmt.executeUpdate(SQL00); 
                 if(plugin.isDebug()){plugin.getLogger().info("Made the DB (mysql)");}
