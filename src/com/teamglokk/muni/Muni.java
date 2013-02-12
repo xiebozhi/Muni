@@ -355,7 +355,7 @@ public class Muni extends JavaPlugin {
      * @param player
      * @return the town where the player is a citizen
      */
-    public String getTown (Player player){
+    public String getTownName (Player player){
         return allCitizens.get( player.getName() ).toString();
     }
     

@@ -324,7 +324,7 @@ public class Town implements Comparable<Town> {
      * @param player
      * @return 
      */
-    public boolean removeCitizen ( Player player ){
+    public boolean removeCitizen ( Player player, Player officer ){
         if (isCitizen( player ) ){
             citizens.remove(new Citizen (plugin,player) );
             saveCitizens();
@@ -338,7 +338,7 @@ public class Town implements Comparable<Town> {
      * @param player
      * @return 
      */
-    public boolean makeDeputy(Player player){
+    public boolean makeDeputy(Player player, Player officer){
         if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
             plugin.getLogger().warning("Player "+player.getName()+" is not online to make a deputy of " +townName );
             return false;
@@ -414,9 +414,24 @@ public class Town implements Comparable<Town> {
      */
     public boolean acceptInvite(Player player){
         if (invitees.contains(new Citizen(plugin,townName,player.getName() ) ) ){
-            plugin.allCitizens.put(player.getName(), townName);
+            //plugin.allCitizens.put(player.getName(), townName);
             citizens.add(new Citizen(plugin,townName,player.getName() ) );
             invitees.remove(new Citizen(plugin,townName,player.getName() ) );
+            //need to make changes to the database here
+            return true;
+        } else {player.sendMessage("You have not been invited to " + townName); }
+        return false; 
+    }
+    
+    /**
+     * Declines the player's application to this town
+     * @param player
+     * @return 
+     */
+    public boolean declineApplication(Player player){
+        if (applicants.contains(new Citizen(plugin,townName,player.getName() ) ) ){
+            applicants.remove(new Citizen(plugin,townName,player.getName() ) );
+            plugin.allCitizens.remove( player.getName() );
             //need to make changes to the database here
             return true;
         } else {player.sendMessage("You have not been invited to " + townName); }
@@ -494,6 +509,16 @@ public class Town implements Comparable<Town> {
             //need to make changes to the database here
             return true;
         } else {officer.sendMessage("The player is already involved with " + plugin.allCitizens.get(player.getName() ) ); }
+        return false; 
+    }
+    
+    public boolean leave(Player player){
+        if (plugin.allCitizens.get(player.getName () ).equalsIgnoreCase(townName ) ){
+            if (isCitizen(player) ){
+                citizens.remove(new Citizen (plugin,townName,player.getName() ) );
+                return true;
+            } else {player.sendMessage("You are not a citizen of the town " ); }
+        } else {player.sendMessage("You are not a member of this town"); }
         return false; 
     }
     
@@ -619,7 +644,7 @@ public class Town implements Comparable<Town> {
     }
     
     /**
-     * Gets a string of deputies, comma seperated 
+     * Gets a string of deputies, comma separated 
      * @return 
      */
     public String getDeputies(){

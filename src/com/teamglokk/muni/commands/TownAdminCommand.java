@@ -66,7 +66,6 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("save")) {
             player.sendMessage("Saving Towns and Citizens to the database!");
-            plugin.saveCitizens();
             plugin.saveTowns();
             return true;
         } else if (split[0].equalsIgnoreCase("debug")) {
@@ -103,9 +102,8 @@ public class TownAdminCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters: /townadmin addcitizen townName playerName");
                 return false;
             }
-            Citizen temp = new Citizen (plugin,split[1],split[2] );
-            plugin.addCtizien(temp);
-            player.sendMessage("Added " +split[2]+" to "+ split[1] );
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.makeCitizen(plugin.getServer().getPlayer(split[1] ), player);
             return true;
         }  else if (split[0].equalsIgnoreCase("removeTown")) {
             if (split.length != 2) {
@@ -120,8 +118,8 @@ public class TownAdminCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            plugin.removeCitizen( split[1] );
-            player.sendMessage("Removed player " + split[1] );
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.removeCitizen(plugin.getServer().getPlayer(split[1]) , player);
             return true;
         } else if (split[0].equalsIgnoreCase("checkBal")) {
             if (split.length != 2) {

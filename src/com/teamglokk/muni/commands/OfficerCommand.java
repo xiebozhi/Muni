@@ -69,43 +69,18 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen tempCit = plugin.getCitizen(player.getName() ) ;
-            if (tempCit.isOfficer(plugin.getTown(player).getName() ) ){
-                if (!plugin.isCitizen(split[1]) ){
-                    tempCit.inviteCitizen(tempCit.getTown(), split[1], player.getName() ); 
-                    plugin.citizens.add( tempCit );
-                } else {
-                    player.sendMessage("Player is already engaged with another town");
-                    player.sendMessage("Tell them to do /town leave");
-                    return true;
-                }
-            }
-            player.sendMessage("Invitation to "+tempCit.getTown()+" was sent.");
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.invite(plugin.getServer().getPlayer(split[1]),player);
+            player.sendMessage("Invitation to "+temp.getName()+" was sent.");
             return true;
-            
             
         }  else if (split[0].equalsIgnoreCase("decline")) {
             if (split.length != 2) {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            Citizen tempCit = plugin.getCitizen( split[1] ) ;
-            if (tempCit == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            if (officer.isOfficer() ){
-                if (officer.getTown().equals(tempCit.getTown() ) ) {
-                    plugin.citizens.remove( tempCit );
-                    player.sendMessage("You have declined the player");
-                } else {player.sendMessage("Player was not a member of your town"); } 
-            } else { player.sendMessage("You are not an officer");}
-            player.sendMessage("Invitation to "+tempCit.getTown()+" was sent.");
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.declineApplication(plugin.getServer().getPlayer(split[1] ) );
             return true;
             
         }  else if (split[0].equalsIgnoreCase("accept")) {
@@ -113,40 +88,21 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            player.sendMessage("Here: "+split[1]);
-            Citizen officer = null;
-            officer = new Citizen ( plugin.getCitizen( player.getName() ) );
-            if (officer.getName().equals("Not found") ) {
-                player.sendMessage("You are not a member of any town");
-                return true;
-            }
-            Citizen tempCit = plugin.getCitizen( split[1] ) ;
-            if (tempCit.getName().equals("Not found") ) {
-                player.sendMessage("They are not a member of any town");
-                return true;
-            }
-            if (officer.isOfficer() ){
-                if (officer.getTown().equals(tempCit.getTown() ) ) {
-                    if ( tempCit.isInvited() ){
-                        tempCit.makeMember();
-                        player.sendMessage("You have accepted the player");
-                    } else { player.sendMessage("That player has not yet been invited");}
-                } else {player.sendMessage("Player was not a member of your town"); } 
-            } else { player.sendMessage("You are not an officer");}
-            player.sendMessage("Invitation to "+tempCit.getTown()+" was sent.");
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.acceptApplication(plugin.getServer().getPlayer(split[1]), player);
             return true;
             
-        } else if (split[0].equalsIgnoreCase("delete") ||split[0].equalsIgnoreCase("disband")) {
+        } /*else if (split[0].equalsIgnoreCase("delete") ||split[0].equalsIgnoreCase("disband")) {
             // This does not but should remove all players from citizens who are members of town
-            Town temp = plugin.getTown(player);
+            Town temp = plugin.getTown( plugin.getTownName(player) );
             plugin.removeTown(temp.getName() );
             player.sendMessage("Removed: "+ temp.getName() );
             return true;
-        }  else if (split[0].equalsIgnoreCase("checkTaxes")) {
+        }*/ else if (split[0].equalsIgnoreCase("checkTaxes")) {
             player.sendMessage("Checking taxes in time.  Use the DB for now");
             return true;
         }  else if (split[0].equalsIgnoreCase("setTax")) {
-            Town temp = plugin.getTown(player);
+            Town temp = plugin.getTown( plugin.getTownName(player) );
             temp.setTaxRate(Double.parseDouble(split[1]) );
             player.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ split[1] );
             return true;
@@ -155,29 +111,14 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            Citizen tempCit = plugin.getCitizen( split[1] ) ;
-            if (tempCit == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            if (officer.isOfficer() ){
-                if (officer.getTown().equals(tempCit.getTown() ) ) {
-                    plugin.removeCitizen(tempCit.getName() );
-                    player.sendMessage("The player has been kicked from town");
-                } else {player.sendMessage("Player was not a member of your town"); } 
-            } else { player.sendMessage("You are not an officer");}
-            player.sendMessage("Invitation to "+tempCit.getTown()+" was sent.");
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.removeCitizen(plugin.getServer().getPlayer( split[1] ), player );
             return true;
             
         } else if (split[0].equalsIgnoreCase("bank")) {
-            Town t = plugin.getTown(player);
-            player.sendMessage("The town bank has "+ t.getBankBal()+" "+
-                    plugin.econwrapper.getCurrName(t.getBankBal()) );
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            player.sendMessage("The town bank has "+ temp.getBankBal()+" "+
+                    plugin.econwrapper.getCurrName(temp.getBankBal()) );
             // withdrawl
             //deposit
             
@@ -187,22 +128,8 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            Citizen tempCit = plugin.getCitizen( split[1] ) ;
-            if (tempCit == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            if (officer.isOfficer() ){
-                if (officer.getTown().equals(tempCit.getTown() ) ) {
-                    tempCit.setDeputy(tempCit.getTown(), true);
-                    player.sendMessage("The player has been deputized");
-                } else {player.sendMessage("Player was not a member of your town"); } 
-            } else { player.sendMessage("You are not an officer");}
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.makeDeputy(plugin.getServer().getPlayer(split[1] ),player);
             return true;
             
         } else if (split[0].equalsIgnoreCase("resign")) {
@@ -210,32 +137,17 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            if ( temp.isMayor(player) ) {
+                temp.resignMayor(player);
+                return true;
+            } else if ( temp.isDeputy(player) ) {
+                temp.resignDeputy(player);
                 return true;
             }
-            if (officer.isOfficer() ){
-                if (officer.isMayor() ) {
-                    player.sendMessage("You cannot resign, find a replacment first");
-                    player.sendMessage("*Currently requires a manual database edit*");
-                } else {
-                    officer.setDeputy (officer.getTown(),false);
-                    player.sendMessage("You have become a regular citizen"); } 
-            } else { player.sendMessage("You are not an officer");}
-            return true;
-            
         } else if (split[0].equalsIgnoreCase("rankup")) {
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            Town t = plugin.getTown(player);
-            if (officer.isMayor() ){
-                t.rankup(player);
-                player.sendMessage(t.getName()+" ranked to " + t.getRank() );
-            } else { player.sendMessage("You are not the mayor"); }
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.rankup(player);
             return true;
             
         } else if (split[0].equalsIgnoreCase("setTax")) {
@@ -243,22 +155,14 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
-                return true;
-            }
-            Town t = plugin.getTown(player);
-            if (officer.isOfficer() ){
-                t.setTaxRate(Double.parseDouble( split[1]) );
-            } else { player.sendMessage("You are not an officer"); }
-            player.sendMessage("Set the tax rate to "+split[1]+" for "+t.getName() );
+            Town temp = plugin.getTown( plugin.getTownName(player) );
+            temp.setTaxRate(Double.parseDouble(split[1]) ) ;
             return true;
-            
         } else {
             displayHelp(player);
             return true;
         }
+        return false;
     }
     private void displayHelp(Player player){ 
             player.sendMessage("Deputy command help.  You can do these commands:");
