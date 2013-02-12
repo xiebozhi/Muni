@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.HashMap;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 

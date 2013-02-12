@@ -23,7 +23,6 @@ package com.teamglokk.muni.utilities;
 import com.teamglokk.muni.Muni;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Material;
 
 import org.bukkit.entity.Player;
