@@ -41,7 +41,7 @@ public class TownAdminCommand implements CommandExecutor {
         plugin = instance;
     }
     @Override
-        public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (!(sender instanceof Player)) {
             console = true;
         } 

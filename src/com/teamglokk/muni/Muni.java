@@ -92,7 +92,7 @@ public class Muni extends JavaPlugin {
     
     public TreeSet<Town> towns = new TreeSet<Town>();
     public TreeSet<Citizen> citizens = new TreeSet<Citizen>();
-    public HashMap allCitizens = new HashMap();
+    public HashMap<String,String> allCitizens = new HashMap<String,String>();
     //protected ArrayList<Town> towns = new ArrayList<Town>();
     //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
@@ -234,7 +234,7 @@ public class Muni extends JavaPlugin {
         this.getLogger().info ("Making test towns");
         Town maker = new Town(this);
         maker = new Town (this,"TestTown","bobbshields");
-        maker.setMaxDeputies(5); maker.setRank(0);
+        //maker.setMaxDeputies(5); maker.setRank(0); Removed from the town class
         maker.setTaxRate(10.5);
         
         maker.saveToDB();
@@ -355,16 +355,19 @@ public class Muni extends JavaPlugin {
      * @param player
      * @return the town where the player is a citizen
      */
-    public Town getTown(Player player){
-        Town temp = new Town(this);
-        String search = getCitizen(player.getName() ).getTown();
-        for (Town curr: towns) {
-            this.getLogger().warning(curr.getName() );
-            if (curr.getName().equalsIgnoreCase(search) ){
-                temp = curr;
-            } else {temp.setName("Not found");}
-        }
-        return temp;
+    public String getTown (Player player){
+        return allCitizens.get( player.getName() ).toString();
+    }
+    
+    /**
+     * Gets whether the player is a citizen of any town
+     * @param player
+     * @return 
+     */
+    public boolean isCitizen (Player player){
+        if (allCitizens.containsKey(player.getName() ) ){
+            return true;
+        } else { return false; } 
     }
     
     /**

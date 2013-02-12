@@ -97,7 +97,7 @@ public class EconWrapper extends Muni {
             player.sendMessage("You paid "+amount+" "+econ.currencyNamePlural()+
                     " for "+reason);
             // make a new transaction here
-            Transaction t = new Transaction (plugin,plugin.getTown(player).getName(),player.getName(),reason,amount,0,true);
+            Transaction t = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),player.getName(),reason,amount,0,true);
             return true;
         } else { 
             
@@ -123,7 +123,7 @@ public class EconWrapper extends Muni {
                     // then pay items and return the status
                     boolean rtn = payItem(player,plugin.getRankupItemID(),items);
                     if (rtn) {
-                        Transaction t  = new Transaction (plugin,plugin.getTown(player).getName(),
+                        Transaction t  = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),
                                 player.getName(),reason,money,items,true);
                         player.sendMessage( t.toString() );
                     }
@@ -146,7 +146,7 @@ public class EconWrapper extends Muni {
             player.sendMessage("You paid "+amount+" of "+ItemID+
                     " for "+reason);
             // make a new transaction here
-            Transaction t = new Transaction (plugin,plugin.getTown(player).getName(),player.getName(),reason,0,amount,true);
+            Transaction t = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),player.getName(),reason,0,amount,true);
             return true;
         } else { 
             
