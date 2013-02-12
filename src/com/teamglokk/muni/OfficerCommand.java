@@ -100,14 +100,16 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            Citizen officer = plugin.getCitizen(player.getName() );
-            if (officer == null ) {
-                player.sendMessage("You are not a member of a town");
+            player.sendMessage("Here: "+split[1]);
+            Citizen officer = null;
+            officer = new Citizen ( plugin.getCitizen( player.getName() ) );
+            if (officer.getName().equals("Not found") ) {
+                player.sendMessage("You are not a member of any town");
                 return true;
             }
             Citizen tempCit = plugin.getCitizen( split[1] ) ;
-            if (tempCit == null ) {
-                player.sendMessage("You are not a member of a town");
+            if (tempCit.getName().equals("Not found") ) {
+                player.sendMessage("They are not a member of any town");
                 return true;
             }
             if (officer.isOfficer() ){

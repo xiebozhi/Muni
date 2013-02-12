@@ -5,6 +5,7 @@ import net.milkbowl.vault.economy.Economy;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.Collections;
@@ -74,6 +75,7 @@ public class Muni extends JavaPlugin {
     
     protected TreeSet<Town> towns = new TreeSet<Town>();
     protected TreeSet<Citizen> citizens = new TreeSet<Citizen>();
+    protected HashMap allCitizens = new HashMap();
     //protected ArrayList<Town> towns = new ArrayList<Town>();
     //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
@@ -139,8 +141,8 @@ public class Muni extends JavaPlugin {
         this.getLogger().info ("Loading Towns from database");
         loadTowns();
         
-        this.getLogger().info ("Loading Citizens from database");
-        loadCitizens();
+        //this.getLogger().info ("Loading Citizens from database");
+        //loadCitizens();
 
         this.getLogger().info ("Loaded and Ready for Town administration" );
     }// end: onEnable()
@@ -149,7 +151,6 @@ public class Muni extends JavaPlugin {
      * Queries DB for player names then constructor each loads db at array addition
      * 
      * @author bobbshields
-     */
     public void loadCitizens(){
         try{
             Iterator itr = dbwrapper.getSingleCol("citizens","playerName").iterator();
@@ -165,13 +166,14 @@ public class Muni extends JavaPlugin {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Citizens"); }
         }
     }
+     */
     /**
      * Queries DB for town names then town constructor loads itself 
      * 
      * @author bobbshields
      */
     public void loadTowns(){
-            Town copyTown = new Town (this);
+        Town copyTown = new Town (this);
         try{
             if ( isDebug() ) { this.getLogger().info("Towns Loading. " ); }
             
@@ -186,6 +188,15 @@ public class Muni extends JavaPlugin {
         } finally {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Towns"); }
         }
+        // Now we'll iterate the towns once to load its citizens from the db
+        for (Town t: towns){
+            t.loadCitizens();
+        }
+    }
+    public boolean useOP(){
+        return true; 
+        // this will eventually be stored as a config option
+        // always true for now
     }
     /* For testing only, will be deleted closer to the beta
      * 
@@ -255,30 +266,33 @@ public class Muni extends JavaPlugin {
     public Town getTown(String town_Name){
         Town temp = null;
         for (Town curr: towns) {
-            if (curr.getName().equals(town_Name) ){
+            if (curr.getName().equalsIgnoreCase(town_Name) ){
                 temp = curr;
             } 
         }
         return temp;
     }
     public Town getTown(Player player){
-        Town temp = null;
+        Town temp = new Town(this);
         String search = getCitizen(player.getName() ).getTown();
         for (Town curr: towns) {
-            if (curr.getName().equals(search) ){
+            this.getLogger().warning(curr.getName() );
+            if (curr.getName().equalsIgnoreCase(search) ){
                 temp = curr;
-            } 
+            } else {temp.setName("Not found");}
         }
         return temp;
     }
     public Citizen getCitizen(String player){
-        Citizen temp = null;
-        for (Citizen curr: citizens){
-            if (curr.getName().equals(player) ){
-                temp = curr;
-            }
+        //Citizen temp = new Citizen(this);                
+            this.getLogger().warning("getCitizen: "+ player );
+        for (Citizen curr: citizens){                
+            this.getLogger().warning(curr.getName() );
+            if (curr.getName().equalsIgnoreCase(player) ){
+                return curr;
+            } 
         }
-        return temp;
+        return null;
     }
     public String whereCitizen( String player ){
         Citizen temp = new Citizen(this,player );

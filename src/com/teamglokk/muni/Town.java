@@ -1,6 +1,8 @@
 package com.teamglokk.muni;
 
 import java.sql.Timestamp;
+import java.util.Iterator;
+import java.util.TreeSet;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -21,8 +23,134 @@ public class Town implements Comparable<Town> {
     private double taxRate;
     private int townRank;
      
-	// Stored in (prefix)_citizens	
+	// Stored in (prefix)_citizens	TreeSet<Citizen> citizens = new TreeSet<Citizen>();
     private String townMayor;
+    protected Citizen mayor = null;
+    protected TreeSet<Citizen> deputies = new TreeSet<Citizen>();
+    protected TreeSet<Citizen> citizens = new TreeSet<Citizen>();
+            
+    public boolean makeMayor(Player player){
+        if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
+            plugin.getLogger().warning("Player "+player.getName()+" is not online to make a mayor of " +townName );
+            return false;
+        }
+        if ( isMayor(player) ){
+            player.sendMessage("You are already the mayor of "+townName);
+            return true;
+        }
+        if ( isDeupty(player) || isCitizen(player) ){
+            if (mayor.getName().equalsIgnoreCase( "empty" ) ){
+               if ( plugin.econwrapper.hasPerm( player, "muni.mayor" ) ){
+                    mayor = new Citizen ( plugin, player );
+                    saveToDB();
+                    return true;
+                } else { player.sendMessage("You do not have permission to become a mayor."); }
+            } else {player.sendMessage("There is already a mayor") ;}
+        } else {player.sendMessage("You're not a citizen of the town" ); }
+        return true;
+    }
+    public boolean resignMayor (){
+        mayor.setName("empty");
+        // log a transaction here
+        return true;
+    }
+    public boolean resignDeputy ( Player player ){
+        deputies.remove(new Citizen (plugin,player) );
+        saveToDB();
+        // log a transaction here
+        return true;
+    }
+    public boolean removeCitizen ( Player player ){
+        citizens.remove(new Citizen (plugin,player) );
+        saveToDB();
+        // log a transaction here
+        return true;
+    }
+    public boolean makeDeputy(Player player){
+        if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
+            plugin.getLogger().warning("Player "+player.getName()+" is not online to make a deputy of " +townName );
+            return false;
+        }
+        if ( isMayor(player) ){
+            player.sendMessage("You are already the mayor of "+townName);
+            return false;
+        } else if ( isDeupty(player ) ){
+            player.sendMessage("You are already a deputy of "+townName);
+            return false;
+        } else if ( isCitizen(player) ){
+            if ( plugin.townRanks[townRank].maxDeputies > deputies.size() ){ // might have to adjust array...
+                if ( plugin.econwrapper.hasPerm(player, "muni.deputy")
+                        || plugin.econwrapper.hasPerm(player, "muni.deputy") ){
+                    deputies.add(new Citizen (plugin,player) );
+                    saveToDB();
+                    return true;
+                } else { player.sendMessage("You do not have permission to become a deputy."); }
+            } else { player.sendMessage("Too many deputies, rank up or fire someone"); }
+        } else { player.sendMessage("You are not a member of "+ townName); }
+        return false;
+    }
+    public boolean makeCitizen(Player player){
+        if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
+            plugin.getLogger().warning("Player "+player.getName()+" is not online to make a citizen of " +townName );
+            return false;
+        }
+        if ( isMayor(player) ){
+            player.sendMessage("You are already the mayor of "+townName);
+            return false;
+        } else if ( isDeupty(player ) ){
+            player.sendMessage("You are already a deputy of "+townName);
+            return false;
+        } else if ( plugin.allCitizens.containsValue( player.getName() ) ) {
+            player.sendMessage("You are already a member of a town.");
+            return false;
+        } else if ( plugin.townRanks[townRank].maxCitizens > deputies.size() + citizens.size() + 1 ){ // might have to adjust array...
+                if ( plugin.econwrapper.hasPerm(player, "muni.citizen") ){
+                    citizens.add(new Citizen (plugin,player) );
+                    saveToDB();
+                    return true;
+                } else { player.sendMessage("You do not have permission to become a citizen."); }
+        } else { player.sendMessage(townName+" has too many citizens.  Wait for a vacancy"); }
+        return false;
+    }
+    
+    public boolean isMayor( Player player ){
+        if ( player.getName().equalsIgnoreCase( mayor.getName() ) ){
+            return true;
+        } else { return false; }
+    }
+    public boolean isDeupty( Player player ){
+        if (deputies.contains( new Citizen(plugin, player.getName()) ) ){
+            return true;
+        } else { return false; }
+    }
+    public boolean isCitizen(Player player){
+        if (citizens.contains( new Citizen(plugin, player.getName()) ) ){
+            return true;
+        } else { return false; }
+    }
+    public void loadCitizens(){
+        try{
+            Iterator itr = plugin.dbwrapper.getTownCits( townName ).iterator();
+            if ( plugin.isDebug() ) { plugin.getLogger().info(" Loading Citizens. " ); }
+            while ( itr.hasNext() ){
+                String current = itr.next().toString();
+                if ( plugin.isDebug() ) { plugin.getLogger().info("Loading citizens: " + current); }
+                citizens.add( new Citizen( plugin, current ) ); //constructor loads from DB
+                if ( citizens.last().isMayor() ) {
+                    mayor = citizens.last();
+                    citizens.remove(citizens.last() );
+                }
+                if ( citizens.last().isDeputy() ) {
+                    deputies.add(citizens.last() );
+                    citizens.remove(citizens.last() );
+                }
+          }
+        } catch (NullPointerException ex){
+            plugin.getLogger().severe("Failed to load citizens for town ("+ townName +"): "+ex.getMessage() );
+        } finally {
+            if ( plugin.isDebug() ) { plugin.getLogger().info("Finshed loading Citizens"); }
+        }
+    }
     private int maxDeputies = 5;
     
     private Timestamp createdDate;

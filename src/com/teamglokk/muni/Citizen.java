@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import org.bukkit.entity.Player;
 /**
  * Town.java: defines the Town class
  * @author bobbshields
@@ -33,6 +34,10 @@ public class Citizen implements Comparable<Citizen> {
     public Citizen (Muni instance){
         plugin = instance;
         
+    }
+    public Citizen (Muni instance, Player player){
+        plugin = instance; 
+        loadFromDB ( player.getName() );
     }
     public Citizen (Muni instance, String player){
         plugin = instance; 
@@ -215,7 +220,8 @@ public class Citizen implements Comparable<Citizen> {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(11, 13). 
-            append(name).append(townName).toHashCode();
+            append(name).toHashCode(); //append(townName).
+        // town Name append removed for temporary basis
     }
     @Override
     public boolean equals(Object obj) {

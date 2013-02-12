@@ -116,6 +116,32 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
+    public ArrayList<String> getTownCits ( String townName ){
+        ArrayList<String> rtn = new ArrayList<String>();
+        String SQL = "SELECT playerName FROM "+plugin.db_prefix+"citizens WHERE townName='"+townName+"' ORDER BY playerName DESC;";
+        try {
+            db_open();
+            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            
+            while ( rs.next() ){
+               String temp = rs.getString( "playerName" );
+               rtn.add( temp );
+               if (plugin.isDebug()) { plugin.getLogger().info("getSingleCol getting: "+temp); }
+           }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "getSingleCol: "+ex.getMessage() ); 
+            rtn = null;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
+                rtn = null;
+            } finally{}
+        }
+        return rtn;
+    }
     public Town getTown(String townName){
         Town temp = new Town (plugin) ;
         String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.db_prefix+"towns WHERE townName='"+townName+"';";

@@ -116,9 +116,10 @@ public class EconWrapper extends Muni {
     public boolean hasPerm (Player player, String perm){
         if ( player.hasPermission(perm) ){
             return true;
-        } else{
-            return false;
+        } else if (plugin.useOP() && player.isOp() ) {
+            return true;
         }
+        else { return false; }
     }
     public String getCurrNameSingular(){
         return econ.currencyNameSingular();
