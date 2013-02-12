@@ -41,11 +41,19 @@ public class WGWrapper extends Muni {
     private WorldGuardPlugin wg = null;
     private RegionManager rm = null;
         
+    /**
+     * Default constructor
+     * @param instance 
+     */
     public WGWrapper(Muni instance) {
         plugin = instance;
         //wg =  plugin.wgp.; 
     }
   
+    /**
+     * Expands the specified region in one direction by the rules defined in config
+     * @return 
+     */
     public boolean expandRegion ( /*Player.location() player,*/) { 
 
 /*
@@ -65,11 +73,22 @@ public class WGWrapper extends Muni {
         */
         return true;
     } 
+    
+    /**
+     * Checks the World Guard build permisison at the player's current location
+     * @param player
+     * @return 
+     */
     public boolean checkBuildPerms (Player player)
     {
         return this.wgp.canBuild(player,
             player.getLocation().getBlock().getRelative(0, -1, 0));
     }
+    /**
+     * Gets a list of regions at the player's current location 
+     * @param player
+     * @return 
+     */
     public String getRegions (Player player)
     {
         //return this.wgp.getRegionManager(null).
@@ -83,11 +102,25 @@ public class WGWrapper extends Muni {
     }
 
    //requires if string.equals("pvp") { getflag(DefaultFlag.PVP }; elseif...
+   /**
+    * Gets whether the specified region has the specified flag
+    * @param player
+    * @param flag
+    * @return 
+    */
     public boolean getflag (Player player, StateFlag flag ){
         //region.getFlag(flag, flag.parseInput(plugin.wgp, player, flag));
         return getARS(player).allows(flag);
     }
     
+    /**
+     * Sets the flag for the region 
+     * @param player
+     * @param region
+     * @param flag
+     * @param value
+     * @return 
+     */
     public boolean setflag (Player player, ProtectedRegion region,
                 Flag flag, String value){
             //Check that the user has ownership

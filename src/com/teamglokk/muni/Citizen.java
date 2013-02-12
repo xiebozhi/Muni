@@ -25,7 +25,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import org.bukkit.entity.Player;
 /**
- * Town.java: defines the Town class
+ * Citizen.java: defines the Citizen class
  * @author bobbshields
  */
 public class Citizen implements Comparable<Citizen> {
@@ -38,6 +38,7 @@ public class Citizen implements Comparable<Citizen> {
     private String townName =null;
     
     // Stored in (prefix)_citizens
+    
     private boolean mayor =false;
     private boolean deputy = false;
     

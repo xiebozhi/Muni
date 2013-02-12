@@ -39,7 +39,7 @@ import java.util.ArrayList;
 
 //import com.teamglokk.muni;
 /**
- * Wraps the database functions to be easier to work with
+ * Wraps the database functions to provide simple functions
  * @author BobbShields
  */
 public class dbWrapper extends Muni {
@@ -53,6 +53,11 @@ public class dbWrapper extends Muni {
     public dbWrapper( Muni instance ){
         plugin = instance;
     }
+    
+    /**
+     * Opens a connection to the database
+     * @throws SQLException 
+     */
     public void db_open() throws SQLException {
         if(plugin.isDebug()){
             String temp = plugin.useMysql() ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
@@ -76,16 +81,29 @@ public class dbWrapper extends Muni {
         }
         stmt = conn.createStatement();
     }
+    
+    /**
+     * Closes the connection to the database
+     * @throws SQLException 
+     */
     public void db_close() throws SQLException {
         if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
         if ( rs != null) { rs.close(); }
         if ( stmt != null) { stmt.close(); }
         if ( conn != null ) { conn.close();}
     }
-    public boolean checkExistence ( String table, String pk, String value ){
+    
+    /**
+     * Checks to see if a field exists in a certain table
+     * @param table     the table to be used
+     * @param col       column name 
+     * @param value     check to see if this value exists in the column of the table
+     * @return true if exists, false if not
+     */
+    public boolean checkExistence ( String table, String col, String value ){
         boolean rtn = false;
-        String SQL = "SELECT "+pk+" FROM "+plugin.getDB_prefix()+table+
-                    " WHERE "+pk+"='"+value +"';";
+        String SQL = "SELECT "+col+" FROM "+plugin.getDB_prefix()+table+
+                    " WHERE "+col+"='"+value +"';";
         try {
             
             db_open();
@@ -98,7 +116,7 @@ public class dbWrapper extends Muni {
             if(this.isDebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
             } 
         } catch (SQLException ex){
-            plugin.getLogger().info( "checkExistence: Value not found: "+table+"."+pk+"="+value ); 
+            plugin.getLogger().info( "checkExistence: Value not found: "+table+"."+col+"="+value ); 
             rtn = false;
         } finally {
             try { db_close();
@@ -109,6 +127,13 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
+    
+    /**
+     * Get an ArrayList of strings for a whole column 
+     * @param table     the table to be used
+     * @param column    the column name for the values to return
+     * @return          all the results for the specified column, in an array list
+     */
     public ArrayList<String> getSingleCol (String table, String column ){
         ArrayList<String> rtn = new ArrayList<String>();
         String SQL = "SELECT "+column+" FROM "+plugin.getDB_prefix()+table+" ORDER BY "+column+";";
@@ -136,6 +161,12 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
+    
+    /**
+     * Gets a list of all the citizens in the specified town
+     * @param townName
+     * @return      array list of all the citizens in the town
+     */
     public ArrayList<String> getTownCits ( String townName ){
         ArrayList<String> rtn = new ArrayList<String>();
         String SQL = "SELECT playerName FROM "+plugin.getDB_prefix()+"citizens WHERE townName='"+townName+"' ORDER BY playerName DESC;";
@@ -162,6 +193,12 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
+    
+    /**
+     * Get all the town data from only the town name
+     * @param townName
+     * @return          copy of the specified town
+     */
     public Town getTown(String townName){
         Town temp = new Town (plugin) ;
         String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"towns WHERE townName='"+townName+"';";
@@ -181,6 +218,12 @@ public class dbWrapper extends Muni {
         }
         return temp;
     }
+    
+    /**
+     * Gets a citizen from the playerName
+     * @param playerName
+     * @return              copy of the specified citizen 
+     */
     public Citizen getCitizen(String playerName){
         Citizen temp = new Citizen (plugin);
         String SQL = "SELECT "+temp.toDB_Cols() +" FROM "+plugin.getDB_prefix()+"citizens WHERE playerName='"+playerName+"';";
@@ -201,6 +244,14 @@ public class dbWrapper extends Muni {
         }
         return temp;
     }
+    
+    /**
+     * Insert a single row into the database
+     * @param table
+     * @param cols
+     * @param values
+     * @return          true if worked properly
+     */
     public boolean insert(String table, String cols, String values) {
         boolean rtn = true;
         String SQL = "INSERT INTO "+plugin.getDB_prefix()+table+" ("+cols+
@@ -222,11 +273,14 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
+    
     /**
      * Updates a single row for a single key
-     * 
-     * @author bobbshields
-     * @param table test test
+     * @param table
+     * @param key_col
+     * @param key
+     * @param col
+     * @param value
      * @return 
      */
     public boolean update(String table, String key_col, String key, String col, String value) {
@@ -250,7 +304,16 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-        public boolean updateRow(String table, String key_col, String key, String colsANDvals) {
+    
+    /**
+     * Updates a row, requires special colsANDvals in SQL format
+     * @param table
+     * @param key_col
+     * @param key
+     * @param colsANDvals
+     * @return 
+     */
+    public boolean updateRow(String table, String key_col, String key, String colsANDvals) {
         
         boolean rtn = true;
         String SQL = "UPDATE "+plugin.getDB_prefix()+table+" SET "+colsANDvals+" WHERE "
@@ -272,6 +335,11 @@ public class dbWrapper extends Muni {
         return rtn;
     }
 
+    /**
+     * Creates the database specifically for Muni 
+     * @param drops true means the tables will be dropped before creating them again
+     * @return      false if there was a problem
+     */
     public boolean createDB (boolean drops) { 
         boolean rtn = false;
         String serial;

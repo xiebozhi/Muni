@@ -50,19 +50,26 @@ public class Town implements Comparable<Town> {
     protected TreeSet<Citizen> applicants = new TreeSet<Citizen>();
     protected TreeSet<Citizen> invitees = new TreeSet<Citizen>();
     
-    public enum Types {
+    //private int maxDeputies = 5;
+    
+    private Timestamp createdDate;
+    
+    /**
+     * The different types of citizen, such as mayor, deputy, etc.
+     */
+    public enum roles {
         MAYOR("mayor"),
         DEPUTY("deputy"),
         INVITEE("invited"),
         APPLICANT("applied");
         String value;
-        Types (String s) {value = s; }
+        roles (String s) {value = s; }
         public String getValue() {return value;}
-        public static Types fromString(String text) throws IllegalArgumentException {
+        public static roles fromString(String text) throws IllegalArgumentException {
             if (text != null){
-                for (Types t: Types.values() ){
-                    if (text.equalsIgnoreCase(t.value) ){
-                        return t;
+                for (roles r: roles.values() ){
+                    if (text.equalsIgnoreCase(r.value) ){
+                        return r;
                     }
                 }
                 throw new IllegalArgumentException("Type not found"); 
@@ -70,8 +77,16 @@ public class Town implements Comparable<Town> {
             return null;
         }
     }
+    /**
+     * The citizens who are in this town mapped to their role
+     */
     protected HashMap citizensMap = new HashMap();
             
+    /**
+     * Makes the player into the town mayor, if checks are passed
+     * @param player
+     * @return 
+     */
     public boolean makeMayor(Player player){
         if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
             plugin.getLogger().warning("Player "+player.getName()+" is not online to make a mayor of " +townName );
@@ -92,9 +107,16 @@ public class Town implements Comparable<Town> {
         } else {player.sendMessage("You're not a citizen of the town" ); }
         return true;
     }
+    
+    /**
+     * Makes the mayor into a regular citizen then opens mayor slot
+     * @param player
+     * @return 
+     */
     public boolean resignMayor (Player player){
         if (isMayor(player ) ) {
             mayor.setName("empty");
+            makeCitizen(player,player);
             // log a transaction here
             return true;
         } else {
@@ -102,6 +124,11 @@ public class Town implements Comparable<Town> {
             return false;
         }
     }
+    /**
+     * Makes the deputy into a regular citizen
+     * @param player
+     * @return 
+     */
     public boolean resignDeputy ( Player player ){
         if ( isDeputy(player) ){
             deputies.remove(new Citizen (plugin,player) );
@@ -113,6 +140,12 @@ public class Town implements Comparable<Town> {
             return false;
         }
     }
+    
+    /**
+     * Kicks the citizen from the town
+     * @param player
+     * @return 
+     */
     public boolean removeCitizen ( Player player ){
         if (isCitizen( player ) ){
             citizens.remove(new Citizen (plugin,player) );
@@ -121,6 +154,12 @@ public class Town implements Comparable<Town> {
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Turns the regular citizen into a deputy, if checks are passed
+     * @param player
+     * @return 
+     */
     public boolean makeDeputy(Player player){
         if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
             plugin.getLogger().warning("Player "+player.getName()+" is not online to make a deputy of " +townName );
@@ -144,6 +183,13 @@ public class Town implements Comparable<Town> {
         } else { player.sendMessage("You are not a member of "+ townName); }
         return false;
     }
+    
+    /**
+     * Turns the player into a regular citizen, if not citizen elsewhere
+     * @param player
+     * @param officer
+     * @return 
+     */
     public boolean makeCitizen(Player player, Player officer){
         if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
             plugin.getLogger().warning("Player "+player.getName()+" is not online to make a citizen of " +townName );
@@ -168,21 +214,84 @@ public class Town implements Comparable<Town> {
         return false;
     }
     
+    /**
+     * Officer invites the player into town
+     * @param player
+     * @param officer
+     * @return 
+     */
+    public boolean invite (Player player, Player officer){
+        
+        return true;
+    }
+    
+    /**
+     * The invited player accepts the town invitation
+     * @param player
+     * @return 
+     */
+    public boolean accpetInvite(Player player){
+        
+        return true;
+    }
+    
+    /**
+     * Player applies to be accepted into town
+     * @param player
+     * @return 
+     */
+    public boolean apply (Player player) {
+        
+        return true;
+    }
+    
+    /**
+     * The officer accepts the application from the player
+     * @param player
+     * @param officer
+     * @return 
+     */
+    public boolean acceptApplication (Player player, Player officer){
+        
+        return true;
+    }
+    
+    /**
+     * Checks whether player is the mayor of this town
+     * @param player
+     * @return 
+     */
     public boolean isMayor( Player player ){
         if ( player.getName().equalsIgnoreCase( mayor.getName() ) ){
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Checks whether the player is a deputy of this town
+     * @param player
+     * @return 
+     */
     public boolean isDeputy( Player player ){
         if (deputies.contains( new Citizen(plugin, player.getName()) ) ){
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Checks whether the player is a citizen of this town
+     * @param player
+     * @return 
+     */
     public boolean isCitizen(Player player){
         if (citizens.contains( new Citizen(plugin, player.getName()) ) ){
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Loads all citizens from the database into the town citizen collections
+     */
     public void loadCitizens(){
         try{
             Iterator itr = plugin.dbwrapper.getTownCits( townName ).iterator();
@@ -206,13 +315,19 @@ public class Town implements Comparable<Town> {
             if ( plugin.isDebug() ) { plugin.getLogger().info("Finshed loading Citizens"); }
         }
     }
-    private int maxDeputies = 5;
     
-    private Timestamp createdDate;
-    
+    /**
+     * Default constructor with no data
+     * @param instance 
+     */
     public Town (Muni instance){
         plugin = instance;
     }
+    
+    /**
+     * Copy constructor
+     * @param copy 
+     */
     public Town (Town copy){
         townName = copy.getName();
         townMayor = copy.getMayor(); 
@@ -220,7 +335,14 @@ public class Town implements Comparable<Town> {
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
     }
-   public Town (Muni instance, String town_Name, String player ){
+    
+    /**
+     * Constructor for starting a new town with specified player as the mayor
+     * @param instance
+     * @param town_Name
+     * @param player 
+     */
+    public Town (Muni instance, String town_Name, String player ){
         
         plugin = instance;
         if (plugin.isDebug() ) plugin.getLogger().info("Town with mayor: "+town_Name+", "+player);
@@ -260,6 +382,12 @@ public class Town implements Comparable<Town> {
         loadFromDB(town_Name);
         
     }    
+    
+    /**
+     * Loads the town data from the database
+     * @param town_Name
+     * @return 
+     */
     public boolean loadFromDB(String town_Name){
         Town copy = plugin.dbwrapper.getTown(town_Name);
         //plugin = copy.plugin;
@@ -270,6 +398,11 @@ public class Town implements Comparable<Town> {
         taxRate = copy.getTaxRate();
         return true;
     }    
+    
+    /**
+     * Saves the town data to the database
+     * @return 
+     */
     public boolean saveToDB(){
         // if exists, update; else insert
         boolean temp = false; 
@@ -282,9 +415,18 @@ public class Town implements Comparable<Town> {
             return true;
         } else { return false; } 
     }
+    /**
+     * Saves the data for the mayor to the database 
+     * @return 
+     */
     public boolean saveMayor(){
         return mayor.saveToDB();
     }
+    
+    /**
+     * Saves the data for the deputies to the database 
+     * @return 
+     */
     public boolean saveDeputies(){
         for (Citizen curr : deputies){
             if ( !curr.saveToDB() ) {
@@ -293,6 +435,11 @@ public class Town implements Comparable<Town> {
         }
         return true;
     }
+    
+    /**
+     * Saves the data for the citizens to the database 
+     * @return 
+     */
     public boolean saveCitizens(){
         for (Citizen curr : citizens){
             if ( !curr.saveToDB() ) {
@@ -301,27 +448,58 @@ public class Town implements Comparable<Town> {
         }
         return true;
     }
+    
+    /**
+     * Saves all the citizens to the database
+     * @return 
+     */
     public boolean saveAllCitizens(){
         if (saveMayor() && saveDeputies() && saveCitizens() ){
             return true;
         } else { return false; }
     }
     
+    /**
+     * Gives a string that has all the valid database column names
+     * @return 
+     */
     public String toDB_Cols(){
-        return "townName,mayor, townRank,bankBal,taxRate";
+        return "townName,mayor,townRank,bankBal,taxRate";
     }
+    
+    /**
+     * Gives a string that has all the values for this town, follows order of toDB_Cols()
+     * @return 
+     */
     public String toDB_Vals(){
         return "'"+townName +"','"+townMayor+"','"+
                Integer.toString(townRank) +"','"+
                Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
     }  
+    
+    /**
+     * Gives special string to allow a database update to the whole row in the wrapper
+     * @return 
+     */
     public String toDB_UpdateRowVals(){
         return "townName='"+townName+"', townRank='"+townRank+"', bankBal='"+
                 Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+"' ";
     }
+    
+    /**
+     * Gives a string of user-friendly information about the town
+     * @return 
+     */
     public String info(){
         return toDB_Vals();
     }
+    
+    /**
+     * Adds the town to the database
+     * @param mayor
+     * @param town_Name
+     * @return 
+     */
     public boolean db_addTown(Player mayor, String town_Name){
         if ( !plugin.econwrapper.payMoney(mayor,1000) ){
             mayor.sendMessage("Not enough money to found the town");
@@ -339,6 +517,11 @@ public class Town implements Comparable<Town> {
             return false;
         }
     }
+    
+    /**
+     * Adds this town to the database
+     * @return 
+     */
     public boolean db_addTown(){
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
             plugin.dbwrapper.insert("towns",toDB_Cols(),toDB_Vals() );
@@ -347,37 +530,82 @@ public class Town implements Comparable<Town> {
             return false;
         }
     }
-    public boolean setMaxDeputies(int max){
-        maxDeputies = max;
-        return true;
-    }
+    
+    /**
+     * Gets the maximum number of deputies defined for this townRank in the config
+     * @return 
+     */
     public int getMaxDeputies() {
-        return maxDeputies; 
+        return plugin.townRanks[townRank].getMaxDeputies(); 
     }
+    
+    /**
+     * Gets the maximum number of citizens defined for this townRank in the config
+     * @return 
+     */
+    public int getMaxCitizens() {
+        return plugin.townRanks[townRank].getMaxCitizens(); 
+    }
+    
+    /**
+     * Gets the mayor's name
+     * @return 
+     */
     public String getMayor(){
-        return townMayor;
+        return mayor.getName() ;
     }
-    public boolean setMayor(String mayor){
-        townMayor = mayor;
-        return true;
+    
+    /**
+     * Gets a string of deputies, comma seperated 
+     * @return 
+     */
+    public String getDeputies(){
+        String temp = null;
+        for (Citizen d: deputies){
+             temp = temp + d.getName() +", ";
+         }
+         return temp;
     }
-    public boolean rankup(Player player){
+    
+    /**
+     * Check whether the player is the mayor or a deputy
+     * @param player
+     * @return 
+     */
+    public boolean checkOfficer (Player player) {
+        if (isMayor(player) || isDeputy(player) ) {
+            return true;
+        } else { return false; } 
+    }
+    
+    /**
+     * Mayor ranks up the town after checks and payment
+     * @param player
+     * @return 
+     */
+    public boolean rankup(Player mayor){
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
         if ( rankCost >= townBankBal ){
-            if (plugin.econwrapper.payItemR( player, plugin.rankupItemID, rankCostItem,"Rankup" ) ) {
-                player.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
+            if (plugin.econwrapper.payItemR( mayor, plugin.rankupItemID, rankCostItem,"Rankup" ) ) {
+                mayor.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
                 return payFromTB(rankCost); //Payment of money taken after sponges are confirmed
             } else{ 
-                player.sendMessage("You do not have enough "+"Sponges"+" in your inventory to rank up "+ townName);
+                mayor.sendMessage("You do not have enough "+"Sponges"+" in your inventory to rank up "+ townName);
                 return false;
             }
         }else {
-            player.sendMessage("You need to depsoit "+ (rankCost-townBankBal) +" into the town bank to rank up "+ townName);
+            mayor.sendMessage("You need to depsoit "+ (rankCost-townBankBal) +" into the town bank to rank up "+ townName);
             return false;
         }  
     }
+    
+    /**
+     * Withdraw from the town bank
+     * @param amount
+     * @return 
+     */
     public boolean payFromTB (Double amount){
         if ( townBankBal >= amount ){
                 townBankBal = townBankBal - amount;
@@ -386,34 +614,60 @@ public class Town implements Comparable<Town> {
             return false;
         }
     }
+    
+    /**
+     * Gets the town rank
+     * @return 
+     */
     public int getRank(){
         return townRank;
     }
-    public boolean setRank(int rank){
-        if (rank >= 0 && rank < 10){
-            townRank = rank;
-            return true;
-        }else{ return false; }
-    }
+    
+    /**
+     * Player deposits funds into the town bank
+     * @param player
+     * @param amount
+     * @return 
+     */
     public boolean tb_deposit(Player player, double amount){
         if ( plugin.econwrapper.payMoney(player,amount) ){
             townBankBal = townBankBal + amount;
             return true;
         } else {return false; }
     }
-    public boolean tb_withdrawl(Player player, double amount){
+    
+    /**
+     * Officer withdraws funds from the town bank
+     * @param officer
+     * @param amount
+     * @return 
+     */
+    public boolean tb_withdrawl(Player officer, double amount){
         if ( townBankBal >= amount ){
-            if (plugin.econwrapper.giveMoney(player,amount) ) {
+            if (plugin.econwrapper.giveMoney(officer,amount) ) {
                 townBankBal = townBankBal - amount;
                 return true;
             } else { return false; }
         } else { return false; }
     }
+    
+    /**
+     * Player pays the set amount of taxes
+     * @param player
+     * @return 
+     */
     public boolean payTaxes(Player player){
         if (payTaxes(player, taxRate ) ){
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Player pays a specified amount in taxes
+     * @param player
+     * @param amount
+     * @return 
+     */
     public boolean payTaxes(Player player, Double amount){
         if ( plugin.econwrapper.pay(player, amount, 0, "Taxes for "+townName ) ){
             townBankBal = townBankBal + amount;
@@ -422,12 +676,28 @@ public class Town implements Comparable<Town> {
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Checks the town bank balance
+     * @return 
+     */
     public double getBankBal (){
         return townBankBal;
     }
+    
+    /**
+     * Checks the current tax rate
+     * @return 
+     */
     public double getTaxRate(){
         return taxRate;
     }
+    
+    /**
+     * Officer sets the current tax rate
+     * @param rate
+     * @return 
+     */ // need to add player to the parameters and check for officership
     public boolean setTaxRate(double rate){
         // verify the rate is above 0 and below the hard max
         if (rate < plugin.maxTaxRate && rate > 0){
@@ -437,13 +707,25 @@ public class Town implements Comparable<Town> {
             return false;
         }
     }
+    
+    /**
+     * Gets the town name
+     * @return 
+     */
     public String getName(){
         return townName;
     }
+    
+    /**
+     * Sets the town name
+     * @param name
+     * @return 
+     */
     public boolean setName(String name){
         townName = name;
         return true;
     }
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder(7, 31). 
@@ -479,25 +761,6 @@ public class Town implements Comparable<Town> {
     }
     
     /*
-    public String getDeputies(){
-        String temp = null;
-        Iterator itr = townDeputies.iterator();
-         while(itr.hasNext() ){
-             temp = temp + itr.next() +", ";
-         }
-         return temp;
-    }
-    public boolean addDeputy(String deputy){
-        townDeputies.add(deputy);
-        return true;
-    }
-    public boolean checkOfficer (String player) {
-        if (townMayor.equalsIgnoreCase(player) )
-        { return true;
-        } else if (Arrays.asList(townDeputies).contains(player) ){
-            return true;
-        } else {return false;}
-    }
     public Location getCenter (){
         return townCenter;
     }

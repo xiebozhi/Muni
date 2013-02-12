@@ -44,10 +44,24 @@ public class Transaction {
     private int item_amount = 0;
     private String notes = null;
     
+    /**
+     * Default constructor
+     * @param instance 
+     */
     public Transaction (Muni instance){
         plugin = instance;
         
     }
+    
+    /**
+     * Full data constructor
+     * @param instance
+     * @param town_Name
+     * @param player
+     * @param reason
+     * @param payment
+     * @param item_payment 
+     */
     public Transaction (Muni instance, String town_Name, String player, 
             String reason, double payment, int item_payment ){
         plugin = instance;
@@ -60,6 +74,17 @@ public class Transaction {
                 //= Calendar.getInstance();
         //time = Calendar.getInstance();
     }
+    
+    /**
+     * Full data constructor with option to autosave
+     * @param instance
+     * @param town_Name
+     * @param player
+     * @param reason
+     * @param payment
+     * @param item_payment
+     * @param autosave 
+     */
     public Transaction (Muni instance, String town_Name, String player, 
             String reason, double payment, int item_payment, boolean autosave ){
         plugin = instance;
@@ -74,14 +99,27 @@ public class Transaction {
         if (autosave){ saveTrans(); }
     }
     
+    /**
+     * Gets the valid database column names
+     * @return 
+     */
     private String db_Cols(){
         return "playerName,townName,timestamp,type,amount,item_amount,notes";
     }
     
+    /**
+     * Gets the database values in the order of db_Cols()
+     * @return 
+     */
     private String db_Vals(){
         return "'"+playerName+"', '"+townName+"', '"+datetime+"', '"+type
                 +"', '"+amount+"', '"+item_amount+"', '"+notes+"'";
     }
+    
+    /**
+     * Saves the transaction to the database
+     * @return 
+     */
     public boolean saveTrans(){
         if (plugin.dbwrapper.insert("transactions", db_Cols(), db_Vals() )){
             return true;

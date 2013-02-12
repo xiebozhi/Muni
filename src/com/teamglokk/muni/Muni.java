@@ -96,12 +96,15 @@ public class Muni extends JavaPlugin {
     //protected ArrayList<Town> towns = new ArrayList<Town>();
     //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
+    /**
+     * Shut down sequence
+     */
     @Override
     public void onDisable() {
         getLogger().info("Shutting Down");
         
         //Save Citizens and towns
-        saveCitizens();
+        //saveCitizens();
         saveTowns();
         
         // Save the config to file
@@ -110,6 +113,9 @@ public class Muni extends JavaPlugin {
         getLogger().info("Shut Down sequence complete");
     }
 
+    /**
+     * Start up sequence
+     */
     @Override
     public void onEnable() {
         getLogger().info("Starting Up");
@@ -150,7 +156,7 @@ public class Muni extends JavaPlugin {
             this.getLogger().warning("Dropping database!");
             dbwrapper.createDB(true);
             makeDefaultTowns();
-            makeDefaultCitizens();
+            //makeDefaultCitizens();
         }
         // Ensure the database is there
         dbwrapper.createDB(false);
@@ -184,10 +190,10 @@ public class Muni extends JavaPlugin {
         }
     }
      */
+    
     /**
-     * Queries DB for town names then town constructor loads itself 
+     * Queries DB for town names then town constructor loads towns individually 
      * 
-     * @author bobbshields
      */
     public void loadTowns(){
         Town copyTown = new Town (this);
@@ -210,13 +216,19 @@ public class Muni extends JavaPlugin {
             t.loadCitizens();
         }
     }
+    
+    /**
+     * Returns the useOP config option, which allows/denies players with OP and no perms
+     * @return 
+     */
     public boolean useOP(){
         return true; 
         // this will eventually be stored as a config option
         // always true for now
     }
-    /* For testing only, will be deleted closer to the beta
-     * 
+    
+    /**
+     * For testing only, will be deleted closer to the beta
      */
     public void makeDefaultTowns(){
         this.getLogger().info ("Making test towns");
@@ -237,6 +249,7 @@ public class Muni extends JavaPlugin {
         this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
     }
     
+    /*
     public void makeDefaultCitizens(){
         this.getLogger().info ("Making test citizens");
         Citizen maker = new Citizen(this);
@@ -249,29 +262,14 @@ public class Muni extends JavaPlugin {
         maker = new Citizen(this,"SecondTest","astickynote", true, false, false, false, null);
         maker.saveToDB();
         
-    }
+    } 
     public void saveCitizens(){
         for (Citizen curr : citizens){
             curr.saveToDB();
         }
     }
-    public void saveTowns() {
-        for (Town curr: towns) {
-            curr.saveToDB();
-        }
-    }
-    public void addTown( Town addition ) {
-        towns.add(addition);
-    }
     public void addCtizien (Citizen addition) {
         citizens.add(addition);
-    }
-    public void removeTown(String town_Name){
-        Town temp = new Town (this,town_Name);
-        if (towns.contains(temp) ){
-            towns.remove(temp);
-        }
-        // if in database, remove from database
     }
     public void removeCitizen(String player){
         Citizen temp = new Citizen (this, player);
@@ -279,26 +277,6 @@ public class Muni extends JavaPlugin {
             citizens.remove(temp);
         }
         // if in database, remove from database
-    }
-    public Town getTown(String town_Name){
-        Town temp = null;
-        for (Town curr: towns) {
-            if (curr.getName().equalsIgnoreCase(town_Name) ){
-                temp = curr;
-            } 
-        }
-        return temp;
-    }
-    public Town getTown(Player player){
-        Town temp = new Town(this);
-        String search = getCitizen(player.getName() ).getTown();
-        for (Town curr: towns) {
-            this.getLogger().warning(curr.getName() );
-            if (curr.getName().equalsIgnoreCase(search) ){
-                temp = curr;
-            } else {temp.setName("Not found");}
-        }
-        return temp;
     }
     public Citizen getCitizen(String player){
         //Citizen temp = new Citizen(this);                
@@ -320,17 +298,6 @@ public class Muni extends JavaPlugin {
         } 
         return rtn;
     }
-    public boolean isCitizen ( String player ){
-        Citizen temp = new Citizen(this,player );
-        return citizens.contains(temp);
-    }
-    public String getAllTowns(){
-        String temp = "";
-        for (Town curr: towns) {
-            temp = temp + curr.getName() +", ";
-        }
-        return temp;
-    }
     public String getAllCitizens(){
         String temp = null;
         for (Citizen curr: citizens){
@@ -338,7 +305,93 @@ public class Muni extends JavaPlugin {
         }
         return temp;
     }
+    */
+    
+    /**
+     * Saves all towns to the database
+     */
+    public void saveTowns() {
+        for (Town curr: towns) {
+            curr.saveToDB();
+        }
+    }
+    
+    /**
+     * Adds a town to the collection
+     * @param addition 
+     */
+    public void addTown( Town addition ) {
+        towns.add(addition);
+    }
+    
+    /**
+     * Removes a town from the collection
+     * @param town_Name 
+     */
+    public void removeTown(String town_Name){
+        Town temp = new Town (this,town_Name);
+        if (towns.contains(temp) ){
+            towns.remove(temp);
+        }
+        // if in database, remove from database
+    }
+    /**
+     * Searches for town by name
+     * @param town_Name
+     * @return  the Town if found, null if not
+     */
+    public Town getTown(String town_Name){
+        Town temp = null;
+        for (Town curr: towns) {
+            if (curr.getName().equalsIgnoreCase(town_Name) ){
+                temp = curr;
+            } 
+        }
+        return temp;
+    }
+    
+    /**
+     * Returns the town to which the player belongs
+     * @param player
+     * @return the town where the player is a citizen
+     */
+    public Town getTown(Player player){
+        Town temp = new Town(this);
+        String search = getCitizen(player.getName() ).getTown();
+        for (Town curr: towns) {
+            this.getLogger().warning(curr.getName() );
+            if (curr.getName().equalsIgnoreCase(search) ){
+                temp = curr;
+            } else {temp.setName("Not found");}
+        }
+        return temp;
+    }
+    
+    /**
+     * Returns whether the player is a citizen of any town
+     * @param player
+     * @return 
+     */
+    public boolean isCitizen ( String player ){
+        Citizen temp = new Citizen(this,player );
+        return citizens.contains(temp);
+    }
+    
+    /**
+     * Gives a comma separated list of towns
+     * @return 
+     */
+    public String getAllTowns(){
+        String temp = "";
+        for (Town curr: towns) {
+            temp = temp + curr.getName() +", ";
+        }
+        return temp;
+    }
 
+    /**
+     * Hooks into World Guard, Vault, and loads custom wrappers
+     */
     private void hookInDependencies() {
         try {
             wgp = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
@@ -362,6 +415,11 @@ public class Muni extends JavaPlugin {
         dbwrapper = new dbWrapper(this);
         if ( isDebug() ) { getLogger().info( "Dependancies Hooked"); }
     }
+    
+    /**
+     * Called by hookInDependancies(), Loads Vault and econwrapper
+     * @return false if there was a problem
+     */
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
@@ -375,7 +433,10 @@ public class Muni extends JavaPlugin {
         return (economy != null );
     }
 
-   protected void loadConfigSettings(){
+    /**
+     * Loads the config settings from config.yml in plugins/muni
+     */
+    protected void loadConfigSettings(){
         if (CONFIG_VERSION != this.getConfig().getDouble("config_version") ){
             getLogger().warning("Config version does not match software requirements.");
         }
@@ -418,11 +479,19 @@ public class Muni extends JavaPlugin {
         
    }
    
+    /**
+     * Whether the plugin should output verbose debugging info to the log
+     * @return 
+     */
    public boolean isDebug() { return DEBUG; }
+   
+   /**
+    * Set the debug value about whether to output verbose to the log
+    * @param value 
+    */
    public void setDebug(boolean value){ 
        DEBUG = value; 
        this.getLogger().info("Debug changed to: " + String.valueOf(value) );
    }
-   //public boolean isMySQL() { return useMYSQL; }
     
 }

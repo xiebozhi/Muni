@@ -37,18 +37,44 @@ public class EconWrapper extends Muni {
     private Economy econ = null;
     private EconomyResponse er = null;
     
+    /**
+     * Default constructor
+     * @param instance 
+     */
     public EconWrapper(Muni instance) {
         plugin = instance;
         econ = plugin.economy;
     }
+    
+    /**
+     * Checks to see if player has enough to cover the amount
+     * @param player
+     * @param amount
+     * @return 
+     */
     public boolean checkBal (Player player, double amount) {
         
         return false;
     }
+    
+    /**
+     * Checks to see if the player has enough items to cover the amount
+     * @param player
+     * @param ItemID
+     * @param amount
+     * @return 
+     */
     public boolean checkItem (Player player, int ItemID, double amount) {
         
         return false;
     }
+    
+    /**
+     * The player pays the amount of money
+     * @param player
+     * @param amount
+     * @return 
+     */
     public boolean payMoney( Player player, double amount){ 
         er = econ.withdrawPlayer(player.getName(), amount );
             if(er.transactionSuccess()) {
@@ -58,6 +84,14 @@ public class EconWrapper extends Muni {
                 return false;
             } 
     }
+    
+    /**
+     * The player pays the amount of money and it logs a transaction with a reason
+     * @param player
+     * @param amount
+     * @param reason
+     * @return 
+     */
     public boolean payMoneyR(Player player, double amount, String reason){
         if ( payMoney(player,amount) ){
             player.sendMessage("You paid "+amount+" "+econ.currencyNamePlural()+
@@ -70,6 +104,15 @@ public class EconWrapper extends Muni {
             return false;
         }
     }
+    
+    /**
+     * The player pays money and so many of the rankup material, and it logs a reason
+     * @param player
+     * @param money
+     * @param items
+     * @param reason
+     * @return 
+     */
     public boolean pay(Player player, Double money, int items, String reason){
         // Double check to make sure the player is online
         if (plugin.getServer().getPlayer(player.getName()) != null ){
@@ -90,6 +133,14 @@ public class EconWrapper extends Muni {
         } else {return false;} // not online
     }
     
+    /**
+     * The player pays a certain number of items and it logs a reason
+     * @param player
+     * @param ItemID
+     * @param amount
+     * @param reason
+     * @return 
+     */
     public boolean payItemR(Player player, int ItemID, int amount, String reason){
         if ( payItem(player,ItemID,amount) ){
             player.sendMessage("You paid "+amount+" of "+ItemID+
@@ -102,6 +153,14 @@ public class EconWrapper extends Muni {
             return false;
         }
     }
+    
+    /**
+     * The player pays a certain number of items
+     * @param player
+     * @param ItemID
+     * @param amount
+     * @return 
+     */
     public boolean payItem( Player player, int ItemID, int amount){ 
         if (player.getInventory().contains(ItemID,amount) ){
             player.sendMessage("Taking "+amount+" items");
@@ -115,10 +174,22 @@ public class EconWrapper extends Muni {
             return false;
         }
     }
+    
+    /**
+     * Gets the player's current amount of money
+     * @param player
+     * @return 
+     */
     public double getBalance(Player player){
         return econ.getBalance(player.getName() );
     }
             
+    /**
+     * Gives the player money
+     * @param player
+     * @param amount
+     * @return 
+     */
     public boolean giveMoney( Player player, double amount){ 
         er = econ.depositPlayer(player.getName(), amount );
             if(er.transactionSuccess()) {
@@ -126,12 +197,27 @@ public class EconWrapper extends Muni {
             } else {
                 return false;
             } 
-    }        
+    }     
+    
+    /**
+     * Gives the player items
+     * @param player
+     * @param ItemID
+     * @param amount
+     * @return 
+     */
     public boolean giveItem( Player player, int ItemID, int amount){ 
         player.getInventory().addItem( new ItemStack[] {
                 new ItemStack( Material.getMaterial(ItemID),amount ) } );
         return true;
     }
+    
+    /**
+     * Checks the player's permission
+     * @param player
+     * @param perm
+     * @return 
+     */
     public boolean hasPerm (Player player, String perm){
         if ( player.hasPermission(perm) ){
             return true;
@@ -140,20 +226,47 @@ public class EconWrapper extends Muni {
         }
         else { return false; }
     }
+    
+    /**
+     * Gets the singular currency name
+     * @return 
+     */
     public String getCurrNameSingular(){
         return econ.currencyNameSingular();
     }
+    /**
+     * Gets the plural currency name
+     * @return 
+     */
     public String getCurrNamePlural(){
         return econ.currencyNamePlural();
     }
+    
+    /**
+     * Decides on singular or plural currency name based on the parameter
+     * @param i
+     * @return 
+     */
     public String getCurrName(Integer i){
         return getCurrName( Double.parseDouble( i.toString() ) );
     }
+    
+    /**
+     * Decides on singular or plural currency name based on the parameter
+     * @param i
+     * @return 
+     */
     public String getCurrName (double i){
         if (i > 1){
             return getCurrNamePlural();
         } else { return getCurrNameSingular();}
     }
+    
+    /**
+     * Gets the material name based on the parameter
+     * @param itemNumber
+     * @return 
+     */
     public String getItemName(int itemNumber){
         return Material.getMaterial(plugin.getRankupItemID()).toString();
     }
