@@ -22,7 +22,6 @@ public class Citizen implements Comparable<Citizen> {
     private boolean mayor =false;
     private boolean deputy = false;
     
-    
     private boolean applied = false;  
     private boolean invited = false;
     private String invitedBy = null;
@@ -33,7 +32,6 @@ public class Citizen implements Comparable<Citizen> {
     
     public Citizen (Muni instance){
         plugin = instance;
-        
     }
     public Citizen (Muni instance, Player player){
         plugin = instance; 
