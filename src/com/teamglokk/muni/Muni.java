@@ -208,6 +208,7 @@ public class Muni extends JavaPlugin {
             }
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading towns: "+ex.getMessage() );
+            this.getLogger().info(copyTown.info());
         } finally {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Towns"); }
         }
@@ -233,20 +234,20 @@ public class Muni extends JavaPlugin {
     public void makeDefaultTowns(){
         this.getLogger().info ("Making test towns");
         Town maker = new Town(this);
-        maker = new Town (this,"TestTown","bobbshields");
+        maker = new Town (this,"TestTown","bobbshields",1,1005.0,100.0);
         //maker.setMaxDeputies(5); maker.setRank(0); Removed from the town class
-        maker.setTaxRate(10.5);
+        maker.setTaxRate(105.5);
         
         maker.saveToDB();
         
         maker = new Town (this,"SecondTest","astickynote",2,1000,100);
-        maker.db_addTown();
+        maker.saveToDB();
         
         maker.loadFromDB("TestTown");
-        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
+        this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
         
         maker = new Town (this,"SecondTest");
-        this.getLogger().warning("Load: "+maker.toDB_UpdateRowVals() );
+        this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
     }
     
     /*

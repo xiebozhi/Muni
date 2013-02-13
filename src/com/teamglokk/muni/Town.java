@@ -45,7 +45,7 @@ public class Town implements Comparable<Town> {
 	// Stored in (prefix)_citizens	TreeSet<Citizen> citizens = new TreeSet<Citizen>();
     private String townMayor;
     protected Citizen mayor = null;
-    protected TreeSet<Citizen> deputies = new TreeSet<Citizen>();
+    protected HashMap<String,Citizen> deputies = new HashMap<String,Citizen>();
     protected TreeSet<Citizen> citizens = new TreeSet<Citizen>();
     protected TreeSet<Citizen> applicants = new TreeSet<Citizen>();
     protected TreeSet<Citizen> invitees = new TreeSet<Citizen>();
@@ -60,6 +60,7 @@ public class Town implements Comparable<Town> {
     public enum roles {
         MAYOR("mayor"),
         DEPUTY("deputy"),
+        CITIZEN("citizen"),
         INVITEE("invited"),
         APPLICANT("applied");
         String value;
@@ -100,6 +101,11 @@ public class Town implements Comparable<Town> {
         townRank = copy.getRank();
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
+        mayor = copy.mayor;
+        deputies = copy.deputies;
+        citizens = copy.citizens;
+        applicants = copy.applicants;
+        invitees = copy.invitees;
     }
     
     /**
@@ -177,9 +183,8 @@ public class Town implements Comparable<Town> {
         } else {
             temp =  plugin.dbwrapper.insert("towns", toDB_Cols(), toDB_Vals() );
         }
-        if (temp && saveAllCitizens() ){
-            return true;
-        } else { return false; } 
+        if (plugin.isDebug()){ plugin.getLogger().warning("Looking for me? Saving citizens next"); }
+        return temp; 
     }
     /**
      * Saves the data for the mayor to the database 
@@ -194,8 +199,14 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean saveDeputies(){
-        for (Citizen curr : deputies){
+        if (deputies.isEmpty() ) {
+            if(plugin.isDebug()){ plugin.getLogger().warning("Saving Deputies: Empty list"); }
+            return false; 
+        }
+        
+        for (Citizen curr : deputies.values() ){
             if ( !curr.saveToDB() ) {
+                if(plugin.isDebug()){ plugin.getLogger().info("Save failed for citizen: "+curr.getName()+" in "+curr.getTown() ); }
                 return false;
             }
         }
@@ -207,6 +218,10 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean saveCitizens(){
+        if (citizens.isEmpty() ) {
+            if(plugin.isDebug()){ plugin.getLogger().warning("Saving Deputies: Empty list"); }
+            return false; 
+        }
         for (Citizen curr : citizens){
             if ( !curr.saveToDB() ) {
                 return false;
@@ -353,7 +368,7 @@ public class Town implements Comparable<Town> {
             if ( getMaxDeputies() > deputies.size() ){ // might have to adjust array...
                 if ( plugin.econwrapper.hasPerm(player, "muni.deputy")
                         || plugin.econwrapper.hasPerm(player, "muni.deputy") ){
-                    deputies.add(new Citizen (plugin, townName, player.getName() ) );
+                    deputies.put(player.getName(),new Citizen (plugin, townName, player.getName() ) );
                     saveToDB();
                     return true;
                 } else { player.sendMessage("You do not have permission to become a deputy."); }
@@ -539,7 +554,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean isDeputy( Player player ){
-        if (deputies.contains( new Citizen(plugin, player.getName()) ) ){
+        if (deputies.containsKey(player.getName() ) ){
             return true;
         } else { return false; }
     }
@@ -571,7 +586,7 @@ public class Town implements Comparable<Town> {
                     citizens.remove(citizens.last() );
                 }
                 if ( citizens.last().isDeputy() ) {
-                    deputies.add(citizens.last() );
+                    deputies.put(citizens.last().getName(),citizens.last() );
                     citizens.remove(citizens.last() );
                 }
           }
@@ -649,7 +664,7 @@ public class Town implements Comparable<Town> {
      */
     public String getDeputies(){
         String temp = null;
-        for (Citizen d: deputies){
+        for (Citizen d: deputies.values() ){
              temp = temp + d.getName() +", ";
          }
          return temp;

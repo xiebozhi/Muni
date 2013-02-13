@@ -80,27 +80,39 @@ public class Citizen implements Comparable<Citizen> {
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
-        this.mayor = cit.isMayor();
-        this.deputy = cit.isDeputy();
-        this.applied = cit.isApplicant();
-        this.invited = cit.isInvited();
+        this.mayor = cit.mayor;
+        this.deputy = cit.deputy;
+        this.applied = cit.applied;
+        this.invited = cit.invited;
         this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
     }
-    public boolean loadFromDB(String player){
+    public Citizen loadFromDB(String player){
         Citizen cit = plugin.dbwrapper.getCitizen(player);
         
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
-        this.deputy = cit.isDeputy();
-        this.applied = cit.isApplicant();
-        this.invited = cit.isInvited();
+        this.mayor = cit.mayor;
+        this.deputy = cit.deputy;
+        this.applied = cit.applied;
+        this.invited = cit.invited;
         this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
         
-        return true;
+        return new Citizen (this );
     }    
+    public boolean loadFromTown(Town t, Player player) {
+        
+        this.name = player.getName();
+        this.townName = t.getName();
+        this.deputy = t.isDeputy(player);
+        this.applied = t.isApplicant(player);
+        this.invited = t.isInvited(player);
+        //this.invitedBy = t.getInviteOfficer(player);
+        
+        return true;
+    }
     public boolean saveToDB(){
         // if exists, update; else insert
         //db_updateRow(String table, String key_col, String key, String colsANDvals
@@ -109,6 +121,18 @@ public class Citizen implements Comparable<Citizen> {
         } else {
             return plugin.dbwrapper.insert("citizens", toDB_Cols(), toDB_Vals() );
         }
+    }
+    public Citizen parseInvolvedCitizen(Town t, Player player) {
+        Citizen rtn = new Citizen(plugin) ;
+        
+        rtn.name = player.getName();
+        rtn.townName = t.getName();
+        rtn.deputy = t.isDeputy(player);
+        rtn.applied = t.isApplicant(player);
+        rtn.invited = t.isInvited(player);
+        //this.invitedBy = t.getInviteOfficer(player);
+        
+        return rtn;
     }
     public String toDB_UpdateRowVals(){
         return "playerName='"+name+"', townName='"+townName+"', mayor='"+
@@ -141,29 +165,12 @@ public class Citizen implements Comparable<Citizen> {
         applied = true;
         //sentDate = Calendar.getInstance();
     }
-    public boolean isMayor(String town_Name){
-        if (townName.equals(town_Name) ){
-            return mayor;
-        } else {
-            plugin.getLogger().warning(name+" is not a member of "+town_Name+" so they cannot be mayor"); 
-            return false;
-        }
-    }
     public boolean setMayor(String town_Name, boolean value){
         if (townName.equals(town_Name) ){
             mayor = value;
             return true;
         } else {
             plugin.getLogger().warning(name+" is not a member of "+town_Name+" so they cannot become mayor"); 
-            return false;
-        }
-    }
-    public boolean isDeputy(){return deputy; }
-    public boolean isDeputy(String town_Name){
-        if (townName.equals(town_Name) ){
-            return deputy;
-        } else {
-            plugin.getLogger().warning(name+" is not a member of "+town_Name+" so they cannot be a deputy"); 
             return false;
         }
     }
@@ -176,17 +183,21 @@ public class Citizen implements Comparable<Citizen> {
             return false;
         }
     }
-    public boolean checkOfficer (String town_Name) {
-        if (townName.equals(town_Name) ){
-            if (mayor) {return true;}
-            if (deputy) {return true;}
-            return false; 
-        } else {
-            plugin.getLogger().warning(name+" is not a member of "+town_Name+" so they cannot be an officer"); 
-            return false;
-        }
+    public boolean isMayor(){
+        return mayor;
     }
-
+    public boolean isDeputy(){
+        return deputy;
+    }
+    public boolean isApplicant(){
+        return applied;
+    }
+    public boolean isInvitee(){
+        return invited;
+    }
+    public String getInvitationOfficer(){
+        return invitedBy;
+    }
     public String getName(){
         return name;
     }
@@ -202,35 +213,7 @@ public class Citizen implements Comparable<Citizen> {
         return true;
     }
     
-    public boolean isApplicant(){ return applied;}
-    public boolean isInvited() {return invited;}
     public String getInviteOfficer() {return invitedBy;}
-    public boolean isMayor() { return mayor;}
-    public boolean makeMember () {
-        applied = false;
-        invited = false;
-        return true;
-    }
-    public boolean isMember() {
-        if (applied ||invited)
-        { return false; }
-        else { return true; }
-    }
-    //public getSentDate ();
-    public boolean isOfficer(String town_Name){
-        if (townName.equals(town_Name) ) {
-            if (isMayor() || isDeputy() ){
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean isOfficer(){
-        if (isMayor() || isDeputy() ){
-            return true;
-        }
-        return false;
-    }
     @Override
     public String toString(){
         return name;
