@@ -44,27 +44,26 @@ public class TownAdminCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (!(sender instanceof Player)) {
             console = true;
-        } 
-        player = (Player) sender;
+        } else { player = (Player) sender; }
 
         if (split.length == 0){
-            displayHelp(player);
+            displayHelp(sender);
             return false;
         } else if (split[0].equalsIgnoreCase("help")  ) {
-            displayHelp(player);
+            displayHelp(sender);
             return true;
         } else if (split[0].equalsIgnoreCase("reload") ) {
-            player.sendMessage("Reloading config");
+            plugin.out(sender, "Reloading config");
             plugin.reloadConfig();
             plugin.getLogger().info("Config reloaded");
             return true;
         } else if (split[0].equalsIgnoreCase("save")) {
-            player.sendMessage("Saving Towns and Citizens to the database!");
+            plugin.out(sender, "Saving Towns and Citizens to the database!");
             plugin.saveTowns();
             return true;
         } else if (split[0].equalsIgnoreCase("debug")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                plugin.out(sender, "Not enough parameters;");
                 return false;
             }
             if (split[1].equalsIgnoreCase("on") ){
@@ -72,11 +71,11 @@ public class TownAdminCommand implements CommandExecutor {
             } else if (split[1].equalsIgnoreCase("off") ){
                 plugin.setDebug(false);
             }
-            player.sendMessage("Debug changed to "+split[1] );
+            plugin.out(sender, "Debug changed to "+split[1] );
             return true;
         } else if (split[0].equalsIgnoreCase("addTown")) {
             if (split.length != 3) {
-                player.sendMessage("Incorrect number of parameters");
+                plugin.out(sender, "Incorrect number of parameters");
                 return false;
             }
             // Check to see of the player is real and connected
@@ -84,16 +83,16 @@ public class TownAdminCommand implements CommandExecutor {
             temp = plugin.getServer().getPlayer(split[2]);            
             if (temp != null){
                    plugin.towns.add( new Town (plugin,split[1],split[2] ) ) ;
-                   player.sendMessage("Added the town: "+split[2] );
+                   plugin.out(sender, "Added the town: "+split[2] );
                 return true; 
             } else {
-                player.sendMessage("Could not add the town, check the logs");
+                plugin.out(sender, "Could not add the town, check the logs");
                 return false;
             }
             //} else { return false; }
         } else if (split[0].equalsIgnoreCase("addCitizen")) {
             if (split.length != 3) {
-                player.sendMessage("Not enough parameters: /townadmin addcitizen townName playerName");
+                plugin.out(sender, "Not enough parameters: /townadmin addcitizen townName playerName");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -101,15 +100,15 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         }  else if (split[0].equalsIgnoreCase("removeTown")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                plugin.out(sender, "Not enough parameters;");
                 return false;
             }
             plugin.removeTown( split[1] );
-            player.sendMessage("Removed town: "+ split[1] );
+            plugin.out(sender, "Removed town: "+ split[1] );
             return true;
         } else if (split[0].equalsIgnoreCase("removeCitizen")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                plugin.out(sender, "Not enough parameters;");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -117,7 +116,7 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("checkBal")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                plugin.out(sender, "Not enough parameters;");
                 return false;
             }
             // Check to see of the player is real and connected
@@ -127,7 +126,7 @@ public class TownAdminCommand implements CommandExecutor {
                 if (split[1].equalsIgnoreCase(player.getName() ) ) {
                     player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance(player));
                 } else {
-                    player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance( temp ));
+                    plugin.out(sender, "Your balance is "+ plugin.econwrapper.getBalance( temp ));
                 }
             } else {
                 player.sendMessage("Could not check the offline player's balance");
@@ -173,14 +172,14 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         }else if (split[0].equalsIgnoreCase("testop")) {
             if (player.isOp() ){
-                player.sendMessage(player.getDisplayName()+" is Op" );
+                plugin.out(player, player.getDisplayName()+" is Op" );
             }else {
-                player.sendMessage(player.getDisplayName()+" is not Op" );
+                plugin.out(player, player.getDisplayName()+" is not Op" );
             }
             return true;
         } else if (split[0].equalsIgnoreCase("tp")) { //Transform to ticketing system in time
             if (split.length != 4) {
-                player.sendMessage("Not enough parameters;");
+                plugin.out(sender, "Not enough parameters;");
                 return false;
             }
             player.sendMessage("TP to pos.");
@@ -192,45 +191,45 @@ public class TownAdminCommand implements CommandExecutor {
                 player.teleport(new Location(player.getWorld(), x, y, z));
                 return true;
             } catch (NumberFormatException ex) {
-                player.sendMessage("Given location is invalid");
+                plugin.out(sender, "Given location is invalid");
                 return false;
             }
         }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            player.sendMessage("The command was: "+command.getLabel() );
+            plugin.out(sender, "The command was: "+command.getLabel() );
             return true;
         } else if (split[0].equalsIgnoreCase("testEnum")) { //DELETE MEEEEEE
             Citizen c = new Citizen (plugin);
-            player.sendMessage("The enum result is "+c.getRoleFromEnum(split[1] ) );
+            plugin.out(sender, "The enum result is "+c.getRoleFromEnum(split[1] ) );
             return true;
         } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
             for (Town t :plugin.towns){
-                player.sendMessage("Displaying players for "+t.getName() );
+                plugin.out(sender, "Displaying players for "+t.getName() );
                 t.listAllCitizens(player);
             }
             return true;
         } else if (split[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
             for (String c :plugin.allCitizens.keySet() ){
-                player.sendMessage( c+" "+plugin.allCitizens.get(c) );
+                plugin.out(sender,  c+" "+plugin.allCitizens.get(c) );
             }
             return true;
         } else {
-            displayHelp(player);
+            displayHelp(sender);
             return true;
         }
     }
-    private void displayHelp(Player player){
-            player.sendMessage("TownAdmin Help.  You can do these commands:");
-            player.sendMessage("/townAdmin addTown");
-            player.sendMessage("/townAdmin removeTown");
-            player.sendMessage("/townAdmin setTax");
-            player.sendMessage("/townAdmin addCitizen");
-            player.sendMessage("/townAdmin removeCitizen");
-            player.sendMessage("/townAdmin deputize");
-            player.sendMessage("/townAdmin list");
-            player.sendMessage("/townAdmin save");
-            player.sendMessage("/townAdmin reload");
-            player.sendMessage("/townAdmin checkBal");   
-            player.sendMessage("/townAdmin debug (off/on)");   
+    private void displayHelp(CommandSender player){
+            plugin.out(player, "TownAdmin Help.  You can do these commands:");
+            plugin.out(player, "/townAdmin addTown");
+            plugin.out(player, "/townAdmin removeTown");
+            plugin.out(player, "/townAdmin setTax");
+            plugin.out(player, "/townAdmin addCitizen");
+            plugin.out(player, "/townAdmin removeCitizen");
+            plugin.out(player, "/townAdmin deputize");
+            plugin.out(player, "/townAdmin list");
+            plugin.out(player, "/townAdmin save");
+            plugin.out(player, "/townAdmin reload");
+            plugin.out(player, "/townAdmin checkBal");   
+            plugin.out(player, "/townAdmin debug (off/on)");   
     }
    
 }

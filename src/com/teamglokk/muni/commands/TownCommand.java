@@ -44,55 +44,58 @@ public class TownCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
-        if (!(sender instanceof Player)) {
-            console = true;
-        } else { player = (Player) sender; }
-        
         if (split.length == 0){
             displayHelp(sender);
             return false;
+        } else if (split[0].equalsIgnoreCase("list")) {
+            if (split.length != 1) {
+                plugin.out(sender,"Not enough parameters;");
+                return false;
+            }
+            plugin.out(sender,"List of towns:");
+            // iteration will be required here
+            Iterator<Town> itr = plugin.towns.iterator();
+            if (!itr.hasNext() ){
+                plugin.out(sender,"No towns to check");
+                return false;
+            }
+            while (itr.hasNext() ){
+                Town current = itr.next();
+                plugin.out(sender,current.getName() ) ;
+            }
+            return true;
+        } else if (split[0].equalsIgnoreCase("info")) {
+            if(split.length!=2){
+                plugin.out(sender,"Not the right number of parameters"); 
+                return false;
+            }
+            plugin.out(sender, "Info on: " + split[1],ChatColor.BLUE );
+            //player.sendMessage( plugin.getTown( split[1] ).info() );
+            plugin.getTown( split[1] ).info(sender);
+                    
+            return true;
         } else if (split[0].equalsIgnoreCase("help") ) {
             displayHelp(sender);
             return true;
-        } else if (split[0].equalsIgnoreCase("payTaxes")) {
-            
+        }  
+        //End of console commands
+        
+        if (!(sender instanceof Player)) {
+            console = true;
+            sender.sendMessage("You cannot send that command from the console");
+            return true;
+        } else { player = (Player) sender; }
+        
+        if (split[0].equalsIgnoreCase("payTaxes")) {
             Town temp = plugin.getTown( plugin.getTownName(player) );
             if (split.length == 2 ) {
                 Double amount = Double.parseDouble(split[1]);
-                //player.sendMessage("Paying taxes: "+amount+" to "+temp.getName()+"." );
                 return temp.payTaxes(player, amount );
                  
             } else if ( split.length == 1 ){
                 return temp.payTaxes(player);
                 
             } else { return false; }
-        } else if (split[0].equalsIgnoreCase("list")) {
-            if (split.length != 1) {
-                player.sendMessage("Not enough parameters;");
-                return false;
-            }
-            player.sendMessage("List of towns:");
-            // iteration will be required here
-            Iterator<Town> itr = plugin.towns.iterator();
-            if (!itr.hasNext() ){
-                plugin.getLogger().info("/town list: No towns to check");
-                return false;
-            }
-            while (itr.hasNext() ){
-                Town current = itr.next();
-                player.sendMessage(current.getName() ) ;
-            }
-            return true;
-        } else if (split[0].equalsIgnoreCase("info")) {
-            if(split.length!=2){
-                player.sendMessage("Not the right number of parameters"); 
-                return false;
-            }
-            player.sendMessage( ChatColor.BLUE+ "Info on: " + split[1] );
-            //player.sendMessage( plugin.getTown( split[1] ).info() );
-            plugin.getTown( split[1] ).info(player);
-                    
-            return true;
         } else if (split[0].equalsIgnoreCase("apply")) {
             if (split.length != 2) {
                 player.sendMessage("Not enough parameters;");

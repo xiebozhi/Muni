@@ -219,7 +219,6 @@ public class Muni extends JavaPlugin {
         // Now we'll iterate the towns once to load its citizens from the db
         for (Town t: towns){
             t.loadFromDB(t.getName() );
-            t.info(this.getServer().getPlayer("bobbshields"));
         }
     }
     

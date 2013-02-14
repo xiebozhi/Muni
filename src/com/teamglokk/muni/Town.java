@@ -25,6 +25,7 @@ import java.util.TreeSet;
 import java.util.HashMap;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.bukkit.command.CommandSender;
 
 /**
  * Town.java: defines the Town class
@@ -178,7 +179,7 @@ public class Town implements Comparable<Town> {
         if (applicants.contains(new Citizen (plugin,townName, player) ) ){ return "applicant"; } 
         if (invitees.contains(new Citizen (plugin,townName, player) ) ){ return "invitee"; } 
         
-        return "invalid"; 
+        return "nonmember"; 
     }
     
     /**
@@ -291,7 +292,7 @@ public class Town implements Comparable<Town> {
      * Gives a string of user-friendly information about the town
      * @return 
      */
-    public void info(Player player){
+    public void info(CommandSender player){
         plugin.out( player, townName+" is a "+plugin.townRanks[townRank].getName() );
         plugin.out( player, "The town bank balance is "+townBankBal+" and the tax rate is "+taxRate+".");
         listAllCitizens(player);
@@ -300,7 +301,7 @@ public class Town implements Comparable<Town> {
      * Gives a string of user-friendly information about the town
      * @return 
      */
-    public void listAllCitizens(Player player){
+    public void listAllCitizens(CommandSender player){
         String list = "";
         plugin.out( player, "Mayor: "+mayor.getName() );
         for (Citizen c : deputies.values() ){

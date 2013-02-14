@@ -42,15 +42,16 @@ public class OfficerCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (!(sender instanceof Player)) {
-            return false;
+            sender.sendMessage("You cannot send deputy or mayor commands from the console");
+            return true;
         }
         player = (Player) sender;
 
         if (split.length == 0){
-            displayHelp(player);
+            displayHelp(sender);
             return false;
         } else if (split[0].equalsIgnoreCase("help")  ) {
-            displayHelp(player);
+            displayHelp(sender);
             return true;
         } else if (split[0].equalsIgnoreCase("found") ||split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
             if (split.length != 2) {
@@ -166,26 +167,26 @@ public class OfficerCommand implements CommandExecutor {
         }
         return false;
     }
-    private void displayHelp(Player player){ 
-            player.sendMessage("Deputy command help.  You can do these commands:");
-            player.sendMessage("/deputy invite");
-            player.sendMessage("/deputy accept");
-            player.sendMessage("/deputy decline");
-            player.sendMessage("/deputy kick");
-            //player.sendMessage("/deputy regions");
-            //player.sendMessage("/deputy setRegion");
-            //player.sendMessage("/deputy checkTaxes");
-            //player.sendMessage("**/deputy pushBorder");
-            player.sendMessage("**/deputy setTax");
-            player.sendMessage("**These commands can be run as deputy if the permissions are there");
-            //player.sendMessage("Mayor command help.  You can do all the above commands with /mayor and these:");
-            player.sendMessage("/mayor bank");
-            //player.sendMessage("/mayor bank deposit");
-            //player.sendMessage("/mayor bank withdraw");
-            player.sendMessage("/mayor deputize");
-            player.sendMessage("/mayor resign");
-            player.sendMessage("/mayor delete");
-            player.sendMessage("/mayor rankup");
+    private void displayHelp(CommandSender player){ 
+            plugin.out(player, "Deputy command help.  You can do these commands:");
+            plugin.out(player, "/deputy invite");
+            plugin.out(player, "/deputy accept");
+            plugin.out(player, "/deputy decline");
+            plugin.out(player, "/deputy kick");
+            //plugin.out(player, "/deputy regions");
+            //plugin.out(player, "/deputy setRegion");
+            //plugin.out(player, "/deputy checkTaxes");
+            //plugin.out(player, "**/deputy pushBorder");
+            plugin.out(player, "**/deputy setTax");
+            plugin.out(player, "**These commands can be run as deputy if the permissions are there");
+            //plugin.out(player, "Mayor command help.  You can do all the above commands with /mayor and these:");
+            plugin.out(player, "/mayor bank");
+            //plugin.out(player, "/mayor bank deposit");
+            //plugin.out(player, "/mayor bank withdraw");
+            plugin.out(player, "/mayor deputize");
+            plugin.out(player, "/mayor resign");
+            plugin.out(player, "/mayor delete");
+            plugin.out(player, "/mayor rankup");
     }
         
    
