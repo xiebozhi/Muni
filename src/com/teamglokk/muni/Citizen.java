@@ -68,21 +68,50 @@ public class Citizen implements Comparable<Citizen> {
         }
     }
     
+    /**
+     * Default constructor
+     * @param instance 
+     */
     public Citizen (Muni instance){
         plugin = instance;
     }
+    /**
+     * Self-loading constructor (gets data from DB) 
+     * @param instance
+     * @param player 
+     */
     public Citizen (Muni instance, Player player){
         plugin = instance; 
         loadFromDB ( player.getName() );
     }
+    /**
+     * Self-loading constructor (gets data from DB)
+     * @param instance
+     * @param player 
+     */
     public Citizen (Muni instance, String player){
         plugin = instance; 
         loadFromDB(player);
     }
+    /**
+     * Generic constructor, used to make comparisons
+     * @param instance
+     * @param town_Name
+     * @param player 
+     */
     public Citizen (Muni instance, String town_Name, String player ){
         plugin = instance;
-        addCitizen (town_Name,player);
+        name = player;
+        townName = town_Name;
     }
+    /**
+     * Full-data constructor
+     * @param instance
+     * @param town_Name
+     * @param player
+     * @param role
+     * @param invitedBy 
+     */
     public Citizen (Muni instance, String town_Name, String player, String role, String invitedBy) { //, Date sentDate){
         plugin = instance;
         this.townName = town_Name;
@@ -91,6 +120,10 @@ public class Citizen implements Comparable<Citizen> {
         this.invitedBy = invitedBy;
         this.sentDate = sentDate;
     }    
+    /**
+     * Copy constructor
+     * @param cit 
+     */
     public Citizen (Citizen cit){
         //this.plugin = cit.plugin;
         this.name = cit.getName();
@@ -99,6 +132,11 @@ public class Citizen implements Comparable<Citizen> {
         this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
     }
+    /**
+     * Loads an instance of a Citizen from the database then copies that into own fields
+     * @param player
+     * @return 
+     */
     public Citizen loadFromDB(String player){
         Citizen cit = plugin.dbwrapper.getCitizen(player);
         
@@ -111,15 +149,10 @@ public class Citizen implements Comparable<Citizen> {
         
         return new Citizen (this );
     }    
-    public boolean loadFromTown(Town t, Player player) {
-        
-        this.name = player.getName();
-        this.townName = t.getName();
-        this.role = t.getRole( player.getName() );
-        //this.invitedBy = t.getInviteOfficer(player);
-        
-        return true;
-    }
+    /**
+     * Saves this instance to the database
+     * @return 
+     */
     public boolean saveToDB(){
         // if exists, update; else insert
         //db_updateRow(String table, String key_col, String key, String colsANDvals
@@ -134,6 +167,12 @@ public class Citizen implements Comparable<Citizen> {
             } else {return false; }
         }
     }
+    /**
+     * Takes an active town and a player and sets the appropriate information 
+     * @param t
+     * @param player
+     * @return 
+     */
     public Citizen parseInvolvedCitizen(Town t, Player player) {
         Citizen rtn = new Citizen(plugin) ;
         
@@ -144,25 +183,42 @@ public class Citizen implements Comparable<Citizen> {
         
         return rtn;
     }
+    /**
+     * Helper function to provide SQL UPDATE string for this instance
+     * @return 
+     */
     public String toDB_UpdateRowVals(){
         return "playerName='"+name+"', townName='"+townName+"', role='"+
                 role +"', invitedBy='"+invitedBy+"' ";
         // this is missing the sentDate and lastLogin SQL fields
     }
+    /**
+     * Helper function to provide valid SQL column names for an insert
+     * @return 
+     */
     public String toDB_Cols(){
         return "playerName,townName,role,invitedBy"; //,sentDate,lastLogin";
     }
+    /**
+     * Helper function to provide SQL column values for an insert
+     * @return 
+     */
     public String toDB_Vals(){
         return "'"+name+"', '"+townName+"', '"+role+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
     }
+    /**
+     * Provides a user-friendly output of the citizens
+     * @return 
+     * @deprecated 
+     */
     public String info(){
         return toDB_Vals();
     }
-    public void addCitizen(String town, String player ) {
-        name = player;
-        townName = town;
-    } 
-    
+    /**
+     * Provides validation of role name
+     * @param role
+     * @return 
+     */
     public String getRoleFromEnum(String role ){
         String rtn = "";
         try {
@@ -187,6 +243,11 @@ public class Citizen implements Comparable<Citizen> {
             rtn = "invalid";
         } finally { return rtn; }
     }
+    /**
+     * Sets the role name after validating
+     * @param role
+     * @return 
+     */
     public boolean setRole (String role ) {
         String s = getRoleFromEnum(role);
         if (s.equals("invalid") ) {
@@ -202,7 +263,7 @@ public class Citizen implements Comparable<Citizen> {
     public void setCitizen() { role = "citizen"; }
     public void setApplicant() { role = "applicant"; }
     public void setInvitee() { role = "invitee"; }
-    public void setInfvitee(String officer) { invitedBy = officer; setInvitee(); }
+    public void setInvitee(String officer) { invitedBy = officer; setInvitee(); }
     public boolean isMayor(){
         return role.equalsIgnoreCase("mayor");
     }
@@ -218,7 +279,7 @@ public class Citizen implements Comparable<Citizen> {
     public boolean isInvitee(){
         return role.equalsIgnoreCase("invitee");
     }
-    public String getInvitationOfficer(){
+    public String getInviteOfficer(){
         return invitedBy;
     }
     public String getName(){
@@ -236,7 +297,6 @@ public class Citizen implements Comparable<Citizen> {
         return true;
     }
     
-    public String getInviteOfficer() {return invitedBy;}
     @Override
     public String toString(){
         return name;

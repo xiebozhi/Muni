@@ -52,6 +52,12 @@ public class TownAdminCommand implements CommandExecutor {
         } else if (split[0].equalsIgnoreCase("help")  ) {
             displayHelp(sender);
             return true;
+        } else if (split[0].equalsIgnoreCase("makeTest")  ) {
+            plugin.out(sender,"Dropping the database!  Then re-creating");
+            plugin.dbwrapper.createDB(true);
+            plugin.makeDefaultCitizens();
+            plugin.makeDefaultTowns();
+            return true;
         } else if (split[0].equalsIgnoreCase("reload") ) {
             plugin.out(sender, "Reloading config");
             plugin.reloadConfig();

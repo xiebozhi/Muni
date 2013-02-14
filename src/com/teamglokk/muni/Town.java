@@ -57,7 +57,7 @@ public class Town implements Comparable<Town> {
     /**
      * The citizens who are in this town mapped to their role
      */
-    //protected HashMap<String,roles> citizensMap = new HashMap<String,roles>();
+    protected HashMap<String,String> citizensMap = new HashMap<String,String>();
     
     /**
      * Default constructor with no data
@@ -102,6 +102,7 @@ public class Town implements Comparable<Town> {
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }
+    
     /**
      * Full data constructor
      * 
@@ -121,6 +122,7 @@ public class Town implements Comparable<Town> {
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }
+    
     /* Loads the class instance variables from the database using the passed town name.
      * 
      * @author bobbshields
@@ -171,6 +173,12 @@ public class Town implements Comparable<Town> {
         }
         return true;
     }    
+    
+    /**
+     * Returns the appropriate role for the specified player.  Does not check for multiple roles as there should be none
+     * @param player
+     * @return 
+     */
     public String getRole(String player) {
         
         if (mayor.getName().equalsIgnoreCase(player) ) { return "mayor"; } 
@@ -199,6 +207,7 @@ public class Town implements Comparable<Town> {
         saveAllCitizens();
         return temp; 
     }
+    
     /**
      * Saves the data for the mayor to the database 
      * @return 
@@ -288,6 +297,7 @@ public class Town implements Comparable<Town> {
     public String info(){
         return toDB_Vals();
     }
+    
     /**
      * Gives a string of user-friendly information about the town
      * @return 
@@ -297,6 +307,7 @@ public class Town implements Comparable<Town> {
         plugin.out( player, "The town bank balance is "+townBankBal+" and the tax rate is "+taxRate+".");
         listAllCitizens(player);
     }
+    
     /**
      * Gives a string of user-friendly information about the town
      * @return 
@@ -638,34 +649,6 @@ public class Town implements Comparable<Town> {
             return true;
         } else { return false; }
     }
-    
-    /**
-     * Loads all citizens from the database into the town citizen collections
-     */
-    /*
-    public void loadCitizens(){
-        try{
-            Iterator itr = plugin.dbwrapper.getTownCits( townName ).iterator();
-            if ( plugin.isDebug() ) { plugin.getLogger().info(" Loading Citizens. " ); }
-            while ( itr.hasNext() ){
-                String current = itr.next().toString();
-                if ( plugin.isDebug() ) { plugin.getLogger().info("Loading citizens: " + current); }
-                citizens.add( new Citizen( plugin, current ) ); //constructor loads from DB
-                if ( citizens.last().isMayor() ) {
-                    mayor = citizens.last();
-                    citizens.remove(citizens.last() );
-                }
-                if ( citizens.last().isDeputy() ) {
-                    deputies.put(citizens.last().getName(),citizens.last() );
-                    citizens.remove(citizens.last() );
-                }
-          }
-        } catch (NullPointerException ex){
-            plugin.getLogger().severe("Failed to load citizens for town ("+ townName +"): "+ex.getMessage() );
-        } finally {
-            if ( plugin.isDebug() ) { plugin.getLogger().info("Finshed loading Citizens"); }
-        }
-    }*/
     
     /**
      * Adds the town to the database
