@@ -42,6 +42,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.ChatColor;
 
+import org.bukkit.command.CommandSender;
+
 /**
  * Muni.java: Startup and shutdown for the Muni plugin
  * 
@@ -92,32 +94,105 @@ public class Muni extends JavaPlugin {
     public TownRank [] townRanks;
     //protected Town towns = null;
     
-    public TreeSet<Town> towns = new TreeSet<Town>();
-    public TreeSet<Citizen> citizens = new TreeSet<Citizen>();
-    public HashMap<String,String> allCitizens = new HashMap<String,String>();
+    public static final TreeSet<Town> towns = new TreeSet<Town>();
+    public static final TreeSet<Citizen> citizens = new TreeSet<Citizen>();
+    public static final HashMap<String,String> allCitizens = new HashMap<String,String>();
     //protected ArrayList<Town> towns = new ArrayList<Town>();
     //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
-    public void out (Player player, String msg){
-       out (player,msg,true,ChatColor.WHITE);
+    /**
+     * Defaulted Override: debug=true color=White
+     * @param player
+     * @param msg 
+     */
+    public void out (CommandSender sender, String msg){
+       out (sender,msg,true,ChatColor.WHITE);
     }
-    public void out (Player player, String msg, ChatColor color){
-       out (player,msg,true,color);
+    /**
+     * Defaulted Override: debug=true and color is passed. Whole message is given color
+     * @param player
+     * @param msg
+     * @param color 
+     */
+    public void out (CommandSender sender, String msg, ChatColor color){
+       out (sender,msg,true,color);
     }
-    public void out (Player player, String msg, boolean useConsole){
-       out (player,msg,useConsole,ChatColor.WHITE);
+    /**
+     * Defaulted method: color=white and debug is passed.
+     * @param player
+     * @param msg
+     * @param useConsole 
+     */
+    public void out (CommandSender sender, String msg, boolean useConsole){
+       out (sender,msg,useConsole,ChatColor.WHITE);
     }
-    public boolean out (Player player, String msg, boolean useConsole, ChatColor color){
+    /**
+     * Real Work 
+     * @param player
+     * @param msg
+     * @param useConsole
+     * @param color
+     * @return 
+     */
+    public boolean out (CommandSender sender, String msg, boolean useConsole, ChatColor color){
         boolean console = false;
-        if (!(player instanceof Player)) {
+        if (!(sender instanceof Player)) {
             console = true;
         }
         if (console && useConsole){
             this.getLogger().info(msg);
             return true;
+        } else { 
+            Player player = (Player) sender;
+            player.sendMessage(color+msg);
+            return true;
         }
-        player.sendMessage(color+msg);
-        return true;
+    }
+    /**
+     * Defaulted Override: debug=true color=White
+     * @param player
+     * @param msg 
+     */
+    public void out (Player player, String msg){
+       out (player,msg,true,ChatColor.WHITE);
+    }
+    /**
+     * Defaulted Override: debug=true and color is passed. Whole message is given color
+     * @param player
+     * @param msg
+     * @param color 
+     */
+    public void out (Player player, String msg, ChatColor color){
+       out (player,msg,true,color);
+    }
+    /**
+     * Defaulted method: color=white and debug is passed.
+     * @param player
+     * @param msg
+     * @param useConsole 
+     */
+    public void out (Player player, String msg, boolean useConsole){
+       out (player,msg,useConsole,ChatColor.WHITE);
+    }
+    /**
+     * Real Work 
+     * @param player
+     * @param msg
+     * @param useConsole
+     * @param color
+     * @return 
+     */
+    public boolean out (Player player, String msg, boolean useConsole, ChatColor color){
+        if (player==null ) {return false; }
+        if ( !player.isOnline() ) {
+            if (useConsole) {
+                this.getLogger().info(msg);
+                return true;
+            } else{ return false; }
+        } else { 
+            player.sendMessage(color+msg);
+            return true;
+        }
     }
     /**
      * Shut down sequence

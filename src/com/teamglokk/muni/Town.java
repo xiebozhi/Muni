@@ -290,7 +290,7 @@ public class Town implements Comparable<Town> {
     /**
      * Gives special string to allow a database update to the whole row in the wrapper
      * @return 
-     */
+     */ 
     public String toDB_UpdateRowVals(){
         return "townName='"+townName+"', townRank='"+townRank+"', bankBal='"+
                 Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+"' ";

@@ -46,27 +46,13 @@ public class TownCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (!(sender instanceof Player)) {
             console = true;
-        }
-        player = (Player) sender;
-        /*
-          else if (split[0].equalsIgnoreCase("is") ) {
-            boolean say = plugin.isCitizen(split[1] );
-            player.sendMessage("Is a citizen? " + say);
-            return true;
-        }  else if (split[0].equalsIgnoreCase("where") ) {
-            try{
-                String say = plugin.whereCitizen( split[1] );
-                player.sendMessage(split[1]+ " is a citizen of "+ say);
-            } catch (NullPointerException ex) {
-                player.sendMessage("Player "+split[1]+" is not a member of a town (or misspelled)");
-            }
-            return true;
-        } */
+        } else { player = (Player) sender; }
+        
         if (split.length == 0){
-            displayHelp(player);
+            displayHelp(sender);
             return false;
         } else if (split[0].equalsIgnoreCase("help") ) {
-            displayHelp(player);
+            displayHelp(sender);
             return true;
         } else if (split[0].equalsIgnoreCase("payTaxes")) {
             
@@ -155,18 +141,18 @@ public class TownCommand implements CommandExecutor {
             return false;
         }
     }
-    private void displayHelp(Player player){
-        player.sendMessage(ChatColor.LIGHT_PURPLE+"Muni Help.  You can do these commands:");
-            player.sendMessage("/town list");
-            player.sendMessage("/town info");
-            player.sendMessage("/town apply");
-            player.sendMessage("/town accept");
-            player.sendMessage("/town leave");
-            //player.sendMessage("/town sethome");
-            //player.sendMessage("/town signCharter");
-            //player.sendMessage("/town vote");
-            player.sendMessage("/town payTaxes");
-            player.sendMessage("/town checkBank");
+    private void displayHelp(CommandSender player){
+        plugin.out( player,ChatColor.LIGHT_PURPLE+"Muni Help.  You can do these commands:");
+        plugin.out( player, "/town list");
+        plugin.out( player, "/town info");
+        plugin.out( player, "/town apply");
+        plugin.out( player, "/town accept");
+        plugin.out( player, "/town leave");
+        //player.sendMessage("/town sethome");
+        //player.sendMessage("/town signCharter");
+        //player.sendMessage("/town vote");
+        plugin.out( player, "/town payTaxes");
+        plugin.out( player, "/town checkBank");
     }
    
 }
