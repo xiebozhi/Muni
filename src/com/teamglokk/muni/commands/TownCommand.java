@@ -103,8 +103,9 @@ public class TownCommand implements CommandExecutor {
                 return false;
             }
             player.sendMessage( ChatColor.BLUE+ "Info on: " + split[1] );
-            player.sendMessage( plugin.getTown( split[1] ).info() );
-            
+            //player.sendMessage( plugin.getTown( split[1] ).info() );
+            plugin.getTown( split[1] ).info(player);
+                    
             return true;
         } else if (split[0].equalsIgnoreCase("apply")) {
             if (split.length != 2) {

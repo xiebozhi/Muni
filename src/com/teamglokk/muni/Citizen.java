@@ -41,7 +41,7 @@ public class Citizen implements Comparable<Citizen> {
     
     private boolean mayor =false;
     private boolean deputy = false;
-    
+    private boolean citizen = false;
     private boolean applied = false;  
     private boolean invited = false;
     private String invitedBy = null;
@@ -66,11 +66,13 @@ public class Citizen implements Comparable<Citizen> {
         addCitizen (town_Name,player);
     }
     public Citizen (Muni instance, String town_Name, String player, boolean mayor,
-            boolean deputy, boolean applied, boolean invited, String invitedBy) { //, Date sentDate){
+            boolean deputy,boolean citizen, boolean applied, boolean invited, String invitedBy) { //, Date sentDate){
         plugin = instance;
-        addCitizen (town_Name,player);
+        this.townName = town_Name;
+        this.name = player;
         this.mayor = mayor;
         this.deputy = deputy;
+        this.citizen = citizen;
         this.applied = applied;
         this.invited = invited;
         this.invitedBy = invitedBy;
@@ -82,6 +84,7 @@ public class Citizen implements Comparable<Citizen> {
         this.townName = cit.getTown();
         this.mayor = cit.mayor;
         this.deputy = cit.deputy;
+        this.citizen = cit.citizen;
         this.applied = cit.applied;
         this.invited = cit.invited;
         this.invitedBy = cit.getInviteOfficer();
@@ -95,6 +98,7 @@ public class Citizen implements Comparable<Citizen> {
         this.townName = cit.getTown();
         this.mayor = cit.mayor;
         this.deputy = cit.deputy;
+        this.citizen = cit.citizen;
         this.applied = cit.applied;
         this.invited = cit.invited;
         this.invitedBy = cit.getInviteOfficer();
@@ -107,6 +111,7 @@ public class Citizen implements Comparable<Citizen> {
         this.name = player.getName();
         this.townName = t.getName();
         this.deputy = t.isDeputy(player);
+        this.citizen = t.isCitizen(player);
         this.applied = t.isApplicant(player);
         this.invited = t.isInvited(player);
         //this.invitedBy = t.getInviteOfficer(player);
@@ -117,9 +122,14 @@ public class Citizen implements Comparable<Citizen> {
         // if exists, update; else insert
         //db_updateRow(String table, String key_col, String key, String colsANDvals
         if ( plugin.dbwrapper.checkExistence("citizens", "playerName", name) ){
-            return plugin.dbwrapper.updateRow("citizens", "playerName", name, toDB_UpdateRowVals());
+            if (plugin.isDebug()) { plugin.getLogger().info(toDB_UpdateRowVals());}
+            return plugin.dbwrapper.updateRow("citizens", "playerName", name, toDB_UpdateRowVals() );
         } else {
-            return plugin.dbwrapper.insert("citizens", toDB_Cols(), toDB_Vals() );
+            if (plugin.isDebug()) { plugin.getLogger().info(toDB_Vals());}
+            if (plugin.dbwrapper.insert("citizens", toDB_Cols(), toDB_Vals() ) ) {
+                plugin.allCitizens.put(name, townName);
+                return true;
+            } else {return false; }
         }
     }
     public Citizen parseInvolvedCitizen(Town t, Player player) {
@@ -136,16 +146,16 @@ public class Citizen implements Comparable<Citizen> {
     }
     public String toDB_UpdateRowVals(){
         return "playerName='"+name+"', townName='"+townName+"', mayor='"+
-                mayor +"', deputy='"+deputy+"', applicant='"+applied+
+                mayor +"', deputy='"+deputy+"', citizen='"+citizen+"', applicant='"+applied+
                 "', invitee='"+invited+"', invitedBy='"+invitedBy+"' ";
         // this is missing the sentDate and lastLogin SQL fields
     }
     public String toDB_Cols(){
-        return "playerName,townName,mayor,deputy,applicant,invitee,invitedBy"; //,sentDate,lastLogin";
+        return "playerName,townName,mayor,deputy,citizen,applicant,invitee,invitedBy"; //,sentDate,lastLogin";
     }
     public String toDB_Vals(){
-        return "'"+name+"', '"+townName+"', '"+mayor+"', '"+deputy+"', '"+applied+"', '"+
-                invited+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
+        return "'"+name+"', '"+townName+"', '"+mayor+"', '"+deputy+"', '"+citizen+
+                "', '"+applied+"', '"+invited+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
     }
     public String info(){
         return toDB_Vals();

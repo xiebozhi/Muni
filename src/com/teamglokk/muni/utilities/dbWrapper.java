@@ -59,7 +59,7 @@ public class dbWrapper extends Muni {
      * @throws SQLException 
      */
     public void db_open() throws SQLException {
-        if(plugin.isDebug()){
+        if(plugin.isSQLdebug()){
             String temp = plugin.useMysql() ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
             plugin.getLogger().info(temp);
         }
@@ -87,7 +87,7 @@ public class dbWrapper extends Muni {
      * @throws SQLException 
      */
     public void db_close() throws SQLException {
-        if(plugin.isDebug()){plugin.getLogger().info("Closing DB");}
+        if(plugin.isSQLdebug()){plugin.getLogger().info("Closing DB");}
         if ( rs != null) { rs.close(); }
         if ( stmt != null) { stmt.close(); }
         if ( conn != null ) { conn.close();}
@@ -107,13 +107,13 @@ public class dbWrapper extends Muni {
         try {
             
             db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
             //rs.next();
             String temp = rs.getString(1);
             if (value.equalsIgnoreCase(temp) ){
             rtn = true ;
-            if(this.isDebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
+            if(this.isSQLdebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
             } 
         } catch (SQLException ex){
             plugin.getLogger().info( "checkExistence: Value not found: "+table+"."+col+"="+value ); 
@@ -140,13 +140,13 @@ public class dbWrapper extends Muni {
         try {
             
             db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
             
             while ( rs.next() ){
                String temp = rs.getString(column);
                rtn.add( temp );
-               if (plugin.isDebug()) {plugin.getLogger().info("getSingleCol getting: "+temp);}
+               if (plugin.isSQLdebug()) {plugin.getLogger().info("getSingleCol getting: "+temp);}
            }
             
         } catch (SQLException ex){
@@ -172,13 +172,13 @@ public class dbWrapper extends Muni {
         String SQL = "SELECT playerName FROM "+plugin.getDB_prefix()+"citizens WHERE townName='"+townName+"' ORDER BY playerName DESC;";
         try {
             db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
             
             while ( rs.next() ){
                String temp = rs.getString( "playerName" );
                rtn.add( temp );
-               if (plugin.isDebug()) { plugin.getLogger().info("getSingleCol getting: "+temp); }
+               if (plugin.isSQLdebug()) { plugin.getLogger().info("getSingleCol getting: "+temp); }
            }
             
         } catch (SQLException ex){
@@ -193,9 +193,54 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-    
     /**
-     * Get all the town data from only the town name
+     * Gets a list of all the citizens in the specified town in the specified role
+     * @param townName
+     * @return      array list of all the citizens in the town
+     */
+    public ArrayList<String> getTownCits ( String townName, String role ){
+        ArrayList<String> rtn = new ArrayList<String>();
+        String srch = "";
+        if (role.equalsIgnoreCase( "mayor" ) ) {
+            srch = "mayor";
+        } else if (role.equalsIgnoreCase( "deputy" ) ) {
+            srch = "deputy";
+        } else if (role.equalsIgnoreCase( "citizen" ) ) {
+            srch = "citizen";
+        } else if (role.equalsIgnoreCase( "invitee" ) ) {
+            srch = "invitee";
+        } else if (role.equalsIgnoreCase( "applicant" ) ) {
+            srch = "applicant";
+        } else {plugin.getLogger().warning("getTownCits: failure to specify role"); }
+        
+        String SQL = "SELECT playerName FROM "+plugin.getDB_prefix()+
+                "citizens WHERE townName='"+townName+"' AND "+srch+"='true' "+
+                "ORDER BY playerName DESC;";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().warning(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            
+            while ( rs.next() ){
+               String temp = rs.getString( "playerName" );
+               rtn.add( temp );
+               if (plugin.isSQLdebug()) { plugin.getLogger().info("getTownCits getting: "+temp); }
+           }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "getTownCits: "+ex.getMessage() ); 
+            rtn = null;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "getTownCits: "+ex.getMessage() ); 
+                rtn = null;
+            } finally{}
+        }
+        return rtn;
+    }
+    /**
+     * Get all the town data from only the town name 
      * @param townName
      * @return          copy of the specified town
      */
@@ -204,7 +249,7 @@ public class dbWrapper extends Muni {
         String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"towns WHERE townName='"+townName+"';";
         try {
             db_open();
-            if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
+            if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             rs = stmt.executeQuery(SQL);
             temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"),
                     rs.getInt("townRank"),rs.getDouble("bankBal"),rs.getDouble("taxRate") );
@@ -230,9 +275,9 @@ public class dbWrapper extends Muni {
         try {
             db_open();
             rs = stmt.executeQuery(SQL);
-            if (plugin.isDebug() ){plugin.getLogger().info(SQL); }
+            if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             temp = new Citizen(plugin, rs.getString("townName"), rs.getString("playerName"),
-                    rs.getBoolean("mayor"), rs.getBoolean("deputy"), rs.getBoolean("applicant"),
+                    rs.getBoolean("mayor"), rs.getBoolean("deputy"),rs.getBoolean("citizen"), rs.getBoolean("applicant"),
                     rs.getBoolean("invitee"),rs.getString("invitedBy") ); //,rs.getDate("sentDate") ); also missing lastLogin
         } catch (SQLException ex){
             plugin.getLogger().info( "getCitzien: "+playerName+" not found in database" );
@@ -259,7 +304,7 @@ public class dbWrapper extends Muni {
             
         try {
             db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             stmt.executeUpdate(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe( "dbInsert: "+ex.getMessage() ); 
@@ -290,7 +335,7 @@ public class dbWrapper extends Muni {
                 +key_col+"='"+key+"';";
         try {
             db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             stmt.executeUpdate(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe("db_update: "+ ex.getMessage() ); 
@@ -320,7 +365,7 @@ public class dbWrapper extends Muni {
                 +key_col+"='"+key+"';";
         try {
             db_open();
-            if(plugin.isDebug() ){plugin.getLogger().info(SQL);}
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             stmt.executeUpdate(SQL); 
         } catch (SQLException ex){
             plugin.getLogger().severe("db_updateRow: "+ ex.getMessage() ); 
@@ -366,7 +411,7 @@ public class dbWrapper extends Muni {
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
             "id INTEGER "+ spk + serial +", " + 
             "playerName VARCHAR(16) UNIQUE, " +"townName VARCHAR(25), " +
-            "mayor BINARY, deputy BINARY, applicant BINARY, " +
+            "mayor BINARY, deputy BINARY, citizen BINARY, applicant BINARY, " +
             "invitee BINARY, invitedBy VARCHAR(16), "+
             "sentDate DATETIME, lastLogin DATETIME "+ mpk +");";
                 //, PRIMARY KEY (playerName) ); " ;
@@ -388,17 +433,17 @@ public class dbWrapper extends Muni {
             if (plugin.useMysql() ){ 
                 stmt.executeUpdate(SQL0); 
                 stmt.executeUpdate(SQL00); 
-                if(plugin.isDebug()){plugin.getLogger().info("Made the DB (mysql)");}
+                if(plugin.isSQLdebug()){plugin.getLogger().info("Made the DB (mysql)");}
             }
-            if(plugin.isDebug()){plugin.getLogger().info("Making towns table if doesn't exist. ");}
+            if(plugin.isSQLdebug()){plugin.getLogger().info("Making towns table if doesn't exist. ");}
             stmt.executeUpdate(SQL1);
-            //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
-            if(plugin.isDebug()){plugin.getLogger().info("Making citizens table if doesn't exist. ");}
+            //if (plugin.isSQLdebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
+            if(plugin.isSQLdebug()){plugin.getLogger().info("Making citizens table if doesn't exist. ");}
             stmt.executeUpdate(SQL2);
-            //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
-            if(plugin.isDebug()){plugin.getLogger().info("Making transactions table if doesn't exist. ");}
+            //if (plugin.isSQLdebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
+            if(plugin.isSQLdebug()){plugin.getLogger().info("Making transactions table if doesn't exist. ");}
             stmt.executeUpdate(SQL3);
-            //if (plugin.isDebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
+            //if (plugin.isSQLdebug() ) {this.getLogger().info(stmt.getWarnings().toString() ); }
             rtn = true;
             
         } catch (SQLException ex){

@@ -23,6 +23,8 @@
 
 config_version: .01
 debug: false
+sql_debug: false
+use_op: true
 database:
     use-mysql: false  
     host: localhost
