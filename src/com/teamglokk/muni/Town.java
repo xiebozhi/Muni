@@ -53,31 +53,6 @@ public class Town implements Comparable<Town> {
     //private int maxDeputies = 5;
     
     private Timestamp createdDate;
-    
-    /**
-     * The different types of citizen, such as mayor, deputy, etc.
-     */
-    public enum roles {
-        MAYOR("mayor"),
-        DEPUTY("deputy"),
-        CITIZEN("citizen"),
-        INVITEE("invited"),
-        APPLICANT("applied");
-        String value;
-        roles (String s) {value = s; }
-        public String getValue() {return value;}
-        public static roles fromString(String text) throws IllegalArgumentException {
-            if (text != null){
-                for (roles r: roles.values() ){
-                    if (text.equalsIgnoreCase(r.value) ){
-                        return r;
-                    }
-                }
-                throw new IllegalArgumentException("Type not found"); 
-            }
-            return null;
-        }
-    }
     /**
      * The citizens who are in this town mapped to their role
      */
@@ -163,7 +138,6 @@ public class Town implements Comparable<Town> {
      */
     public boolean loadFromDB(String town_Name){
         Town copy = plugin.dbwrapper.getTown(town_Name);
-        plugin.getLogger().warning(copy.info() );
         //plugin = copy.plugin;
         townMayor = copy.getMayor(); 
         townName = copy.getName();
@@ -171,7 +145,7 @@ public class Town implements Comparable<Town> {
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
         
-        mayor = new Citizen (plugin, townName, copy.getMayor(),true,false,false,false,false,null );
+        mayor = new Citizen (plugin, townName, copy.getMayor(),"mayor",null );
         plugin.allCitizens.put(copy.getMayor(),townName);
         
          if (!plugin.dbwrapper.checkExistence("citizens", "townName", townName) ){
@@ -179,23 +153,33 @@ public class Town implements Comparable<Town> {
             return false;
         }
         for (String c :  plugin.dbwrapper.getTownCits(townName,"deputy") ){
-            deputies.put(c, new Citizen (plugin,townName,c) );
+            deputies.put(c, new Citizen (plugin,townName,c,"deputy",null) );
             plugin.allCitizens.put(c,townName);
         }
         for (String c :  plugin.dbwrapper.getTownCits(townName,"citizen") ){
-            citizens.add(new Citizen (plugin,townName,c) );
+            citizens.add(new Citizen (plugin,townName,c,"citizen",null) );
             plugin.allCitizens.put(c,townName);
         }
         for (String c :  plugin.dbwrapper.getTownCits(townName,"invitee") ){
-            invitees.add(new Citizen (plugin,townName,c) );
+            invitees.add(new Citizen (plugin,townName,c,"invitee",null) );
             plugin.allCitizens.put(c,townName);
         }
         for (String c :  plugin.dbwrapper.getTownCits(townName,"applicant") ){
-            applicants.add(new Citizen (plugin,townName,c) );
+            applicants.add(new Citizen (plugin,townName,c,"applicant",null) );
             plugin.allCitizens.put(c,townName);
         }
         return true;
     }    
+    public String getRole(String player) {
+        
+        if (mayor.getName().equalsIgnoreCase(player) ) { return "mayor"; } 
+        if (deputies.keySet().contains(player) ) { return "deputy"; }
+        if (citizens.contains(new Citizen (plugin,townName, player) ) ){ return "citizen"; } 
+        if (applicants.contains(new Citizen (plugin,townName, player) ) ){ return "applicant"; } 
+        if (invitees.contains(new Citizen (plugin,townName, player) ) ){ return "invitee"; } 
+        
+        return "invalid"; 
+    }
     
     /**
      * Saves the town data to the database
@@ -500,7 +484,7 @@ public class Town implements Comparable<Town> {
     public boolean invite (Player player, Player officer){
         if (!plugin.allCitizens.containsKey(player.getName() ) ) {
             plugin.allCitizens.put(player.getName(), townName);
-            invitees.add(new Citizen(plugin,townName,player.getName(),false,false,false,false,true,officer.getName() ) );
+            invitees.add(new Citizen(plugin,townName,player.getName(),"invitee",officer.getName() ) );
             return true;
         } else { player.sendMessage("You are already a member of "+plugin.allCitizens.get(player.getName() ) ); }
         return false; 
@@ -545,7 +529,7 @@ public class Town implements Comparable<Town> {
     public boolean apply (Player player) {
         if (!plugin.allCitizens.containsKey(player.getName() ) ) {
             plugin.allCitizens.put(player.getName(), townName);
-            applicants.add(new Citizen(plugin,townName,player.getName(),false,false,false,true,false,null ) );
+            applicants.add(new Citizen(plugin,townName,player.getName(),"applicant",null ) );
             return true;
         } else { player.sendMessage("You are already a involved with "+plugin.allCitizens.get(player.getName() ) ); }
         return false; 

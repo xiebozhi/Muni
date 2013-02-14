@@ -57,10 +57,12 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Not enough parameters;");
                 return false;
             }
-            if (plugin.econwrapper.pay(player, plugin.townRanks[0].getMoneyCost(),
-                    plugin.townRanks[0].getItemCost(), "Founding a town" ) ){
+            if (plugin.econwrapper.pay(player, plugin.townRanks[1].getMoneyCost(),
+                    plugin.townRanks[1].getItemCost(), "Founding a town" ) ){
                 Town t = new Town( plugin, split[1], player.getName() );
                 plugin.towns.add(t);
+                plugin.allCitizens.put(player.getName(), t.getName() );
+                
                 player.sendMessage("You have founded "+t.getName());
             } else { player.sendMessage("Could not found the town" ); }
             return true;

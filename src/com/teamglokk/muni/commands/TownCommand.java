@@ -99,10 +99,9 @@ public class TownCommand implements CommandExecutor {
                 return false;
             }
             if (!plugin.isCitizen(player.getName()) ){
-                Citizen temp = new Citizen( plugin ) ;
-                temp.apply4Citizenship(split[1], player.getName() );
-                plugin.citizens.add( temp );
-                player.sendMessage("Application to "+temp.getTown()+" was sent.");
+                Town temp = plugin.getTown(split[1] );
+                temp.apply ( player );
+                player.sendMessage("Application to "+temp.getName()+" was sent.");
                 return true;
             } else { 
                 player.sendMessage("You are already engaged with "+plugin.allCitizens.get(player.getName() ) );

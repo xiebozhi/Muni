@@ -36,19 +36,37 @@ public class Citizen implements Comparable<Citizen> {
     //private int db_pk;
     private String name =null;
     private String townName =null;
-    
-    // Stored in (prefix)_citizens
-    
-    private boolean mayor =false;
-    private boolean deputy = false;
-    private boolean citizen = false;
-    private boolean applied = false;  
-    private boolean invited = false;
+    private String role = null;
     private String invitedBy = null;
     private Timestamp sentDate = null;
     
     //Not really needed yet but may be added in future
     private Timestamp lastLogin = null;
+    
+    /**
+     * The different types of citizen, such as mayor, deputy, etc.
+     */
+    public enum roles {
+        MAYOR("mayor"),
+        DEPUTY("deputy"),
+        CITIZEN("citizen"),
+        INVITEE("invited"),
+        APPLICANT("applied");
+        String value;
+        roles (String s) {value = s; }
+        public String getValue() {return value;}
+        public static roles fromString(String text) throws IllegalArgumentException {
+            if (text != null){
+                for (roles r: roles.values() ){
+                    if (text.equalsIgnoreCase(r.value) ){
+                        return r;
+                    }
+                }
+                throw new IllegalArgumentException("Type not found"); 
+            }
+            return null;
+        }
+    }
     
     public Citizen (Muni instance){
         plugin = instance;
@@ -65,16 +83,11 @@ public class Citizen implements Comparable<Citizen> {
         plugin = instance;
         addCitizen (town_Name,player);
     }
-    public Citizen (Muni instance, String town_Name, String player, boolean mayor,
-            boolean deputy,boolean citizen, boolean applied, boolean invited, String invitedBy) { //, Date sentDate){
+    public Citizen (Muni instance, String town_Name, String player, String role, String invitedBy) { //, Date sentDate){
         plugin = instance;
         this.townName = town_Name;
         this.name = player;
-        this.mayor = mayor;
-        this.deputy = deputy;
-        this.citizen = citizen;
-        this.applied = applied;
-        this.invited = invited;
+        this.role = role;
         this.invitedBy = invitedBy;
         this.sentDate = sentDate;
     }    
@@ -82,11 +95,7 @@ public class Citizen implements Comparable<Citizen> {
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
-        this.mayor = cit.mayor;
-        this.deputy = cit.deputy;
-        this.citizen = cit.citizen;
-        this.applied = cit.applied;
-        this.invited = cit.invited;
+        this.role = cit.role;
         this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
     }
@@ -96,11 +105,7 @@ public class Citizen implements Comparable<Citizen> {
         //this.plugin = cit.plugin;
         this.name = cit.getName();
         this.townName = cit.getTown();
-        this.mayor = cit.mayor;
-        this.deputy = cit.deputy;
-        this.citizen = cit.citizen;
-        this.applied = cit.applied;
-        this.invited = cit.invited;
+        this.role = cit.getRole();
         this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
         
@@ -110,10 +115,7 @@ public class Citizen implements Comparable<Citizen> {
         
         this.name = player.getName();
         this.townName = t.getName();
-        this.deputy = t.isDeputy(player);
-        this.citizen = t.isCitizen(player);
-        this.applied = t.isApplicant(player);
-        this.invited = t.isInvited(player);
+        this.role = t.getRole( player.getName() );
         //this.invitedBy = t.getInviteOfficer(player);
         
         return true;
@@ -137,25 +139,21 @@ public class Citizen implements Comparable<Citizen> {
         
         rtn.name = player.getName();
         rtn.townName = t.getName();
-        rtn.deputy = t.isDeputy(player);
-        rtn.applied = t.isApplicant(player);
-        rtn.invited = t.isInvited(player);
+        rtn.role = t.getRole(player.getName() );
         //this.invitedBy = t.getInviteOfficer(player);
         
         return rtn;
     }
     public String toDB_UpdateRowVals(){
-        return "playerName='"+name+"', townName='"+townName+"', mayor='"+
-                mayor +"', deputy='"+deputy+"', citizen='"+citizen+"', applicant='"+applied+
-                "', invitee='"+invited+"', invitedBy='"+invitedBy+"' ";
+        return "playerName='"+name+"', townName='"+townName+"', role='"+
+                role +"', invitedBy='"+invitedBy+"' ";
         // this is missing the sentDate and lastLogin SQL fields
     }
     public String toDB_Cols(){
-        return "playerName,townName,mayor,deputy,citizen,applicant,invitee,invitedBy"; //,sentDate,lastLogin";
+        return "playerName,townName,role,invitedBy"; //,sentDate,lastLogin";
     }
     public String toDB_Vals(){
-        return "'"+name+"', '"+townName+"', '"+mayor+"', '"+deputy+"', '"+citizen+
-                "', '"+applied+"', '"+invited+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
+        return "'"+name+"', '"+townName+"', '"+role+"', '"+invitedBy+"'"; //+", "+sentDate+", "+lastLogin;
     }
     public String info(){
         return toDB_Vals();
@@ -164,46 +162,61 @@ public class Citizen implements Comparable<Citizen> {
         name = player;
         townName = town;
     } 
-    public void inviteCitizen (String town, String player, String officer ){
-        addCitizen(town,player);
-        invited = true;
-        invitedBy = officer;
-        //sentDate = Calendar.getInstance();
+    
+    public String getRoleFromEnum(String role ){
+        String rtn = "";
+        try {
+            switch(roles.fromString(role) ){
+                case MAYOR:
+                    rtn =  "mayor";
+                    break; 
+                case DEPUTY:
+                    rtn =  "deputy";
+                    break; 
+                case CITIZEN:
+                    rtn =  "citizen";
+                    break; 
+                case INVITEE:
+                    rtn =  "invitee";
+                    break; 
+                case APPLICANT:
+                    rtn =  "applicant";
+                    break; 
+            }
+        } catch (IllegalArgumentException ex){
+            rtn = "invalid";
+        } finally { return rtn; }
     }
-    public void apply4Citizenship(String town, String player){
-        addCitizen(town,player);
-        applied = true;
-        //sentDate = Calendar.getInstance();
-    }
-    public boolean setMayor(String town_Name, boolean value){
-        if (townName.equals(town_Name) ){
-            mayor = value;
-            return true;
-        } else {
-            plugin.getLogger().warning(name+" is not a member of "+town_Name+" so they cannot become mayor"); 
+    public boolean setRole (String role ) {
+        String s = getRoleFromEnum(role);
+        if (s.equals("invalid") ) {
             return false;
+        } else { 
+            role = s;
+            return true; 
         }
     }
-    public boolean setDeputy(String town_Name, boolean value){
-        if (townName.equals(town_Name) ){
-            deputy = value;
-            return true;
-        } else {
-            plugin.getLogger().warning(name+" is not a member of "+town_Name+" so they cannot become a deputy"); 
-            return false;
-        }
-    }
+    public String getRole() { return role; }
+    public void setMayor(){ role = "mayor"; }
+    public void setDeputy() { role = "deputy"; }
+    public void setCitizen() { role = "citizen"; }
+    public void setApplicant() { role = "applicant"; }
+    public void setInvitee() { role = "invitee"; }
+    public void setInfvitee(String officer) { invitedBy = officer; setInvitee(); }
     public boolean isMayor(){
-        return mayor;
+        return role.equalsIgnoreCase("mayor");
     }
     public boolean isDeputy(){
-        return deputy;
+        return role.equalsIgnoreCase("deputy");
+    }
+    public boolean isCitizen(){
+        return role.equalsIgnoreCase("citizen");
     }
     public boolean isApplicant(){
-        return applied;
+        return role.equalsIgnoreCase("applicant");
     }
     public boolean isInvitee(){
-        return invited;
+        return role.equalsIgnoreCase("invitee");
     }
     public String getInvitationOfficer(){
         return invitedBy;

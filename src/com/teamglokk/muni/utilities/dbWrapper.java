@@ -116,7 +116,7 @@ public class dbWrapper extends Muni {
             if(this.isSQLdebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
             } 
         } catch (SQLException ex){
-            plugin.getLogger().info( "checkExistence: Value not found: "+table+"."+col+"="+value ); 
+            if(this.isSQLdebug() ){plugin.getLogger().info( "checkExistence: Value not found: "+table+"."+col+"="+value ); }
             rtn = false;
         } finally {
             try { db_close();
@@ -214,7 +214,7 @@ public class dbWrapper extends Muni {
         } else {plugin.getLogger().warning("getTownCits: failure to specify role"); }
         
         String SQL = "SELECT playerName FROM "+plugin.getDB_prefix()+
-                "citizens WHERE townName='"+townName+"' AND "+srch+"='true' "+
+                "citizens WHERE townName='"+townName+"' AND role='"+srch+"' "+
                 "ORDER BY playerName DESC;";
         try {
             db_open();
@@ -277,8 +277,7 @@ public class dbWrapper extends Muni {
             rs = stmt.executeQuery(SQL);
             if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             temp = new Citizen(plugin, rs.getString("townName"), rs.getString("playerName"),
-                    rs.getBoolean("mayor"), rs.getBoolean("deputy"),rs.getBoolean("citizen"), rs.getBoolean("applicant"),
-                    rs.getBoolean("invitee"),rs.getString("invitedBy") ); //,rs.getDate("sentDate") ); also missing lastLogin
+                    rs.getString("role"), rs.getString("invitedBy") ); //,rs.getDate("sentDate") ); also missing lastLogin
         } catch (SQLException ex){
             plugin.getLogger().info( "getCitzien: "+playerName+" not found in database" );
         } finally {
@@ -411,8 +410,7 @@ public class dbWrapper extends Muni {
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
             "id INTEGER "+ spk + serial +", " + 
             "playerName VARCHAR(16) UNIQUE, " +"townName VARCHAR(25), " +
-            "mayor BINARY, deputy BINARY, citizen BINARY, applicant BINARY, " +
-            "invitee BINARY, invitedBy VARCHAR(16), "+
+            "role VARCHAR(10), invitedBy VARCHAR(16), "+
             "sentDate DATETIME, lastLogin DATETIME "+ mpk +");";
                 //, PRIMARY KEY (playerName) ); " ;
         String SQL3 = "CREATE TABLE IF NOT EXISTS "+prefix+"transactions ( "  + 

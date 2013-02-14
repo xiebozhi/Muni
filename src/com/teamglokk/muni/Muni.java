@@ -101,100 +101,6 @@ public class Muni extends JavaPlugin {
     //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
     /**
-     * Defaulted Override: debug=true color=White
-     * @param player
-     * @param msg 
-     */
-    public void out (CommandSender sender, String msg){
-       out (sender,msg,true,ChatColor.WHITE);
-    }
-    /**
-     * Defaulted Override: debug=true and color is passed. Whole message is given color
-     * @param player
-     * @param msg
-     * @param color 
-     */
-    public void out (CommandSender sender, String msg, ChatColor color){
-       out (sender,msg,true,color);
-    }
-    /**
-     * Defaulted method: color=white and debug is passed.
-     * @param player
-     * @param msg
-     * @param useConsole 
-     */
-    public void out (CommandSender sender, String msg, boolean useConsole){
-       out (sender,msg,useConsole,ChatColor.WHITE);
-    }
-    /**
-     * Real Work 
-     * @param player
-     * @param msg
-     * @param useConsole
-     * @param color
-     * @return 
-     */
-    public boolean out (CommandSender sender, String msg, boolean useConsole, ChatColor color){
-        boolean console = false;
-        if (!(sender instanceof Player)) {
-            console = true;
-        }
-        if (console && useConsole){
-            this.getLogger().info(msg);
-            return true;
-        } else { 
-            Player player = (Player) sender;
-            player.sendMessage(color+msg);
-            return true;
-        }
-    }
-    /**
-     * Defaulted Override: debug=true color=White
-     * @param player
-     * @param msg 
-     */
-    public void out (Player player, String msg){
-       out (player,msg,true,ChatColor.WHITE);
-    }
-    /**
-     * Defaulted Override: debug=true and color is passed. Whole message is given color
-     * @param player
-     * @param msg
-     * @param color 
-     */
-    public void out (Player player, String msg, ChatColor color){
-       out (player,msg,true,color);
-    }
-    /**
-     * Defaulted method: color=white and debug is passed.
-     * @param player
-     * @param msg
-     * @param useConsole 
-     */
-    public void out (Player player, String msg, boolean useConsole){
-       out (player,msg,useConsole,ChatColor.WHITE);
-    }
-    /**
-     * Real Work 
-     * @param player
-     * @param msg
-     * @param useConsole
-     * @param color
-     * @return 
-     */
-    public boolean out (Player player, String msg, boolean useConsole, ChatColor color){
-        if (player==null ) {return false; }
-        if ( !player.isOnline() ) {
-            if (useConsole) {
-                this.getLogger().info(msg);
-                return true;
-            } else{ return false; }
-        } else { 
-            player.sendMessage(color+msg);
-            return true;
-        }
-    }
-    /**
      * Shut down sequence
      */
     @Override
@@ -350,17 +256,21 @@ public class Muni extends JavaPlugin {
     public void makeDefaultCitizens(){
         this.getLogger().info ("Making test citizens");
         Citizen maker = new Citizen(this);
-        maker = new Citizen(this,"TestTown","bobbshields",true, false, false, false, false,null);
+        maker = new Citizen(this,"TestTown","bobbshields","mayor",null);
         maker.saveToDB();
-        maker = new Citizen(this,"TestTown","tlunarrune",false, false, false, true, false,null);
+        maker = new Citizen(this,"TestTown","tlunarrune","deputy",null);
         maker.saveToDB();
-        maker = new Citizen(this,"TestTown","themoltenangel",false, false, false, false, true,"bobbshields");
+        maker = new Citizen(this,"TestTown","themoltenangel","invitee","bobbshields");
         maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","astickynote", true, false, false, false, false, null);
+        maker = new Citizen(this,"TestTown","efofex","citizen","bobbshields");
         maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","astickynote", false, false, true, false, false, null);
+        maker = new Citizen(this,"TestTown","clawson","applicant",null);
         maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","pharoahrhames", false, false, true, false, false, null);
+        maker = new Citizen(this,"SecondTest","astickynote", "mayor", null);
+        maker.saveToDB();
+        maker = new Citizen(this,"SecondTest","astickynote", "mayor", null);
+        maker.saveToDB();
+        maker = new Citizen(this,"SecondTest","pharoahrhames", "deputy", null);
         maker.saveToDB();
         
     } 
@@ -601,4 +511,105 @@ public class Muni extends JavaPlugin {
        this.getLogger().info("Debug changed to: " + String.valueOf(value) );
    }
     
+    /**
+     * Defaulted Override: debug=true color=White
+     * @param player
+     * @param msg 
+     */
+    public void out (CommandSender sender, String msg){
+       out (sender,msg,true,ChatColor.WHITE);
+    }
+    /**
+     * Defaulted Override: debug=true and color is passed. Whole message is given color
+     * @param player
+     * @param msg
+     * @param color 
+     */
+    public void out (CommandSender sender, String msg, ChatColor color){
+       out (sender,msg,true,color);
+    }
+    /**
+     * Defaulted method: color=white and debug is passed.
+     * @param player
+     * @param msg
+     * @param useConsole 
+     */
+    public void out (CommandSender sender, String msg, boolean useConsole){
+       out (sender,msg,useConsole,ChatColor.WHITE);
+    }
+    /**
+     * Real Work 
+     * @param player
+     * @param msg
+     * @param useConsole
+     * @param color
+     * @return 
+     */
+    public boolean out (CommandSender sender, String msg, boolean useConsole, ChatColor color){
+        boolean console = false;
+        if (!(sender instanceof Player)) {
+            console = true;
+        }
+        if (console && useConsole){
+            this.getLogger().info(msg);
+            return true;
+        } else { 
+            Player player = (Player) sender;
+            player.sendMessage(color+msg);
+            return true;
+        }
+    }
+    /**
+     * Defaulted Override: debug=true color=White
+     * @param player
+     * @param msg 
+     */
+    public void out (Player player, String msg){
+       out (player,msg,true,ChatColor.WHITE);
+    }
+    /**
+     * Defaulted Override: debug=true and color is passed. Whole message is given color
+     * @param player
+     * @param msg
+     * @param color 
+     */
+    public void out (Player player, String msg, ChatColor color){
+       out (player,msg,true,color);
+    }
+    /**
+     * Defaulted method: color=white and debug is passed.
+     * @param player
+     * @param msg
+     * @param useConsole 
+     */
+    public void out (Player player, String msg, boolean useConsole){
+       out (player,msg,useConsole,ChatColor.WHITE);
+    }
+    /**
+     * Real Work 
+     * @param player
+     * @param msg
+     * @param useConsole
+     * @param color
+     * @return 
+     */
+    public boolean out (Player player, String msg, boolean useConsole, ChatColor color){
+        if (player==null ) {return false; }
+        if ( !player.isOnline() ) {
+            if (useConsole) {
+                this.getLogger().info(msg);
+                return true;
+            } else{ return false; }
+        } else { 
+            player.sendMessage(color+msg);
+            return true;
+        }
+    }
+    public boolean isOnline(Player player){
+        try { 
+            return player.isOnline();
+        } catch (Exception ex) {
+            return false; 
+        }
+    }
 }

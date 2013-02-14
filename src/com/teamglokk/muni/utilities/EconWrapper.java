@@ -115,7 +115,7 @@ public class EconWrapper extends Muni {
      */
     public boolean pay(Player player, Double money, int items, String reason){
         // Double check to make sure the player is online
-        if (plugin.getServer().getPlayer(player.getName()) != null ){
+        if ( player.isOnline() ){
             // Check to make sure player has enough items to pay
             if (player.getInventory().contains(plugin.getRankupItemID(),items) ){
                 // then pay money (checks to make sure they have enough)

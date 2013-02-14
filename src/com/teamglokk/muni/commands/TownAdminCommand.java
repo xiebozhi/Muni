@@ -198,6 +198,10 @@ public class TownAdminCommand implements CommandExecutor {
         }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
             player.sendMessage("The command was: "+command.getLabel() );
             return true;
+        } else if (split[0].equalsIgnoreCase("testEnum")) { //DELETE MEEEEEE
+            Citizen c = new Citizen (plugin);
+            player.sendMessage("The enum result is "+c.getRoleFromEnum(split[1] ) );
+            return true;
         } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
             for (Town t :plugin.towns){
                 player.sendMessage("Displaying players for "+t.getName() );
