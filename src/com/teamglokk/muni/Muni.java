@@ -40,6 +40,7 @@ import java.util.Calendar;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.ChatColor;
 
 /**
  * Muni.java: Startup and shutdown for the Muni plugin
@@ -63,9 +64,10 @@ public class Muni extends JavaPlugin {
     //Global options to be pulled from config
     private static double CONFIG_VERSION = .01;
     private static boolean DEBUG = true;
+    private static boolean SQL_DEBUG = true;
+    private static boolean USE_OP = true;
     
-    protected boolean useMYSQL = false;
-    public boolean useMysql() { return useMYSQL; } 
+    protected static boolean useMYSQL = false;
     
     private String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
     private String db_database = "defaultdatabase";
@@ -96,6 +98,27 @@ public class Muni extends JavaPlugin {
     //protected ArrayList<Town> towns = new ArrayList<Town>();
     //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
 
+    public void out (Player player, String msg){
+       out (player,msg,true,ChatColor.WHITE);
+    }
+    public void out (Player player, String msg, ChatColor color){
+       out (player,msg,true,color);
+    }
+    public void out (Player player, String msg, boolean useConsole){
+       out (player,msg,useConsole,ChatColor.WHITE);
+    }
+    public boolean out (Player player, String msg, boolean useConsole, ChatColor color){
+        boolean console = false;
+        if (!(player instanceof Player)) {
+            console = true;
+        }
+        if (console && useConsole){
+            this.getLogger().info(msg);
+            return true;
+        }
+        player.sendMessage(color+msg);
+        return true;
+    }
     /**
      * Shut down sequence
      */
@@ -149,14 +172,14 @@ public class Muni extends JavaPlugin {
         //Just testing
         this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
-        boolean runTest = true;
-        if (runTest){ // this is for testing purposes only, will be deleted soon 
+        boolean runDefault = false;
+        if (runDefault){ // this is for testing purposes only, will be deleted  
             // Make sure the database tables are there.  
             // Passing true drops the db first, normally false
             this.getLogger().warning("Dropping database!");
             dbwrapper.createDB(true);
+            makeDefaultCitizens();
             makeDefaultTowns();
-            //makeDefaultCitizens();
         }
         // Ensure the database is there
         dbwrapper.createDB(false);
@@ -214,19 +237,18 @@ public class Muni extends JavaPlugin {
         }
         // Now we'll iterate the towns once to load its citizens from the db
         for (Town t: towns){
-            t.loadCitizens();
+            t.loadFromDB(t.getName() );
+            t.info(this.getServer().getPlayer("bobbshields"));
         }
     }
     
     /**
-     * Returns the useOP config option, which allows/denies players with OP and no perms
+     * Returns the use_op config option, which allows/denies players with OP and no perms
      * @return 
      */
-    public boolean useOP(){
-        return true; 
-        // this will eventually be stored as a config option
-        // always true for now
-    }
+    public boolean useOP(){ return USE_OP; }
+    public boolean isSQLdebug(){ return SQL_DEBUG; }
+    public boolean useMysql() { return useMYSQL; } 
     
     /**
      * For testing only, will be deleted closer to the beta
@@ -250,20 +272,25 @@ public class Muni extends JavaPlugin {
         this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
     }
     
-    /*
     public void makeDefaultCitizens(){
         this.getLogger().info ("Making test citizens");
         Citizen maker = new Citizen(this);
-        maker = new Citizen(this,"TestTown","bobbshields",true, false, false, false,null);
+        maker = new Citizen(this,"TestTown","bobbshields",true, false, false, false, false,null);
         maker.saveToDB();
-        maker = new Citizen(this,"TestTown","tlunarrune",false, false, true, false,null);
+        maker = new Citizen(this,"TestTown","tlunarrune",false, false, false, true, false,null);
         maker.saveToDB();
-        maker = new Citizen(this,"TestTown","themoltenangel",false, false, false, true,"bobbshields");
+        maker = new Citizen(this,"TestTown","themoltenangel",false, false, false, false, true,"bobbshields");
         maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","astickynote", true, false, false, false, null);
+        maker = new Citizen(this,"SecondTest","astickynote", true, false, false, false, false, null);
+        maker.saveToDB();
+        maker = new Citizen(this,"SecondTest","astickynote", false, false, true, false, false, null);
+        maker.saveToDB();
+        maker = new Citizen(this,"SecondTest","pharoahrhames", false, false, true, false, false, null);
         maker.saveToDB();
         
     } 
+    
+    /*
     public void saveCitizens(){
         for (Citizen curr : citizens){
             curr.saveToDB();
@@ -377,8 +404,7 @@ public class Muni extends JavaPlugin {
      * @return 
      */
     public boolean isCitizen ( String player ){
-        Citizen temp = new Citizen(this,player );
-        return citizens.contains(temp);
+        return allCitizens.containsKey(player);
     }
     
     /**
@@ -445,6 +471,8 @@ public class Muni extends JavaPlugin {
             getLogger().warning("Config version does not match software requirements.");
         }
         DEBUG = this.getConfig().getBoolean("debug");
+        SQL_DEBUG = this.getConfig().getBoolean("sql_debug");
+        USE_OP = this.getConfig().getBoolean("use_op");
         
         useMYSQL = this.getConfig().getBoolean("database.use-mysql");
         db_host = this.getConfig().getString("database.host");

@@ -58,12 +58,6 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.reloadConfig();
             plugin.getLogger().info("Config reloaded");
             return true;
-        } else if (split[0].equalsIgnoreCase("listCits") ) {
-            player.sendMessage("Here is the list of citizens: ");
-            for (Citizen c : plugin.citizens ){
-                player.sendMessage(c.getName() );
-            }
-            return true;
         } else if (split[0].equalsIgnoreCase("save")) {
             player.sendMessage("Saving Towns and Citizens to the database!");
             plugin.saveTowns();
@@ -202,11 +196,17 @@ public class TownAdminCommand implements CommandExecutor {
                 return false;
             }
         }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            player.sendMessage("The command was: "+command.getUsage() );
+            player.sendMessage("The command was: "+command.getLabel() );
             return true;
         } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
-            for (Citizen c :plugin.citizens){
-                player.sendMessage(c.getName() );
+            for (Town t :plugin.towns){
+                player.sendMessage("Displaying players for "+t.getName() );
+                t.listAllCitizens(player);
+            }
+            return true;
+        } else if (split[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
+            for (String c :plugin.allCitizens.keySet() ){
+                player.sendMessage( c+" "+plugin.allCitizens.get(c) );
             }
             return true;
         } else {
