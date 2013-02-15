@@ -69,7 +69,7 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("debug")) {
             if (split.length != 2) {
-                plugin.out(sender, "Not enough parameters;");
+                plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
             if (split[1].equalsIgnoreCase("on") ){
@@ -81,32 +81,25 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("addTown")) {
             if (split.length != 3) {
-                plugin.out(sender, "Incorrect number of parameters");
+                plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
                 return false;
             }
-            // Check to see of the player is real and connected
-            Player temp = null;
-            temp = plugin.getServer().getPlayer(split[2]);            
-            if (temp != null){
-                   plugin.towns.add( new Town (plugin,split[1],split[2] ) ) ;
-                   plugin.out(sender, "Added the town: "+split[2] );
+                plugin.towns.add( new Town (plugin,split[1],split[2] ) ) ;
+                plugin.out(sender, "Added the town: "+split[1] );
                 return true; 
-            } else {
-                plugin.out(sender, "Could not add the town, check the logs");
-                return false;
-            }
-            //} else { return false; }
+                
         } else if (split[0].equalsIgnoreCase("addCitizen")) {
             if (split.length != 3) {
-                plugin.out(sender, "Not enough parameters: /townadmin addcitizen townName playerName");
+                plugin.out(sender, "Incorrect number of parameters: /townadmin addcitizen townName playerName");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
-            temp.makeCitizen(plugin.getServer().getPlayer(split[1] ), player);
+            temp.admin_makeCitizen(split[1] ) ;
             return true;
+            
         }  else if (split[0].equalsIgnoreCase("removeTown")) {
             if (split.length != 2) {
-                plugin.out(sender, "Not enough parameters;");
+                plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
             plugin.removeTown( split[1] );
@@ -114,15 +107,15 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("removeCitizen")) {
             if (split.length != 2) {
-                plugin.out(sender, "Not enough parameters;");
+                plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
-            temp.removeCitizen(plugin.getServer().getPlayer(split[1]) , player);
+            temp.admin_removeCitizen( split[1] );
             return true;
         } else if (split[0].equalsIgnoreCase("checkBal")) {
             if (split.length != 2) {
-                plugin.out(sender, "Not enough parameters;");
+                plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
             // Check to see of the player is real and connected
@@ -167,7 +160,7 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("testperms")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters;");
                 return false;
             }
             if (player.hasPermission(split[1]) ){
@@ -185,7 +178,7 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("tp")) { //Transform to ticketing system in time
             if (split.length != 4) {
-                plugin.out(sender, "Not enough parameters;");
+                plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
             player.sendMessage("TP to pos.");

@@ -55,7 +55,7 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("found") ||split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             if (plugin.econwrapper.pay(player, plugin.townRanks[1].getMoneyCost(),
@@ -69,7 +69,7 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("invite")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -79,7 +79,7 @@ public class OfficerCommand implements CommandExecutor {
             
         }  else if (split[0].equalsIgnoreCase("decline")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -88,7 +88,7 @@ public class OfficerCommand implements CommandExecutor {
             
         }  else if (split[0].equalsIgnoreCase("accept")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -111,7 +111,7 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("kick")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -128,7 +128,7 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (split[0].equalsIgnoreCase("deputize")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -137,7 +137,7 @@ public class OfficerCommand implements CommandExecutor {
             
         } else if (split[0].equalsIgnoreCase("resign")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
@@ -155,7 +155,7 @@ public class OfficerCommand implements CommandExecutor {
             
         } else if (split[0].equalsIgnoreCase("setTax")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );

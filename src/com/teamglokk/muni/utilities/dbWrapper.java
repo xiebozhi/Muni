@@ -63,22 +63,16 @@ public class dbWrapper extends Muni {
             String temp = plugin.useMysql() ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
             plugin.getLogger().info(temp);
         }
-        if (plugin.useMysql()){  //Using MySQL
-            try {
-            Class.forName("org.mysql.jdbc.Driver");
+        String driver = plugin.useMysql() ?"org.mysql.jdbc.Driver" :"org.sqlite.JDBC" ;
+        try {
+            Class.forName(driver);
+            
             } catch (ClassNotFoundException ex){
-                plugin.getLogger().severe("db_open (db driver not found): "+ ex.getMessage() );
+                plugin.getLogger().severe("db_open (db driver " +driver+ " not found): "+ ex.getMessage() );
             }
             conn = DriverManager.getConnection(plugin.getDB_URL(),plugin.getDB_user(),plugin.getDB_pass());
             // MySQL is not yet tested!!! 31 Jan 2013 RJS
-        } else { //Using SQLite
-            try {
-            Class.forName("org.sqlite.JDBC");
-            } catch (ClassNotFoundException ex){
-                plugin.getLogger().severe("db_open (db driver not found): "+ ex.getMessage() );
-            }
-            conn = DriverManager.getConnection(plugin.getDB_URL());
-        }
+        
         stmt = conn.createStatement();
     }
     
@@ -87,10 +81,10 @@ public class dbWrapper extends Muni {
      * @throws SQLException 
      */
     public void db_close() throws SQLException {
-        if(plugin.isSQLdebug()){plugin.getLogger().info("Closing DB");}
         if ( rs != null) { rs.close(); }
         if ( stmt != null) { stmt.close(); }
         if ( conn != null ) { conn.close();}
+        if(plugin.isSQLdebug()){plugin.getLogger().info("Closed DB");}
     }
     
     /**

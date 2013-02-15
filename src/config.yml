@@ -21,7 +21,7 @@
 # maxCitizens: the max your town will accept until the next rank, -l for no max
 #####
 
-config_version: .01
+config_version: .02
 debug: false
 sql_debug: false
 use_op: true

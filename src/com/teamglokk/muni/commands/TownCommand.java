@@ -49,7 +49,7 @@ public class TownCommand implements CommandExecutor {
             return false;
         } else if (split[0].equalsIgnoreCase("list")) {
             if (split.length != 1) {
-                plugin.out(sender,"Not enough parameters;");
+                plugin.out(sender,"Incorrect number of parameters");
                 return false;
             }
             plugin.out(sender,"List of towns:");
@@ -98,7 +98,7 @@ public class TownCommand implements CommandExecutor {
             } else { return false; }
         } else if (split[0].equalsIgnoreCase("apply")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             if (!plugin.isCitizen(player.getName()) ){
@@ -113,7 +113,7 @@ public class TownCommand implements CommandExecutor {
             }
         } else if (split[0].equalsIgnoreCase("accept")) {
             if (split.length != 2) {
-                player.sendMessage("Not enough parameters;");
+                player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName(player) );
