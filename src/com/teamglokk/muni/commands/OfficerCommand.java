@@ -72,7 +72,7 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.invite(plugin.getServer().getPlayer(split[1]),player);
             player.sendMessage("Invitation to "+temp.getName()+" was sent.");
             return true;
@@ -82,7 +82,7 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.declineApplication(plugin.getServer().getPlayer(split[1] ) );
             return true;
             
@@ -91,7 +91,11 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            player.sendMessage( player.getName() );
+            player.sendMessage( plugin.allCitizens.get( "bobbshields" ) );
+            player.sendMessage( plugin.getTownName( player.getName() ) );
+            String townN = plugin.getTownName( player.getName() );
+            Town temp = plugin.getTown( townN );
             temp.acceptApplication(plugin.getServer().getPlayer(split[1]), player);
             return true;
             
@@ -105,7 +109,7 @@ public class OfficerCommand implements CommandExecutor {
             player.sendMessage("Checking taxes in time.  Use the DB for now");
             return true;
         }  else if (split[0].equalsIgnoreCase("setTax")) {
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.setTaxRate(Double.parseDouble(split[1]) );
             player.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ split[1] );
             return true;
@@ -114,12 +118,12 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.removeCitizen(plugin.getServer().getPlayer( split[1] ), player );
             return true;
             
         } else if (split[0].equalsIgnoreCase("bank")) {
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             player.sendMessage("The town bank has "+ temp.getBankBal()+" "+
                     plugin.econwrapper.getCurrName(temp.getBankBal()) );
             // withdrawl
@@ -131,7 +135,7 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.makeDeputy(plugin.getServer().getPlayer(split[1] ),player);
             return true;
             
@@ -140,7 +144,7 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if ( temp.isMayor(player) ) {
                 temp.resignMayor(player);
                 return true;
@@ -149,7 +153,7 @@ public class OfficerCommand implements CommandExecutor {
                 return true;
             }
         } else if (split[0].equalsIgnoreCase("rankup")) {
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.rankup(player);
             return true;
             
@@ -158,7 +162,7 @@ public class OfficerCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.setTaxRate(Double.parseDouble(split[1]) ) ;
             return true;
         } else {

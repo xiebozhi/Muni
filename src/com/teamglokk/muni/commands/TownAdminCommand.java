@@ -94,7 +94,7 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Incorrect number of parameters: /townadmin addcitizen townName playerName");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.admin_makeCitizen(split[1] ) ;
             return true;
             
@@ -111,7 +111,7 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.admin_removeCitizen( split[1] );
             return true;
         } else if (split[0].equalsIgnoreCase("checkBal")) {
@@ -195,20 +195,20 @@ public class TownAdminCommand implements CommandExecutor {
                 return false;
             }
         }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            plugin.out(sender, "The command was: "+command.getLabel() );
+            plugin.out(sender, "The command was: "+command.toString() );
             return true;
         } else if (split[0].equalsIgnoreCase("testEnum")) { //DELETE MEEEEEE
             Citizen c = new Citizen (plugin);
             plugin.out(sender, "The enum result is "+c.getRoleFromEnum(split[1] ) );
             return true;
         } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
-            for (Town t :plugin.towns.values() ){
+            for (Town t : plugin.towns.values() ){
                 plugin.out(sender, "Displaying players for "+t.getName() );
                 t.listAllCitizens(player);
             }
             return true;
         } else if (split[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
-            for (String c :plugin.allCitizens.keySet() ){
+            for (String c : plugin.allCitizens.keySet() ){
                 plugin.out(sender,  c+" "+plugin.allCitizens.get(c) );
             }
             return true;

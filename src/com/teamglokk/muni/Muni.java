@@ -26,6 +26,7 @@ import com.teamglokk.muni.commands.TownAdminCommand;
 import com.teamglokk.muni.utilities.dbWrapper;
 import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
+import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.milkbowl.vault.economy.Economy;
 
@@ -90,8 +91,8 @@ public class Muni extends JavaPlugin {
     public static TownRank [] townRanks;
     
     //public static TreeSet<Town> towns = new TreeSet<Town>();
-    public static TreeMap<String, Town> towns = new TreeMap<String,Town>(String.CASE_INSENSITIVE_ORDER);
-    public static TreeMap<String,String> allCitizens = new TreeMap<String,String>(String.CASE_INSENSITIVE_ORDER);
+    public TreeMap<String, Town> towns = new TreeMap<String,Town>(String.CASE_INSENSITIVE_ORDER);
+    public TreeMap<String,String> allCitizens = new TreeMap<String,String>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Shut down sequence
@@ -125,16 +126,8 @@ public class Muni extends JavaPlugin {
         this.saveDefaultConfig(); // saves plugins/Muni/config.yml if !exists
         loadConfigSettings(); // parses the settings and loads into memory
         
-        // Register a new listener
-        getServer().getPluginManager().registerEvents(new Listener() {
-            @EventHandler
-            public void playerJoin(PlayerLoginEvent event) {
-                event.getPlayer().sendMessage("[Muni] Login Message: "+event.getEventName() );
-                // Will get changed to updating last login for citizens
-                // if town officer, show applicants
-                // if invitee, display Invite
-            }
-        }, this);
+        // Register Muni listener(s)
+        getServer().getPluginManager().registerEvents(new MuniLoginEvent(this),this );
 
         // Register Muni commands
         getCommand("town"     ).setExecutor(new TownCommand     (this) );
@@ -241,51 +234,6 @@ public class Muni extends JavaPlugin {
         
     } 
     
-    /*
-    public void saveCitizens(){
-        for (Citizen curr : citizens){
-            curr.saveToDB();
-        }
-    }
-    public void addCtizien (Citizen addition) {
-        citizens.add(addition);
-    }
-    public void removeCitizen(String player){
-        Citizen temp = new Citizen (this, player);
-        if (citizens.contains(temp) ) {
-            citizens.remove(temp);
-        }
-        // if in database, remove from database
-    }
-    public Citizen getCitizen(String player){
-        //Citizen temp = new Citizen(this);                
-            this.getLogger().warning("getCitizen: "+ player );
-        for (Citizen curr: citizens){                
-            this.getLogger().warning(curr.getName() );
-            if (curr.getName().equalsIgnoreCase(player) ){
-                return curr;
-            } 
-        }
-        return null;
-    }
-    public String whereCitizen( String player ){
-        Citizen temp = new Citizen(this,player );
-        String rtn = null;
-        Citizen rtn2 = citizens.ceiling(temp);
-        if (rtn2.getName().equalsIgnoreCase(player) ) {
-            rtn = rtn2.getTown();
-        } 
-        return rtn;
-    }
-    public String getAllCitizens(){
-        String temp = null;
-        for (Citizen curr: citizens){
-            temp = temp + curr.getName() +", ";
-        }
-        return temp;
-    }
-    */
-    
     /**
      * Saves all towns to the database
      */
@@ -321,6 +269,8 @@ public class Muni extends JavaPlugin {
      */
     public Town getTown(String town_Name){
         Town temp = null;
+        if (town_Name == null) {this.getLogger().info("getTown received a null string") ;}
+        
         if (towns.containsKey(town_Name) ){
             temp = towns.get(town_Name); 
             this.getLogger().info("Town search result = "+temp.getName() );
@@ -333,10 +283,17 @@ public class Muni extends JavaPlugin {
     /**
      * Returns the town to which the player belongs
      * @param player
-     * @return the town where the player is a citizen
+     * @return the town name where the player is a citizen
      */
-    public String getTownName (Player player){
-        return allCitizens.get( player.getName() );
+    public String getTownName (String player){
+        
+        this.getLogger().severe("here: "+player);
+        String temp;
+        temp = "";
+        if ( allCitizens.containsKey( player ) ){
+        temp = allCitizens.get( player );
+        } else { this.getLogger().info("allCitizen: "+player+" not found"); }
+        return temp;
     }
     
     /**
@@ -379,8 +336,8 @@ public class Muni extends JavaPlugin {
             wgp = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
             wgwrapper = new WGWrapper(this);
         } catch (Exception e) {
-            getLogger().severe( "[Muni] Error occurred in hooking in to WorldGuard. Are both WorldGuard and WorldEdit installed?");
-            getLogger().severe( "[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
+            getLogger().severe( "Error occurred in hooking in to WorldGuard. Are both WorldGuard and WorldEdit installed?");
+            getLogger().severe( "!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
             this.getPluginLoader().disablePlugin(this);
         }
 
@@ -390,8 +347,8 @@ public class Muni extends JavaPlugin {
                 getLogger().severe( "Muni: Unable to hook-in to Vault (Econ)!");
             }
         } catch (Exception e) {
-            getLogger().severe( "Muni: Unable to hook-in to Vault: "+e.getMessage());
-            getLogger().severe("[Muni] !!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
+            getLogger().severe( "Unable to hook-in to Vault: "+e.getMessage());
+            getLogger().severe("!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
             this.getPluginLoader().disablePlugin(this);
         }
         dbwrapper = new dbWrapper(this);
@@ -570,13 +527,6 @@ public class Muni extends JavaPlugin {
         } else { 
             player.sendMessage(color+msg);
             return true;
-        }
-    }
-    public boolean isOnline(Player player){
-        try { 
-            return player.isOnline();
-        } catch (Exception ex) {
-            return false; 
         }
     }
 }

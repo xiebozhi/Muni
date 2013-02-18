@@ -87,7 +87,7 @@ public class TownCommand implements CommandExecutor {
         } else { player = (Player) sender; }
         
         if (split[0].equalsIgnoreCase("payTaxes")) {
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if (split.length == 2 ) {
                 Double amount = Double.parseDouble(split[1]);
                 return temp.payTaxes(player, amount );
@@ -116,12 +116,12 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.acceptInvite(player);
             
             return true;
         } else if (split[0].equalsIgnoreCase("leave")) {
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.leave(player);
             return true;
         }else if (split[0].equalsIgnoreCase("sethome")) {
@@ -131,7 +131,7 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Voting not yet added.");
             return true;
         } else if (split[0].equalsIgnoreCase("checkBank")) {
-            Town temp = plugin.getTown( plugin.getTownName(player) );
+            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal());
             return true;
         }  else if (split[0].equalsIgnoreCase("signCharter")) {
