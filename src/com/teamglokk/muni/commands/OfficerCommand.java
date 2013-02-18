@@ -61,7 +61,7 @@ public class OfficerCommand implements CommandExecutor {
             if (plugin.econwrapper.pay(player, plugin.townRanks[1].getMoneyCost(),
                     plugin.townRanks[1].getItemCost(), "Founding a town" ) ){
                 Town t = new Town( plugin, split[1], player.getName() );
-                plugin.towns.add(t);
+                plugin.towns.put(t.getName(), t );
                 plugin.allCitizens.put(player.getName(), t.getName() );
                 
                 player.sendMessage("You have founded "+t.getName());

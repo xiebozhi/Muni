@@ -84,7 +84,8 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
                 return false;
             }
-                plugin.towns.add( new Town (plugin,split[1],split[2] ) ) ;
+                Town t = new Town (plugin,split[1],split[2] );
+                plugin.towns.put( t.getName(), t ) ;
                 plugin.out(sender, "Added the town: "+split[1] );
                 return true; 
                 
@@ -201,7 +202,7 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.out(sender, "The enum result is "+c.getRoleFromEnum(split[1] ) );
             return true;
         } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
-            for (Town t :plugin.towns){
+            for (Town t :plugin.towns.values() ){
                 plugin.out(sender, "Displaying players for "+t.getName() );
                 t.listAllCitizens(player);
             }

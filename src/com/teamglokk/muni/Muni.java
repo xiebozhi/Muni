@@ -57,7 +57,7 @@ public class Muni extends JavaPlugin {
     protected static Economy economy = null;
     public static EconWrapper econwrapper = null;
     
-    public dbWrapper dbwrapper = null;
+    public static dbWrapper dbwrapper = null;
 
     //Config file path  (Believe this is not needed, testing)
     //private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
@@ -68,37 +68,33 @@ public class Muni extends JavaPlugin {
     private static boolean DEBUG = true;
     private static boolean SQL_DEBUG = true;
     private static boolean USE_OP = true;
-    
     protected static boolean useMYSQL = false;
     
-    private String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
-    private String db_database = "defaultdatabase";
-    protected String db_user = "defaultuser";
-    protected String db_pass = "defaultpass"; 
-    protected String db_prefix = "defaultpass"; 
-    protected String db_URL = null;
-    public String getDB_URL() { return db_URL;}
-    public String getDB_user() {return db_user;}
-    public String getDB_pass() { return db_pass;}
-    public String getDB_prefix() {return db_prefix; }
+    private static String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
+    private static String db_database = "defaultdatabase";
+    protected static String db_user = "defaultuser";
+    protected static String db_pass = "defaultpass"; 
+    protected static String db_prefix = "defaultpass"; 
+    protected static String db_URL = null;
+    public static String getDB_URL() { return db_URL;}
+    public static String getDB_user() {return db_user;}
+    public static String getDB_pass() { return db_pass;}
+    public static String getDB_prefix() {return db_prefix; }
     
-    protected double maxTaxRate = 10000;
-    protected int rankupItemID = 19;
-    protected double maxTBbal = -1;
-    protected int totalTownRanks = 5;
-    public double getMaxTaxRate () { return maxTaxRate; }
-    public int getRankupItemID () { return rankupItemID; }
-    public double getMaxTBbal () { return maxTBbal; }
-    public int getTotalTownRanks () { return totalTownRanks; } 
+    protected static double maxTaxRate = 10000;
+    protected static int rankupItemID = 19;
+    protected static double maxTBbal = -1;
+    protected static int totalTownRanks = 5;
+    public static double getMaxTaxRate () { return maxTaxRate; }
+    public static int getRankupItemID () { return rankupItemID; }
+    public static double getMaxTBbal () { return maxTBbal; }
+    public static int getTotalTownRanks () { return totalTownRanks; } 
     
-    public TownRank [] townRanks;
-    //protected Town towns = null;
+    public static TownRank [] townRanks;
     
-    public static final TreeSet<Town> towns = new TreeSet<Town>();
-    public static final TreeSet<Citizen> citizens = new TreeSet<Citizen>();
-    public static final HashMap<String,String> allCitizens = new HashMap<String,String>();
-    //protected ArrayList<Town> towns = new ArrayList<Town>();
-    //protected ArrayList<Citizen> citizens = new ArrayList<Citizen>();
+    //public static TreeSet<Town> towns = new TreeSet<Town>();
+    public static HashMap<String, Town> towns = new HashMap<String,Town>();
+    public static HashMap<String,String> allCitizens = new HashMap<String,String>();
 
     /**
      * Shut down sequence
@@ -208,7 +204,7 @@ public class Muni extends JavaPlugin {
                 if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
                 //Town copyTown = new Town (this);
                 copyTown.loadFromDB( curr );
-                towns.add( new Town ( copyTown ) );
+                towns.put(copyTown.getName(), new Town ( copyTown ) );
             }
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading towns: "+ex.getMessage() );
@@ -217,7 +213,7 @@ public class Muni extends JavaPlugin {
             if ( isDebug() ) { this.getLogger().info("Finshed loading Towns"); }
         }
         // Now we'll iterate the towns once to load its citizens from the db
-        for (Town t: towns){
+        for (Town t: towns.values() ){
             t.loadFromDB(t.getName() );
         }
     }
@@ -323,7 +319,7 @@ public class Muni extends JavaPlugin {
      * Saves all towns to the database
      */
     public void saveTowns() {
-        for (Town curr: towns) {
+        for (Town curr: towns.values()) {
             curr.saveToDB();
         }
     }
@@ -333,7 +329,7 @@ public class Muni extends JavaPlugin {
      * @param addition 
      */
     public void addTown( Town addition ) {
-        towns.add(addition);
+        towns.put(addition.getName(),addition);
     }
     
     /**
@@ -342,7 +338,7 @@ public class Muni extends JavaPlugin {
      */
     public void removeTown(String town_Name){
         Town temp = new Town (this,town_Name);
-        if (towns.contains(temp) ){
+        if (towns.containsKey(temp.getName() ) ){
             towns.remove(temp);
         }
         // if in database, remove from database
@@ -354,7 +350,7 @@ public class Muni extends JavaPlugin {
      */
     public Town getTown(String town_Name){
         Town temp = null;
-        for (Town curr: towns) {
+        for (Town curr: towns.values()) {
             if (curr.getName().equalsIgnoreCase(town_Name) ){
                 temp = curr;
             } 
@@ -397,7 +393,7 @@ public class Muni extends JavaPlugin {
      */
     public String getAllTowns(){
         String temp = "";
-        for (Town curr: towns) {
+        for (Town curr: towns.values() ) {
             temp = temp + curr.getName() +", ";
         }
         return temp;
