@@ -104,11 +104,10 @@ public class Muni extends JavaPlugin {
         getLogger().info("Shutting Down");
         
         //Save Citizens and towns
-        //saveCitizens();
         saveTowns();
         
         // Save the config to file
-        //this.saveConfig();
+        this.saveConfig();
         
         getLogger().info("Shut Down sequence complete");
     }
@@ -126,17 +125,17 @@ public class Muni extends JavaPlugin {
         hookInDependencies();
         
         //Load the configuration file
-        this.saveDefaultConfig();
-        this.loadConfigSettings();
+        this.saveDefaultConfig(); // saves plugins/Muni/config.yml if !exists
+        loadConfigSettings(); // parses the settings and loads into memory
         
         // Register a new listener
         getServer().getPluginManager().registerEvents(new Listener() {
             @EventHandler
             public void playerJoin(PlayerLoginEvent event) {
-                // Will get changed to updating last login for citizens
                 event.getPlayer().sendMessage("[Muni] Login Message: "+event.getEventName() );
-                // if town mayor, show applicants
-                // if invitee, display
+                // Will get changed to updating last login for citizens
+                // if town officer, show applicants
+                // if invitee, display Invite
             }
         }, this);
 
@@ -146,51 +145,25 @@ public class Muni extends JavaPlugin {
         getCommand("mayor"    ).setExecutor(new OfficerCommand  (this) );
         getCommand("townadmin").setExecutor(new TownAdminCommand(this) );
         
-        //Just testing
-        this.getLogger().info( Calendar.getInstance().getTime().toString() );
+        //this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
         boolean runDefault = false;
         if (runDefault){ // this is for testing purposes only, will be deleted  
-            // Make sure the database tables are there.  
             // Passing true drops the db first, normally false
             this.getLogger().warning("Dropping database!");
             dbwrapper.createDB(true);
             makeDefaultCitizens();
             makeDefaultTowns();
         }
-        // Ensure the database is there
+        // Ensure the database is there but does not drop tables
         dbwrapper.createDB(false);
         
         this.getLogger().info ("Loading Towns from database");
         loadTowns();
         
-        //this.getLogger().info ("Loading Citizens from database");
-        //loadCitizens();
-
-        this.getLogger().info ("Loaded and Ready for Town administration" );
+        this.getLogger().info ("Loaded and Ready" );
     }// end: onEnable()
-    
-    /**
-     * Queries DB for player names then constructor each loads db at array addition
-     * 
-     * @author bobbshields
-    public void loadCitizens(){
-        try{
-            Iterator itr = dbwrapper.getSingleCol("citizens","playerName").iterator();
-            if ( isDebug() ) { this.getLogger().info(" Loading Citizens. " ); }
-            while ( itr.hasNext() ){
-                String current = itr.next().toString();
-                if ( isDebug() ) { this.getLogger().info("Loading citizens: " + current); }
-                citizens.add( new Citizen( this, current ) );
-          }
-        } catch (NullPointerException ex){
-            this.getLogger().severe("Loading citizens: "+ex.getMessage() );
-        } finally {
-            if ( isDebug() ) { this.getLogger().info("Finshed loading Citizens"); }
-        }
-    }
-     */
-    
+        
     /**
      * Queries DB for town names then town constructor loads towns individually 
      * 
@@ -205,6 +178,7 @@ public class Muni extends JavaPlugin {
                 //Town copyTown = new Town (this);
                 copyTown.loadFromDB( curr );
                 towns.put(copyTown.getName(), new Town ( copyTown ) );
+                copyTown = new Town (this); // trying to fix a bug with this
             }
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading towns: "+ex.getMessage() );
@@ -546,7 +520,7 @@ public class Muni extends JavaPlugin {
             console = true;
         }
         if (console && useConsole){
-            this.getLogger().info(msg);
+            sender.sendMessage(msg);
             return true;
         } else { 
             Player player = (Player) sender;
