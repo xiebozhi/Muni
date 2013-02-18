@@ -29,14 +29,11 @@ import com.teamglokk.muni.utilities.EconWrapper;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.milkbowl.vault.economy.Economy;
 
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-//import net.milkbowl.vault.permission.Permission
-import java.util.Calendar;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -93,8 +90,8 @@ public class Muni extends JavaPlugin {
     public static TownRank [] townRanks;
     
     //public static TreeSet<Town> towns = new TreeSet<Town>();
-    public static HashMap<String, Town> towns = new HashMap<String,Town>();
-    public static HashMap<String,String> allCitizens = new HashMap<String,String>();
+    public static TreeMap<String, Town> towns = new TreeMap<String,Town>(String.CASE_INSENSITIVE_ORDER);
+    public static TreeMap<String,String> allCitizens = new TreeMap<String,String>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Shut down sequence
@@ -324,12 +321,13 @@ public class Muni extends JavaPlugin {
      */
     public Town getTown(String town_Name){
         Town temp = null;
-        for (Town curr: towns.values()) {
-            if (curr.getName().equalsIgnoreCase(town_Name) ){
-                temp = curr;
-            } 
+        if (towns.containsKey(town_Name) ){
+            temp = towns.get(town_Name); 
+            this.getLogger().info("Town search result = "+temp.getName() );
         }
+        this.getLogger().info("Town search result = not found"  );
         return temp;
+        
     }
     
     /**
@@ -338,7 +336,7 @@ public class Muni extends JavaPlugin {
      * @return the town where the player is a citizen
      */
     public String getTownName (Player player){
-        return allCitizens.get( player.getName() ).toString();
+        return allCitizens.get( player.getName() );
     }
     
     /**

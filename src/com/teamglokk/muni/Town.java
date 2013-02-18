@@ -21,7 +21,8 @@ package com.teamglokk.muni;
 
 import java.sql.Timestamp;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.Comparator;
 import java.util.HashMap;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -43,13 +44,13 @@ public class Town implements Comparable<Town> {
     private double taxRate;
     private int townRank;
      
-	// Stored in (prefix)_citizens	TreeSet<Citizen> citizens = new TreeSet<Citizen>();
+    // Stored in (prefix)_citizens	
     private String townMayor;
     protected Citizen mayor = new Citizen(plugin);
-    protected HashMap<String,Citizen> deputies = new HashMap<String,Citizen>();
-    protected HashMap<String,Citizen> citizens = new HashMap<String,Citizen>();
-    protected HashMap<String,Citizen> applicants = new HashMap<String,Citizen>();
-    protected HashMap<String,Citizen> invitees = new HashMap<String,Citizen>();
+    protected TreeMap<String,Citizen> deputies = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
+    protected TreeMap<String,Citizen> citizens = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
+    protected TreeMap<String,Citizen> applicants = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
+    protected TreeMap<String,Citizen> invitees = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
     
     //private int maxDeputies = 5;
     
@@ -303,7 +304,7 @@ public class Town implements Comparable<Town> {
      * Gives a string that has all the valid database column names
      * @return 
      */
-    public String toDB_Cols(){
+    public static String toDB_Cols(){
         return "townName,mayor,townRank,bankBal,taxRate";
     }
     
@@ -329,6 +330,7 @@ public class Town implements Comparable<Town> {
     /**
      * Gives a string of user-friendly information about the town
      * @return 
+     * @deprecated 
      */
     public String info(){
         return toDB_Vals();

@@ -196,7 +196,7 @@ public class Citizen implements Comparable<Citizen> {
      * Helper function to provide valid SQL column names for an insert
      * @return 
      */
-    public String toDB_Cols(){
+    public static String toDB_Cols(){
         return "playerName,townName,role,invitedBy"; //,sentDate,lastLogin";
     }
     /**

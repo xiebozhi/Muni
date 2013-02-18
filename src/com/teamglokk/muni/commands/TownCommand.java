@@ -119,7 +119,6 @@ public class TownCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName(player) );
             temp.acceptInvite(player);
             
-            player.sendMessage("Accepted an invite from " + temp.getName() );
             return true;
         } else if (split[0].equalsIgnoreCase("leave")) {
             Town temp = plugin.getTown( plugin.getTownName(player) );
