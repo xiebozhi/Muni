@@ -37,7 +37,6 @@ import java.util.Iterator;
 public class TownCommand implements CommandExecutor {
     private Muni plugin;
     private Player player;
-    private boolean console = false;
     
     public TownCommand (Muni instance){
         plugin = instance;
@@ -84,7 +83,6 @@ public class TownCommand implements CommandExecutor {
         //End of console commands
         
         if (!(sender instanceof Player)) {
-            console = true;
             sender.sendMessage("You cannot send that command from the console");
             return true;
         } else { player = (Player) sender; }

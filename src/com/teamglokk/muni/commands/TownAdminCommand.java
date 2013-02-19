@@ -35,7 +35,6 @@ import com.teamglokk.muni.Town;
 public class TownAdminCommand implements CommandExecutor {
     private Muni plugin;
     private Player player;
-    private boolean console = false;
     
     public TownAdminCommand (Muni instance){
         plugin = instance;
@@ -43,7 +42,6 @@ public class TownAdminCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (!(sender instanceof Player)) {
-            console = true;
         } else { player = (Player) sender; }
 
         if (split.length == 0){
@@ -104,21 +102,23 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
                 return false;
             }
-                Town t = new Town (plugin,split[1],split[2], true );
+                Town t = new Town (plugin,split[1],split[2]);
+                t.saveToDB();
                 plugin.towns.put( t.getName(), t ) ;
                 plugin.out(sender, "Added the town: "+split[1] );
                 return true; 
                 
-        } else if (split[0].equalsIgnoreCase("addCitizen")) { // not working at all, no error - 18 Feb
+        } else if (split[0].equalsIgnoreCase("addCitizen")) { //was kinda working, now maybe fixed - 18 Feb
             if (split.length != 3) {
                 plugin.out(sender, "/townAdmin addCitizen <townName> <playerName>");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            temp.admin_makeCitizen(player, split[1] ) ;
+            Town temp = plugin.getTown( plugin.getTownName( split[1] ) );
+            temp.admin_makeCitizen(sender, split[2] ) ;
+            plugin.out(sender,split[2]+" was added to "+split[1]); 
             return true;
             
-        }  else if (split[0].equalsIgnoreCase("removeTown")) { // Throws a NPE error - 18 Feb
+        }  else if (split[0].equalsIgnoreCase("removeTown")) { // The NPE error might be fixed - 18 Feb
             if (split.length != 2) {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
@@ -127,7 +127,7 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.out(sender, "Removed town: "+ split[1] );
             return true;
         } else if (split[0].equalsIgnoreCase("removeCitizen")) { // changed, not tested - 18 Feb
-            if (split.length != 2) {
+            if (split.length != 3) {
                 plugin.out(sender, "/townAdmin removeCitizens <townName> <playerName>");
                 return true;
             }

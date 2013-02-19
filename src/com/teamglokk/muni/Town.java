@@ -100,29 +100,7 @@ public class Town implements Comparable<Town> {
         taxRate = 10;
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
-    }/**
-     * Constructor for starting a new town with specified player as the mayor
-     * @param instance
-     * @param town_Name
-     * @param player 
-     */
-    
-    public Town (Muni instance, String town_Name, String player, boolean autosave ){
-        
-        plugin = instance;
-        if (plugin.isDebug() ) plugin.getLogger().info("Town with mayor: "+town_Name+", "+player);
-        townName = town_Name;
-        townMayor = player; 
-        townRank = 1;
-        townBankBal = 5;
-        taxRate = 10;
-        if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
-        
-        if (autosave){
-            this.saveToDB();
-        }
-    }
-    
+    }    
     /**
      * Full data constructor
      * 
@@ -150,7 +128,7 @@ public class Town implements Comparable<Town> {
     public Town (Muni instance, String town_Name ){
         
         plugin = instance;
-        loadFromDB(town_Name);
+        //loadFromDB(town_Name);
         
     }    
     
@@ -468,9 +446,19 @@ public class Town implements Comparable<Town> {
      * @param player
      * @return 
      */
-    public boolean removeCitizen ( Player player, Player officer ){
+    public boolean removeCitizen ( String player, Player officer ){
         if (isCitizen( player ) ){
-            citizens.remove( player.getName() );
+            citizens.remove( player );
+            saveCitizens();
+            // log a transaction here
+            return true;
+        } else if (isInvited( player ) ){
+            invitees.remove( player );
+            saveCitizens();
+            // log a transaction here
+            return true;
+        } else if (isApplicant( player ) ){
+            applicants.remove( player );
             saveCitizens();
             // log a transaction here
             return true;
@@ -761,7 +749,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean isCitizen(Player player){
-        return isCitizen(player);
+        return isCitizen(player.getName());
     }
     /**
      * Checks whether the player is a citizen of this town
@@ -773,10 +761,7 @@ public class Town implements Comparable<Town> {
     }
     
     public boolean isOfficer (Player player){
-        if (isMayor(player) || isDeputy(player) ){
-            return true;
-        }
-        return false; 
+        return isOfficer( player.getName() );
     }
     
     public boolean isOfficer (String player){
@@ -804,7 +789,7 @@ public class Town implements Comparable<Town> {
     /**
      * Adds this town to the database
      * @return 
-     */
+     */ /*
     public boolean db_addTown(){
         if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
             plugin.dbwrapper.insert("towns",toDB_Cols(),toDB_Vals() );
@@ -812,7 +797,7 @@ public class Town implements Comparable<Town> {
         } else {
             return false;
         }
-    }
+    } */
     
     public void removeThisTown(Player mayor) {
         if (this.mayor.getName().equalsIgnoreCase(mayor.getName() ) ) {
@@ -872,11 +857,11 @@ public class Town implements Comparable<Town> {
      * @param player
      * @return 
      */
-    public boolean rankup(Player mayor){ //need to fix (-amount when over money) and mention sponges - 18 Feb 13
+    public boolean rankup(Player mayor){ //needs better output but working - 18 Feb 13
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
-        if ( rankCost >= townBankBal ){
+        if ( rankCost <= townBankBal ){
             if (plugin.econwrapper.payItemR( mayor, plugin.rankupItemID, rankCostItem,"Rankup" ) ) {
                 mayor.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
                 return payFromTB(rankCost); //Payment of money taken after sponges are confirmed

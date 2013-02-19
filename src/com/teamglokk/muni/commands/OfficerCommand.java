@@ -34,7 +34,6 @@ import com.teamglokk.muni.Town;
 public class OfficerCommand implements CommandExecutor {
     private Muni plugin;
     private Player officer;
-    private boolean console = false;
     
     public OfficerCommand (Muni instance){
             plugin = instance;
@@ -112,13 +111,16 @@ public class OfficerCommand implements CommandExecutor {
             temp.setTaxRate(Double.parseDouble(split[1]) );
             officer.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ split[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("kick")) {  //infinite loop! - 18 Feb 13
+        } else if (split[0].equalsIgnoreCase("kick")) {  //Assumed working (removed member, needs new output) - 18 Feb 13
             if (split.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.removeCitizen(plugin.getServer().getPlayer( split[1] ), officer );
+            officer.sendMessage("The player is a "+temp.getRole( split[1] ) );
+            if ( temp.removeCitizen(split[1], officer ) ){
+                officer.sendMessage("Player removed");
+            } else { officer.sendMessage("Error"); }
             return true;
             
         } else if (split[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
@@ -184,7 +186,7 @@ public class OfficerCommand implements CommandExecutor {
                 temp.resignDeputy(officer);
                 return true;
             }
-        } else if (split[0].equalsIgnoreCase("rankup")) { //need to make output more verbose, not working - 18 Feb 
+        } else if (split[0].equalsIgnoreCase("rankup")) { //working but needs better output - 18 Feb 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.rankup(officer);
             return true;
