@@ -40,6 +40,8 @@ public class OfficerCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+        String [] args = trimSplit(split);
+        
         if (!(sender instanceof Player)) {
             sender.sendMessage("You cannot send deputy or mayor commands from the console");
             return true;
@@ -47,85 +49,85 @@ public class OfficerCommand implements CommandExecutor {
         officer = (Player) sender;
         
 
-        if (split.length == 0){  //tested and working - 18 Feb 13
+        if (args.length == 0){  //tested and working - 18 Feb 13
             displayHelp(sender, command.getName() );
             return true;
-        } else if (split[0].equalsIgnoreCase("help")  ) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("help")  ) { //tested and working - 18 Feb 13
             displayHelp(sender, command.getName() );
             return true;
-        } else if (split[0].equalsIgnoreCase("found") || //not tested - 18 Feb 13
-                split[0].equalsIgnoreCase("charter") ||split[0].equalsIgnoreCase("add")) {
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("found") || //not tested - 18 Feb 13
+                args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             if (plugin.econwrapper.pay(officer, plugin.townRanks[1].getMoneyCost(),
                     plugin.townRanks[1].getItemCost(), "Founding a town" ) ){
-                Town t = new Town( plugin, split[1], officer.getName() );
+                Town t = new Town( plugin, args[1], officer.getName() );
                 plugin.towns.put(t.getName(), t );
                 plugin.allCitizens.put(officer.getName(), t.getName() );
                 
                 officer.sendMessage("You have founded "+t.getName());
             } else { officer.sendMessage("Could not found the town" ); }
             return true;
-        } else if (split[0].equalsIgnoreCase("invite")) { //tested and working - 18 Feb 13
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("invite")) { //tested and working - 18 Feb 13
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.invite( split[1],officer);
+            temp.invite( args[1],officer);
             officer.sendMessage("Invitation to "+temp.getName()+" was sent.");
             return true;
             
-        }  else if (split[0].equalsIgnoreCase("decline")) {  //not tested - 18 Feb 13
-            if (split.length != 2) {
+        }  else if (args[0].equalsIgnoreCase("decline")) {  //not tested - 18 Feb 13
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.declineApplication( split[1],officer );
+            temp.declineApplication( args[1],officer );
             return true;
             
-        }  else if (split[0].equalsIgnoreCase("accept") ) {  //tested and working - 18 Feb 13
-            if (split.length != 2) {
+        }  else if (args[0].equalsIgnoreCase("accept") ) {  //tested and working - 18 Feb 13
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.acceptApplication(split[1], officer);
+            temp.acceptApplication(args[1], officer);
             return true;
             
-        } else if (split[0].equalsIgnoreCase("delete")  //tested and not working think its now fixed - 18 Feb 13
-                || split[0].equalsIgnoreCase("disband")) {
+        } else if (args[0].equalsIgnoreCase("delete")  //tested and not working think its now fixed - 18 Feb 13
+                || args[0].equalsIgnoreCase("disband")) {
             // This does not but should remove all players from citizens who are members of town
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             plugin.removeTown(temp.getName() );
             officer.sendMessage("Removed: "+ temp.getName() );
             return true;
-        } else if (split[0].equalsIgnoreCase("checkTaxes")) {
+        } else if (args[0].equalsIgnoreCase("checkTaxes")) {
             officer.sendMessage("Checking taxes will come in time.  Use the DB for now");
             return true;
-        }  else if (split[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
+        }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.setTaxRate(Double.parseDouble(split[1]) );
-            officer.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ split[1] );
+            temp.setTaxRate(Double.parseDouble(args[1]) );
+            officer.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ args[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("kick")) {  //Assumed working (removed member, needs new output) - 18 Feb 13
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("kick")) {  //Assumed working (removed member, needs new output) - 18 Feb 13
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            officer.sendMessage("The player is a "+temp.getRole( split[1] ) );
-            if ( temp.removeCitizen(split[1], officer ) ){
+            officer.sendMessage("The player is a "+temp.getRole( args[1] ) );
+            if ( temp.removeCitizen(args[1], officer ) ){
                 officer.sendMessage("Player removed");
             } else { officer.sendMessage("Error"); }
             return true;
             
-        } else if (split[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            switch (split.length){
+            switch (args.length){
                 case 1:
                     plugin.getTown(plugin.getTownName( officer.getName() ) ).checkTownBank(officer);
                     break;
@@ -133,8 +135,8 @@ public class OfficerCommand implements CommandExecutor {
                     temp.checkTownBank(officer);
                     break;
                 case 3: 
-                    if (split[1].equalsIgnoreCase("deposit") || split[1].equalsIgnoreCase("d") ){
-                        double amount = Double.parseDouble( split[2] );
+                    if (args[1].equalsIgnoreCase("deposit") || args[1].equalsIgnoreCase("d") ){
+                        double amount = Double.parseDouble( args[2] );
                         if (temp.tb_deposit(officer, amount ) ) {
                             plugin.out(officer,"You have deposited "+amount+" into your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
@@ -144,8 +146,8 @@ public class OfficerCommand implements CommandExecutor {
                             plugin.out(officer,"You don't have enough to deposit");
                         } 
                         return true;
-                    } else if (split[1].equalsIgnoreCase("withdraw") || split[1].equalsIgnoreCase("w") ){
-                        double amount = Double.parseDouble( split[2] );
+                    } else if (args[1].equalsIgnoreCase("withdraw") || args[1].equalsIgnoreCase("w") ){
+                        double amount = Double.parseDouble( args[2] );
                         if (temp.tb_withdraw(officer, amount) ) {
                             plugin.out(officer,"You have withdrawn "+amount+" from your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
@@ -153,7 +155,7 @@ public class OfficerCommand implements CommandExecutor {
                         } else {
                             plugin.out( sender,"The town bank didn't have enough to withdraw" );
                         }
-                    } else if (split[1].equalsIgnoreCase("check") || split[1].equalsIgnoreCase("c") ){
+                    } else if (args[1].equalsIgnoreCase("check") || args[1].equalsIgnoreCase("c") ){
                         temp.checkTownBank(officer);
                     } else {
                         plugin.out(sender,"/town bank - ERROR (subcommand not recognized)");
@@ -164,17 +166,17 @@ public class OfficerCommand implements CommandExecutor {
                         return false; 
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("deputize")) { // buggy - 18 Feb 13
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("deputize")) { // buggy - 18 Feb 13
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) ); //throwing NPE
-            temp.makeDeputy( split[1] ,officer);
+            temp.makeDeputy( args[1] ,officer);
             return true;
             
-        } else if (split[0].equalsIgnoreCase("resign")) { //# of params was wrong, needs testing - 18 Feb 13
-            if (split.length != 1) {
+        } else if (args[0].equalsIgnoreCase("resign")) { //# of params was wrong, needs testing - 18 Feb 13
+            if (args.length != 1) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
@@ -186,21 +188,21 @@ public class OfficerCommand implements CommandExecutor {
                 temp.resignDeputy(officer);
                 return true;
             }
-        } else if (split[0].equalsIgnoreCase("rankup")) { //working but needs better output - 18 Feb 
+        } else if (args[0].equalsIgnoreCase("rankup")) { //working but needs better output - 18 Feb 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.rankup(officer);
             return true;
             
-        } else if (split[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb
+            if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.setTaxRate(Double.parseDouble(split[1]) ) ;
+            temp.setTaxRate(Double.parseDouble(args[1]) ) ;
             return true;
         } else {
-            displayHelp( officer, split[0] );
+            displayHelp( officer, args[0] );
             return true;
         }
         return false;
@@ -231,5 +233,27 @@ public class OfficerCommand implements CommandExecutor {
         }
     }
         
+    private String [] trimSplit (String [] split ) {
+        if (split.length > 7) {
+            plugin.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
+            return null; 
+        }
+        String [] rtn = new String[7];
+        int i = 0;
+        for (String entry: split) {
+            if (entry.equalsIgnoreCase(" ") ){
+                // do nothing (delete the empty space entries)
+            } else {
+                rtn[i++] = entry.trim();
+            }
+        }
+        String temp[] = rtn;
+        rtn = new String[i];
+        int j = 0;
+        for (String s: temp){
+            rtn[j++] = s;
+        }
+        return rtn;
+    }
    
 }

@@ -43,11 +43,13 @@ public class TownCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
-        if (split.length == 0){
+        String [] args = trimSplit(split);
+        
+        if (args.length == 0){
             displayHelp(sender);
             return false;
-        } else if (split[0].equalsIgnoreCase("list")) { //tested and working - 18 Feb 13
-            if (split.length != 1) {
+        } else if (args[0].equalsIgnoreCase("list")) { //tested and working - 18 Feb 13
+            if (args.length != 1) {
                 plugin.out(sender,"/town list (no parameters allowed)");
                 return false;
             }
@@ -63,20 +65,20 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(sender,current.getName() ) ;
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("info")) { //tested and mostly working - 18 Feb 13
-            if(split.length>2){
+        } else if (args[0].equalsIgnoreCase("info")) { //tested and mostly working - 18 Feb 13
+            if(args.length>2){
                 plugin.out(sender,"/town info <town_Name> "+ChatColor.RED+"OR" +ChatColor.WHITE+" /town info (this is for your own town",ChatColor.WHITE); 
                 return false;
-            } else if (split.length==1){
+            } else if (args.length==1){
                 if (sender instanceof Player && plugin.isCitizen(sender.getName() ) ) {
                     plugin.getTown(plugin.getTownName( sender.getName() ) ).info(sender);
                 } else { plugin.out(sender, "You must specify a town"); }
-            }else if (split.length == 2) { 
+            }else if (args.length == 2) { 
                 // if ( plugin.isTown() ) // error occurs when invalid town name is entered
-                plugin.getTown( split[1] ).info(sender);
+                plugin.getTown( args[1] ).info(sender);
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("help") ) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("help") ) { //tested and working - 18 Feb 13
             displayHelp(sender);
             return true;
         }  
@@ -87,23 +89,23 @@ public class TownCommand implements CommandExecutor {
             return true;
         } else { player = (Player) sender; }
         
-        if (split[0].equalsIgnoreCase("payTaxes")) { //tested and working - 18 Feb 13 
+        if (args[0].equalsIgnoreCase("payTaxes")) { //tested and working - 18 Feb 13 
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            if (split.length == 2 ) {
-                Double amount = Double.parseDouble(split[1]);
+            if (args.length == 2 ) {
+                Double amount = Double.parseDouble(args[1]);
                 return temp.payTaxes(player, amount );
                  
-            } else if ( split.length == 1 ){
+            } else if ( args.length == 1 ){
                 return temp.payTaxes(player);
                 
             } else { return false; }
-        } else if (split[0].equalsIgnoreCase("apply")) { //denies existing citizens, more testing needed - 28 Feb 13
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("apply")) { //denies existing citizens, more testing needed - 28 Feb 13
+            if (args.length != 2) {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             if (!plugin.isCitizen(player.getName()) ){
-                Town temp = plugin.getTown(split[1] );
+                Town temp = plugin.getTown(args[1] );
                 temp.apply ( player );
                 player.sendMessage("Application to "+temp.getName()+" was sent.");
                 return true;
@@ -112,8 +114,8 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("To clear your status, do /town leave");
                 return true;
             }
-        } else if (split[0].equalsIgnoreCase("accept")) { //untested - 18 Feb
-            if (split.length != 1) {
+        } else if (args[0].equalsIgnoreCase("accept")) { //untested - 18 Feb
+            if (args.length != 1) {
                 player.sendMessage("/town accept (no parameters, do /town viewInvite)");
                 return false;
             }
@@ -121,8 +123,8 @@ public class TownCommand implements CommandExecutor {
             temp.acceptInvite(player);
             
             return true;
-        } else if (split[0].equalsIgnoreCase("viewInvite")) { //untested - 18 Feb
-            if (split.length != 1) {
+        } else if (args[0].equalsIgnoreCase("viewInvite")) { //untested - 18 Feb
+            if (args.length != 1) {
                 player.sendMessage("/town viewInvite (no parameters)");
                 return false;
             }
@@ -137,21 +139,21 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(player,"You are not an invitee of " + temp.getName() );
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("leave")) { //infinite loop! - 18 Feb 
+        } else if (args[0].equalsIgnoreCase("leave")) { //infinite loop! - 18 Feb 
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.leave(player);
             return true;
-        }else if (split[0].equalsIgnoreCase("sethome")) {
+        }else if (args[0].equalsIgnoreCase("sethome")) {
             player.sendMessage("Sethome not yet added.");
             return true;
-        }else if (split[0].equalsIgnoreCase("vote")) {
+        }else if (args[0].equalsIgnoreCase("vote")) {
             player.sendMessage("Voting not yet added.");
             return true;
-        } else if (split[0].equalsIgnoreCase("bank")) { //tested and working - 28 Feb 13
+        } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 28 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal());
             return true;
-        }  else if (split[0].equalsIgnoreCase("signCharter")) {
+        }  else if (args[0].equalsIgnoreCase("signCharter")) {
             player.sendMessage("Charters not yet enabled ");
             return true;
         } else {
@@ -173,5 +175,27 @@ public class TownCommand implements CommandExecutor {
         plugin.out( player, "/town bank (check the town bank balance)");
         plugin.out( player,"Future: /town vote");
     }
-   
+       
+    private String [] trimSplit (String [] split ) {
+        if (split.length > 7) {
+            plugin.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
+            return null; 
+        }
+        String [] rtn = new String[7];
+        int i = 0;
+        for (String entry: split) {
+            if (entry.equalsIgnoreCase(" ") ){
+                // do nothing (delete the empty space entries)
+            } else {
+                rtn[i++] = entry.trim();
+            }
+        }
+        String temp[] = rtn;
+        rtn = new String[i];
+        int j = 0;
+        for (String s: temp){
+            rtn[j++] = s;
+        }
+        return rtn;
+    }
 }

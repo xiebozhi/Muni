@@ -41,22 +41,24 @@ public class TownAdminCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+        String [] args = trimSplit(split);
+        
         if (!(sender instanceof Player)) {
         } else { player = (Player) sender; }
 
-        if (split.length == 0){
+        if (args.length == 0){
             displayHelp(sender);
             return true;
-        } else if (split[0].equalsIgnoreCase("help")  ) { // working - 18 Feb
+        } else if (args[0].equalsIgnoreCase("help")  ) { // working - 18 Feb
             displayHelp(sender);
             return true;
-        } else if (split[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
+        } else if (args[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
             plugin.out(sender,"Dropping the database!  Then re-creating");
             plugin.dbwrapper.createDB(true);
             plugin.makeDefaultCitizens();
             plugin.makeTestTowns();
             return true;
-        } else if (split[0].equalsIgnoreCase("reload") ) { // Config reload tested good, towns reload added - 18 Feb
+        } else if (args[0].equalsIgnoreCase("reload") ) { // Config reload tested good, towns reload added - 18 Feb
             plugin.out(sender, "Reloading config & towns");
             plugin.getLogger().info(sender.getName()+" issued the reload command");
             plugin.reloadConfig();
@@ -67,74 +69,74 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.getLogger().info("Towns reloaded");
             plugin.out(sender, "Finished");
             return true;
-        } else if (split[0].equalsIgnoreCase("save")) { //tested and working - 18 Feb
+        } else if (args[0].equalsIgnoreCase("save")) { //tested and working - 18 Feb
             plugin.out(sender, "Saving Towns and Citizens to the database!");
             plugin.saveTowns();
             return true;
-        } else if (split[0].equalsIgnoreCase("debug")) {
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("debug")) {
+            if (args.length != 2) {
                 plugin.out(sender, "/townadmin debug on|off");
             }
-            if (split[1].equalsIgnoreCase("on") ){
+            if (args[1].equalsIgnoreCase("on") ){
                 plugin.setDebug(true);
-            } else if (split[1].equalsIgnoreCase("off") ){
+            } else if (args[1].equalsIgnoreCase("off") ){
                 plugin.setDebug(false);
             } else {
                 plugin.out(sender, "/townadmin debug on|off");
             }
-            plugin.out(sender, "Debug changed to "+split[1] );
+            plugin.out(sender, "Debug changed to "+args[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("SQLdebug")) { //added but not tested - 18 Feb
-            if (split.length != 2) {
+        } else if (args[0].equalsIgnoreCase("SQLdebug")) { //added but not tested - 18 Feb
+            if (args.length != 2) {
                 plugin.out(sender, "/townadmin SQLdebug on|off");
             }
-            if (split[1].equalsIgnoreCase("on") ){
+            if (args[1].equalsIgnoreCase("on") ){
                 plugin.setSQLDebug(true);
-            } else if (split[1].equalsIgnoreCase("off") ){
+            } else if (args[1].equalsIgnoreCase("off") ){
                 plugin.setSQLDebug(false);
             } else {
                 plugin.out(sender, "/townadmin SQLdebug on|off");
             }
-            plugin.out(sender, "SQL_Debug changed to "+split[1] );
+            plugin.out(sender, "SQL_Debug changed to "+args[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("addTown")) { //working but changed to save to db, not fully tested - 18 Feb
-            if (split.length != 3) {
+        } else if (args[0].equalsIgnoreCase("addTown")) { //working but changed to save to db, not fully tested - 18 Feb
+            if (args.length != 3) {
                 plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
                 return false;
             }
-                Town t = new Town (plugin,split[1],split[2]);
+                Town t = new Town (plugin,args[1],args[2]);
                 t.saveToDB();
                 plugin.towns.put( t.getName(), t ) ;
-                plugin.out(sender, "Added the town: "+split[1] );
+                plugin.out(sender, "Added the town: "+args[1] );
                 return true; 
                 
-        } else if (split[0].equalsIgnoreCase("addCitizen")) { //was kinda working, now maybe fixed - 18 Feb
-            if (split.length != 3) {
+        } else if (args[0].equalsIgnoreCase("addCitizen")) { //was kinda working, now maybe fixed - 18 Feb
+            if (args.length != 3) {
                 plugin.out(sender, "/townAdmin addCitizen <townName> <playerName>");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName( split[1] ) );
-            temp.admin_makeCitizen(sender, split[2] ) ;
-            plugin.out(sender,split[2]+" was added to "+split[1]); 
+            Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
+            temp.admin_makeCitizen(sender, args[2] ) ;
+            plugin.out(sender,args[2]+" was added to "+args[1]); 
             return true;
             
-        }  else if (split[0].equalsIgnoreCase("removeTown")) { // The NPE error might be fixed - 18 Feb
-            if (split.length != 2) {
+        }  else if (args[0].equalsIgnoreCase("removeTown")) { // The NPE error might be fixed - 18 Feb
+            if (args.length != 2) {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
-            plugin.removeTown( split[1] );
-            plugin.out(sender, "Removed town: "+ split[1] );
+            plugin.removeTown( args[1] );
+            plugin.out(sender, "Removed town: "+ args[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("removeCitizen")) { // changed, not tested - 18 Feb
-            if (split.length != 3) {
+        } else if (args[0].equalsIgnoreCase("removeCitizen")) { // changed, not tested - 18 Feb
+            if (args.length != 3) {
                 plugin.out(sender, "/townAdmin removeCitizens <townName> <playerName>");
                 return true;
             }
-            Town temp = plugin.getTown( plugin.getTownName( split[1] ) );
-            temp.admin_removeCitizen( player, split[2] );
+            Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
+            temp.admin_removeCitizen( player, args[2] );
             return true;
-        } else if (split[0].equalsIgnoreCase("check")) { // been working since early on - 18 Feb
+        } else if (args[0].equalsIgnoreCase("check")) { // been working since early on - 18 Feb
             player.sendMessage("Checking build perms.");
             if (plugin.wgwrapper.checkBuildPerms(player) ){
                player.sendMessage("You may build here");
@@ -142,16 +144,16 @@ public class TownAdminCommand implements CommandExecutor {
                 player.sendMessage("You may not build here.");
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("tp")) { //Transform to ticketing system in time
-            if (split.length != 4) {
+        } else if (args[0].equalsIgnoreCase("tp")) { //Transform to ticketing system in time
+            if (args.length != 4) {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
             player.sendMessage("TP to pos.");
             try {
-                double x = Double.parseDouble( split[1] );
-                double y = Double.parseDouble( split[2] );
-                double z = Double.parseDouble( split[3] );
+                double x = Double.parseDouble( args[1] );
+                double y = Double.parseDouble( args[2] );
+                double z = Double.parseDouble( args[3] );
 
                 player.teleport(new Location(player.getWorld(), x, y, z));
                 return true;
@@ -159,18 +161,18 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Given location is invalid");
                 return false;
             }
-        }  else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
+        }  else if (args[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
             for (Town t : plugin.towns.values() ){
                 plugin.out(sender, "Displaying players for "+t.getName() );
                 t.listAllCitizens(player);
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
+        } else if (args[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
             for (String c : plugin.allCitizens.keySet() ){
                 plugin.out(sender,  c+" "+plugin.allCitizens.get(c) );
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
+        } else if (args[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
             
             player.sendMessage("Here!");
             player.sendMessage(plugin.getTownName("bobbshields") );
@@ -193,5 +195,27 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.out(sender, "/townAdmin debug <off/on>");   
             plugin.out(sender, "/townAdmin SQLdebug <off/on>");   
     }
-   
+       
+    private String [] trimSplit (String [] split ) {
+        if (split.length > 7) {
+            plugin.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
+            return null; 
+        }
+        String [] rtn = new String[7];
+        int i = 0;
+        for (String entry: split) {
+            if (entry.equalsIgnoreCase(" ") ){
+                // do nothing (delete the empty space entries)
+            } else {
+                rtn[i++] = entry.trim();
+            }
+        }
+        String temp[] = rtn;
+        rtn = new String[i];
+        int j = 0;
+        for (String s: temp){
+            rtn[j++] = s;
+        }
+        return rtn;
+    }
 }
