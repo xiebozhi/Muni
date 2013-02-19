@@ -95,14 +95,8 @@ public class TownCommand implements CommandExecutor {
             if (args.length == 2 ) {
                 Double amount = plugin.parseD( args[1] );
                 rtn = temp.payTaxes(player, amount );
-                if (rtn){
-                    temp.messageOfficers(player.getName()+" has paid taxes in the amount of " + amount);
-                }
             } else if ( args.length == 1 ){
                 rtn = temp.payTaxes(player);
-                if (rtn){
-                    temp.messageOfficers(player.getName()+" has paid the default amount of taxes");
-                }
             } 
             return rtn;
         } else if (args[0].equalsIgnoreCase("apply")) { //denies existing citizens, more testing needed - 28 Feb 13
@@ -128,7 +122,6 @@ public class TownCommand implements CommandExecutor {
             }
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.acceptInvite(player);
-            temp.messageOfficers(player.getName() + " has accepted an invite to your town");
             
             return true;
         } else if (args[0].equalsIgnoreCase("viewInvite")) { //untested - 18 Feb

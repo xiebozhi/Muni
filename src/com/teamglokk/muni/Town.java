@@ -558,7 +558,9 @@ public class Town implements Comparable<Town> {
         if (!officer.isOnline() ) { return false; }
         if ( !plugin.allCitizens.containsKey(player) ) {
             plugin.allCitizens.put(player, townName);
-            invitees.put(player,new Citizen(plugin,townName,player,"invitee",officer.getName() ) );
+            Citizen c = new Citizen(plugin,townName,player,"invitee",officer.getName() );
+            invitees.put(player, c );
+            c.saveToDB();
             return true;
         } else { officer.sendMessage( player+ " is already a member of "+plugin.allCitizens.get(player) ); }
         return false; 
@@ -575,7 +577,7 @@ public class Town implements Comparable<Town> {
             citizens.put( player.getName(), new Citizen(plugin,townName,player.getName() ) );
             invitees.remove(new Citizen(plugin,townName,player.getName() ) );
             announce(player+" has become a town member by invitation");
-            saveToDB();
+            plugin.dbwrapper.updateRole(this, "citizen");
             return true;
         } else {player.sendMessage("You have not been invited to " + townName); }
         return false; 
@@ -590,9 +592,10 @@ public class Town implements Comparable<Town> {
         if (!player.isOnline() ) { return false; }
         if (!plugin.allCitizens.containsKey(player.getName() ) ) {
             plugin.allCitizens.put(player.getName(), townName);
-            applicants.put( player.getName(), new Citizen(plugin,townName,player.getName(),"applicant",null ) );
+            Citizen c = new Citizen(plugin,townName,player.getName(),"applicant",null );
+            applicants.put( player.getName(), c );
             messageOfficers(player.getName()+" has applied to be a citizen");
-            saveToDB();
+            c.saveToDB();
             return true;
         } else { player.sendMessage("You are already a involved with "+plugin.allCitizens.get(player.getName() ) ); }
         return false; 
@@ -608,10 +611,10 @@ public class Town implements Comparable<Town> {
         if (!officer.isOnline() ) { return false; }
         if ( plugin.allCitizens.containsKey(player) ) {
             if ( applicants.containsKey ( player ) ){
-                citizens.put(player, new Citizen(plugin,townName,player ) );
+                citizens.put(player, new Citizen(plugin,townName,player,"citizen", null ) );
                 applicants.remove( player );
                 announce(player+" has become a town member by application");
-                saveToDB();
+                plugin.dbwrapper.updateRole(this, "citizen");
                 return true;
             } else { officer.sendMessage( "The player is not an applicant" ); }
         } else { officer.sendMessage( "The player is already involved with " + plugin.allCitizens.get( player ) ); }
@@ -628,6 +631,7 @@ public class Town implements Comparable<Town> {
         if ( applicants.containsKey( player ) ){
             applicants.remove(new Citizen(plugin,townName,player ) );
             plugin.allCitizens.remove( player );
+            plugin.dbwrapper.deleteCitizen( player );
             messageOfficers( player+ "'s application has been declined by "+officer.getName() );
             if (plugin.isOnline(player ) ) {
                 Player p = plugin.getServer().getPlayer(player);
@@ -647,7 +651,7 @@ public class Town implements Comparable<Town> {
                 citizens.remove( player.getName() );
                 announce(player+" has left the town");
                 player.sendMessage("You have given up any type of membership in " +townName);
-                saveToDB();
+                plugin.dbwrapper.deleteCitizen(player.getName() );
                 return true;
             } else {player.sendMessage("You are not a citizen of the town " ); }
         } else {player.sendMessage("You are not a member of this town"); }
@@ -674,6 +678,7 @@ public class Town implements Comparable<Town> {
             rtn = true;
         }
         if (rtn){
+            plugin.dbwrapper.deleteCitizen(player.getName() );
             player.sendMessage("You have cleared your application or invitation to "+townName);
         }
         return rtn;
@@ -707,7 +712,7 @@ public class Town implements Comparable<Town> {
         } else if ( isCitizen(player) ){
             if ( getMaxDeputies() > deputies.size() ){ // might have to adjust array...
                 deputies.put(player,new Citizen (plugin, townName, player ) );
-                saveToDB();
+                plugin.dbwrapper.updateRole(this, player);
                 return true; 
             } 
         } 
@@ -727,30 +732,38 @@ public class Town implements Comparable<Town> {
             sender.sendMessage( player+ " is already a member of a town.");
             return false;
         } else if ( getMaxCitizens() > deputies.size() + citizens.size() ){ 
-                citizens.put( player, new Citizen (plugin, townName, player ) );
-                //saveCitizens();
-                return true;
+            Citizen c = new Citizen (plugin, townName, player, "citizen",null );
+            citizens.put( player, c );
+            c.saveToDB();
+            return true;
         } else { sender.sendMessage( townName+" has too many citizens.  Wait for a vacancy"); }
         return false;
     }
     public boolean admin_removeCitizen(CommandSender sender, String player){
+        boolean rtn = false; 
         if (plugin.allCitizens.get(player).equalsIgnoreCase(townName) ){
             if (isMayor(player) ) {
                 mayor = new Citizen (plugin, townName, "empty") ;
             }
             if (isDeputy(player) ) {
                 deputies.remove(player);
+                rtn = true; 
             }if (isCitizen(player) ) {
                 citizens.remove(player);
+                rtn = true; 
             }if (isInvited(player) ) {
                 invitees.remove(player);
+                rtn = true; 
             }if (isApplicant(player) ) {
                 applicants.remove(player);
+                rtn = true; 
             }
-            sender.sendMessage( "Citizen " +player+" removed from " +townName);
-            return true;
+            if (rtn) {
+                sender.sendMessage( "Citizen " +player+" removed from " +townName);
+                plugin.dbwrapper.deleteCitizen(player);
+            }
         }
-        return false; 
+        return rtn; 
     }
     
     /**
@@ -970,6 +983,7 @@ public class Town implements Comparable<Town> {
     public boolean tb_deposit(Player player, double amount){
         if ( plugin.econwrapper.pay(player,amount,0,"TB Deposit") ){
             townBankBal = townBankBal + amount;
+            messageOfficers(player.getName()+" deposited "+amount+" into the town bank");
             return true;
         } else {return false; }
     }
@@ -984,6 +998,7 @@ public class Town implements Comparable<Town> {
         if ( townBankBal >= amount ){
             if (plugin.econwrapper.giveMoney(officer,amount, "TB Withdraw") ) {
                 townBankBal = townBankBal - amount;
+            messageOfficers(officer.getName()+" witndrew "+amount+" into the town bank");
                 return true;
             } 
         } 
@@ -1000,9 +1015,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean payTaxes(Player player){
-        if (payTaxes(player, taxRate ) ){
-            return true;
-        } else { return false; }
+        return payTaxes(player,taxRate);
     }
     
     /**
@@ -1014,8 +1027,8 @@ public class Town implements Comparable<Town> {
     public boolean payTaxes(Player player, Double amount){
         if ( plugin.econwrapper.pay(player, amount, 0, "Taxes for "+townName ) ){
             townBankBal = townBankBal + amount;
-            //player.sendMessage("You have paid your taxes to "+townName+" of amount "+ amount+" "+plugin.econwrapper.getCurrName(amount) );
-            //Transaction t = new Transaction ( )
+            player.sendMessage("You have paid your taxes to "+townName+" of amount "+ amount+" "+plugin.econwrapper.getCurrName(amount) );
+            messageOfficers(player.getName() +"has pad " +amount+ " in taxes");
             return true;
         } else { return false; }
     }

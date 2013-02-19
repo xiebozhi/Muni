@@ -234,6 +234,69 @@ public class dbWrapper extends Muni {
         return rtn;
     }
     /**
+     * Gets a list of all the citizens in the specified town in the specified role
+     * @param townName
+     * @return      array list of all the citizens in the town
+     */
+    public boolean updateRole ( Town t, String cit ){
+        boolean rtn = false;
+        
+        String SQL = "UPDATE "+plugin.getDB_prefix()+
+                "citizens SET role='"+t.getRole(cit)+
+                "' WHERE playername='"+cit +"';";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().warning(SQL);}
+            int resultCount = stmt.executeUpdate(SQL); 
+            if (resultCount == 1){
+                return true;
+            } 
+            return false;
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "getTownCits: "+ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "getTownCits: "+ex.getMessage() ); 
+                rtn = false;
+            } finally{}
+        }
+        return rtn;
+    }
+    /**
+     * Gets a list of all the citizens in the specified town in the specified role
+     * @param townName
+     * @return      array list of all the citizens in the town
+     */
+    public boolean deleteCitizen ( String cit ){
+        boolean rtn = false;
+        
+        String SQL = "DELETE FROM  "+plugin.getDB_prefix()+
+                "citizens WHERE playername='"+cit +"';";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().warning(SQL);}
+            int resultCount = stmt.executeUpdate(SQL); 
+            if (resultCount == 1){
+                return true;
+            } 
+            return false;
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "getTownCits: "+ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "getTownCits: "+ex.getMessage() ); 
+                rtn = false;
+            } finally{}
+        }
+        return rtn;
+    }
+    /**
      * Get all the town data from only the town name 
      * @param townName
      * @return          copy of the specified town

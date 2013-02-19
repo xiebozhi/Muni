@@ -306,7 +306,6 @@ public class Muni extends JavaPlugin {
             this.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
             return null; 
         }
-        this.getLogger().warning("trimSplit subcommand: "+split[0] );
         String [] temp = new String[split.length];
         int i = 0;
         for (String entry: split) {
@@ -317,7 +316,6 @@ public class Muni extends JavaPlugin {
                 i++;
             }
         }
-        this.getLogger().warning("i = "+i);
         String [] rtn = new String[i];
         int j = 0;
         for (j=0; j<i; j++){

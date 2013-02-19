@@ -87,10 +87,6 @@ public class OfficerCommand implements CommandExecutor {
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.declineApplication( args[1],officer );
-            if (plugin.isOnline(args[1] ) ) {
-                Player p = plugin.getServer().getPlayer(args[1]);
-                p.sendMessage("You have been declined from "+temp.getName()+" by "+ officer.getName() );
-            }
             return true;
             
         }  else if (args[0].equalsIgnoreCase("accept") ) {  //tested and working - 18 Feb 13
@@ -104,10 +100,12 @@ public class OfficerCommand implements CommandExecutor {
             
         } else if (args[0].equalsIgnoreCase("delete")  //tested and not working think its now fixed - 18 Feb 13
                 || args[0].equalsIgnoreCase("disband")) {
+            // this should verify intention before continuing.
             // This does not but should remove all players from citizens who are members of town
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             plugin.removeTown(temp.getName() );
-            temp.announce("Town removed by the mayor "+ officer.getName() );
+            temp.removeCitizen(split[1], officer);
+            temp.announce("Town removed by the mayor, "+ officer.getName() );
             return true;
         } else if (args[0].equalsIgnoreCase("checkTaxes")) {
             officer.sendMessage("Checking taxes will come in time.  Use the DB for now");
@@ -115,7 +113,7 @@ public class OfficerCommand implements CommandExecutor {
         }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.setTaxRate(Double.parseDouble(args[1]) );
-            officer.sendMessage("You have set the tax rate for "+temp.getName()+ " to "+ args[1] );
+            temp.announce(officer.getName()+" has set the tax rate for "+temp.getName()+ " to "+ args[1] );
             return true;
         } else if (args[0].equalsIgnoreCase("kick")) {  //Assumed working (removed member, needs new output) - 18 Feb 13
             if (args.length != 2) {
@@ -144,7 +142,6 @@ public class OfficerCommand implements CommandExecutor {
                             plugin.out(officer,"You have deposited "+amount+" into your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
                             temp.checkTownBank(officer);
-                            temp.messageOfficers(officer.getName()+" deposited "+amount+" into the town bank");
                         }
                         else {
                             plugin.out(officer,"You don't have enough to deposit");
@@ -156,7 +153,6 @@ public class OfficerCommand implements CommandExecutor {
                             plugin.out(officer,"You have withdrawn "+amount+" from your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
                             temp.checkTownBank(officer);
-                            temp.messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
                         } else {
                             plugin.out( sender,"The town bank didn't have enough to withdraw" );
                         }
