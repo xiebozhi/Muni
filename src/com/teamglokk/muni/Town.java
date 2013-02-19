@@ -22,6 +22,7 @@ package com.teamglokk.muni;
 import java.sql.Timestamp;
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.ArrayList;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.bukkit.command.CommandSender;
@@ -373,7 +374,45 @@ public class Town implements Comparable<Town> {
             plugin.out( player, "Applicants: "+list.substring(0, list.length()-2));
         }
     }
-            
+      
+    public void messageOfficers(String msg ) {
+        ArrayList<Player> online = new ArrayList<Player>();
+        if (plugin.isOnline( mayor.getName() ) ){
+            online.add(plugin.getServer().getPlayer(mayor.getName() ) ) ;
+        } 
+        for (Citizen c : deputies.values() ){
+            if (plugin.isOnline( c.getName() ) ){
+                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+            } 
+        }
+        for (Player p : online ){
+            p.sendMessage(msg);
+        }
+        
+    }  
+    public void announce(String msg ) {
+        messageOfficers(msg);
+        ArrayList<Player> online = new ArrayList<Player>();
+        for (Citizen c : citizens.values() ){
+            if (plugin.isOnline( c.getName() ) ){
+                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+            } 
+        }
+        for (Citizen c : invitees.values() ){
+            if (plugin.isOnline( c.getName() ) ){
+                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+            } 
+        } 
+        for (Citizen c : applicants.values() ){
+            if (plugin.isOnline( c.getName() ) ){
+                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+            } 
+        }
+        for (Player p : online ){
+            p.sendMessage(msg);
+        }
+        
+    }
     /**
      * Makes the player into the town mayor, if checks are passed
      * @param player
@@ -393,6 +432,8 @@ public class Town implements Comparable<Town> {
                if ( plugin.econwrapper.hasPerm( player, "muni.mayor" ) ){
                     mayor = new Citizen ( plugin, townName, player.getName(),"mayor",null );
                     mayor.saveToDB();
+                    messageOfficers(mayor.getName() +" has become the mayor of "+townName);
+                    saveToDB();
                     return true;
                 } else { player.sendMessage("You do not have permission to become a mayor."); }
             } else {player.sendMessage("There is already a mayor") ;}
@@ -413,6 +454,8 @@ public class Town implements Comparable<Town> {
             admin_makeCitizen(player, player.getName() );
             citizensMap.remove(player.getName() );
             citizensMap.put(player.getName(), "citizen") ;
+            announce(player.getName()+" has resigned as mayor");
+            saveToDB();
             // log a transaction here
             return true;
         } else {
@@ -433,6 +476,8 @@ public class Town implements Comparable<Town> {
             deputies.remove( player.getName() );
             citizensMap.remove(player.getName() );
             citizensMap.put(player.getName(), "citizen") ;
+            announce(player.getName()+" has resigned as deputy");
+            saveToDB();
             // log a transaction here
             return true;
         } else {
@@ -447,22 +492,31 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean removeCitizen ( String player, Player officer ){
+        boolean rtn = false;
         if (isCitizen( player ) ){
             citizens.remove( player );
             saveCitizens();
             // log a transaction here
-            return true;
+            rtn = true;
         } else if (isInvited( player ) ){
             invitees.remove( player );
             saveCitizens();
             // log a transaction here
-            return true;
+            rtn = true;
         } else if (isApplicant( player ) ){
             applicants.remove( player );
             saveCitizens();
             // log a transaction here
-            return true;
-        } else { return false; }
+            rtn = true;
+        } 
+        if (rtn){officer.sendMessage("Player removed");
+            announce(player+" was kicked by "+ officer.getName() );
+            if (plugin.isOnline(player ) ) {
+                Player p = plugin.getServer().getPlayer(player);
+                p.sendMessage("You have been kicked from "+townName+" by "+ officer.getName() );
+            }
+        }
+        return rtn;
     } 
     
     /**
@@ -471,10 +525,6 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean makeDeputy(String player, Player officer){
-        if ( !plugin.getServer().getPlayer( player ).isOnline() ){ //throwing NPE
-            plugin.getLogger().warning("Player "+player+" is not online to make a deputy of " +townName );
-            return false;
-        }
         if ( isMayor(player) ){
             officer.sendMessage(player +" is already the mayor of "+townName);
             return false;
@@ -489,7 +539,8 @@ public class Town implements Comparable<Town> {
                     citizensMap.put(c.getName(), "deputy");
                     citizens.remove(c);
                     deputies.put(player,c );
-                    //saveToDB();
+                    announce(player+" has become a deputy!");
+                    saveToDB();
                     return true;
                 //} else { officer.sendMessage("You do not have permission to become a deputy."); }
             } else { officer.sendMessage("Too many deputies, rank up or fire someone"); }
@@ -521,10 +572,10 @@ public class Town implements Comparable<Town> {
     public boolean acceptInvite(Player player){
         if (!player.isOnline() ) { return false; }
         if (invitees.containsKey(player.getName() ) ){
-            //plugin.allCitizens.put(player.getName(), townName);
             citizens.put( player.getName(), new Citizen(plugin,townName,player.getName() ) );
             invitees.remove(new Citizen(plugin,townName,player.getName() ) );
-            //need to make changes to the database here
+            announce(player+" has become a town member by invitation");
+            saveToDB();
             return true;
         } else {player.sendMessage("You have not been invited to " + townName); }
         return false; 
@@ -540,6 +591,8 @@ public class Town implements Comparable<Town> {
         if (!plugin.allCitizens.containsKey(player.getName() ) ) {
             plugin.allCitizens.put(player.getName(), townName);
             applicants.put( player.getName(), new Citizen(plugin,townName,player.getName(),"applicant",null ) );
+            messageOfficers(player.getName()+" has applied to be a citizen");
+            saveToDB();
             return true;
         } else { player.sendMessage("You are already a involved with "+plugin.allCitizens.get(player.getName() ) ); }
         return false; 
@@ -557,9 +610,8 @@ public class Town implements Comparable<Town> {
             if ( applicants.containsKey ( player ) ){
                 citizens.put(player, new Citizen(plugin,townName,player ) );
                 applicants.remove( player );
-                officer.sendMessage( player+ " has been accepted as a regular member to "+townName );
-                //need to make changes to the database here
-                //plugin.dbwrapper.updateRole( player, "citizen" );
+                announce(player+" has become a town member by application");
+                saveToDB();
                 return true;
             } else { officer.sendMessage( "The player is not an applicant" ); }
         } else { officer.sendMessage( "The player is already involved with " + plugin.allCitizens.get( player ) ); }
@@ -576,8 +628,12 @@ public class Town implements Comparable<Town> {
         if ( applicants.containsKey( player ) ){
             applicants.remove(new Citizen(plugin,townName,player ) );
             plugin.allCitizens.remove( player );
-            officer.sendMessage( player+ " has rejected as a regular member to "+townName );
-            //need to make changes to the database here
+            messageOfficers( player+ "'s application has been declined by "+officer.getName() );
+            if (plugin.isOnline(player ) ) {
+                Player p = plugin.getServer().getPlayer(player);
+                p.sendMessage("Your application to "+townName+" has been declined by "+officer.getName() );
+            }
+            saveToDB();
             return true;
         } else {officer.sendMessage(player+" has not applied to " + townName); }
         return false; 
@@ -589,10 +645,15 @@ public class Town implements Comparable<Town> {
                 plugin.allCitizens.remove(player.getName() );
                 citizensMap.remove(player.getName() ); 
                 citizens.remove( player.getName() );
+                announce(player+" has left the town");
+                player.sendMessage("You have given up any type of membership in " +townName);
+                saveToDB();
                 return true;
             } else {player.sendMessage("You are not a citizen of the town " ); }
         } else {player.sendMessage("You are not a member of this town"); }
-        return false; 
+        
+        //If we make it to here, see if the player has something pending and clear it
+        return clearPending(player);
     }
     
     /**
@@ -611,6 +672,9 @@ public class Town implements Comparable<Town> {
             invitees.remove(new Citizen (plugin,townName,player.getName() ));
             plugin.allCitizens.remove( player.getName() );
             rtn = true;
+        }
+        if (rtn){
+            player.sendMessage("You have cleared your application or invitation to "+townName);
         }
         return rtn;
     }

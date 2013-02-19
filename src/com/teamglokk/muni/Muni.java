@@ -290,6 +290,54 @@ public class Muni extends JavaPlugin {
         return temp;
     }
     
+    
+    public boolean isOnline(String player) {
+        if (this.getServer().getPlayer(player) != null ){
+            return true;
+        } else {
+            return false; 
+        }
+    }
+       
+    public String [] trimSplit (String [] split ) {
+        if (split.length == 0 ){
+            return new String [0];
+        } else if (split.length > 7) {
+            this.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
+            return null; 
+        }
+        this.getLogger().warning("trimSplit subcommand: "+split[0] );
+        String [] temp = new String[split.length];
+        int i = 0;
+        for (String entry: split) {
+            if (entry.equalsIgnoreCase(" ") || entry.isEmpty() ){
+                // do nothing (delete the empty space entries)
+            } else {
+                temp[i] = entry.trim();
+                i++;
+            }
+        }
+        this.getLogger().warning("i = "+i);
+        String [] rtn = new String[i];
+        int j = 0;
+        for (j=0; j<i; j++){
+            rtn[j] = temp[j];
+        }
+        return rtn;
+    }
+    public Double parseD (String dbl) {
+    
+        double rtn = Double.parseDouble(dbl);
+        return rtn;
+        
+    }
+    public int parseI (String dbl) {
+    
+        int rtn = Integer.parseInt(dbl);
+        return rtn;
+        
+    }
+    
     /**
      * Gets whether the player is a citizen of any town
      * @param player

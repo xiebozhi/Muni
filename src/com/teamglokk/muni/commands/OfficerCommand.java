@@ -40,7 +40,7 @@ public class OfficerCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
-        String [] args = trimSplit(split);
+        String [] args = plugin.trimSplit(split);
         
         if (!(sender instanceof Player)) {
             sender.sendMessage("You cannot send deputy or mayor commands from the console");
@@ -77,7 +77,7 @@ public class OfficerCommand implements CommandExecutor {
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.invite( args[1],officer);
-            officer.sendMessage("Invitation to "+temp.getName()+" was sent.");
+            temp.messageOfficers("An invitation to "+args[1]+" was sent by "+officer.getName() );
             return true;
             
         }  else if (args[0].equalsIgnoreCase("decline")) {  //not tested - 18 Feb 13
@@ -87,6 +87,10 @@ public class OfficerCommand implements CommandExecutor {
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.declineApplication( args[1],officer );
+            if (plugin.isOnline(args[1] ) ) {
+                Player p = plugin.getServer().getPlayer(args[1]);
+                p.sendMessage("You have been declined from "+temp.getName()+" by "+ officer.getName() );
+            }
             return true;
             
         }  else if (args[0].equalsIgnoreCase("accept") ) {  //tested and working - 18 Feb 13
@@ -103,7 +107,7 @@ public class OfficerCommand implements CommandExecutor {
             // This does not but should remove all players from citizens who are members of town
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             plugin.removeTown(temp.getName() );
-            officer.sendMessage("Removed: "+ temp.getName() );
+            temp.announce("Town removed by the mayor "+ officer.getName() );
             return true;
         } else if (args[0].equalsIgnoreCase("checkTaxes")) {
             officer.sendMessage("Checking taxes will come in time.  Use the DB for now");
@@ -121,7 +125,6 @@ public class OfficerCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             officer.sendMessage("The player is a "+temp.getRole( args[1] ) );
             if ( temp.removeCitizen(args[1], officer ) ){
-                officer.sendMessage("Player removed");
             } else { officer.sendMessage("Error"); }
             return true;
             
@@ -141,6 +144,7 @@ public class OfficerCommand implements CommandExecutor {
                             plugin.out(officer,"You have deposited "+amount+" into your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
                             temp.checkTownBank(officer);
+                            temp.messageOfficers(officer.getName()+" deposited "+amount+" into the town bank");
                         }
                         else {
                             plugin.out(officer,"You don't have enough to deposit");
@@ -152,6 +156,7 @@ public class OfficerCommand implements CommandExecutor {
                             plugin.out(officer,"You have withdrawn "+amount+" from your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
                             temp.checkTownBank(officer);
+                            temp.messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
                         } else {
                             plugin.out( sender,"The town bank didn't have enough to withdraw" );
                         }
@@ -232,28 +237,4 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "/mayor rankup");
         }
     }
-        
-    private String [] trimSplit (String [] split ) {
-        if (split.length > 7) {
-            plugin.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
-            return null; 
-        }
-        String [] rtn = new String[7];
-        int i = 0;
-        for (String entry: split) {
-            if (entry.equalsIgnoreCase(" ") ){
-                // do nothing (delete the empty space entries)
-            } else {
-                rtn[i++] = entry.trim();
-            }
-        }
-        String temp[] = rtn;
-        rtn = new String[i];
-        int j = 0;
-        for (String s: temp){
-            rtn[j++] = s;
-        }
-        return rtn;
-    }
-   
 }

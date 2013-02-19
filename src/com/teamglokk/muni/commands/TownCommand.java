@@ -43,7 +43,7 @@ public class TownCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
-        String [] args = trimSplit(split);
+        String [] args = plugin.trimSplit(split);
         
         if (args.length == 0){
             displayHelp(sender);
@@ -90,24 +90,31 @@ public class TownCommand implements CommandExecutor {
         } else { player = (Player) sender; }
         
         if (args[0].equalsIgnoreCase("payTaxes")) { //tested and working - 18 Feb 13 
+            boolean rtn = false; 
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if (args.length == 2 ) {
-                Double amount = Double.parseDouble(args[1]);
-                return temp.payTaxes(player, amount );
-                 
+                Double amount = plugin.parseD( args[1] );
+                rtn = temp.payTaxes(player, amount );
+                if (rtn){
+                    temp.messageOfficers(player.getName()+" has paid taxes in the amount of " + amount);
+                }
             } else if ( args.length == 1 ){
-                return temp.payTaxes(player);
-                
-            } else { return false; }
+                rtn = temp.payTaxes(player);
+                if (rtn){
+                    temp.messageOfficers(player.getName()+" has paid the default amount of taxes");
+                }
+            } 
+            return rtn;
         } else if (args[0].equalsIgnoreCase("apply")) { //denies existing citizens, more testing needed - 28 Feb 13
             if (args.length != 2) {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
             if (!plugin.isCitizen(player.getName()) ){
-                Town temp = plugin.getTown(args[1] );
+                Town temp = plugin.getTown( args[1] );
                 temp.apply ( player );
                 player.sendMessage("Application to "+temp.getName()+" was sent.");
+                temp.messageOfficers(player.getName() + " has applied to your town");
                 return true;
             } else { 
                 player.sendMessage("You are already engaged with "+plugin.allCitizens.get(player.getName() ) );
@@ -121,6 +128,7 @@ public class TownCommand implements CommandExecutor {
             }
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.acceptInvite(player);
+            temp.messageOfficers(player.getName() + " has accepted an invite to your town");
             
             return true;
         } else if (args[0].equalsIgnoreCase("viewInvite")) { //untested - 18 Feb
@@ -142,6 +150,7 @@ public class TownCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("leave")) { //infinite loop! - 18 Feb 
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.leave(player);
+            temp.messageOfficers(player.getName() + " has left your town");
             return true;
         }else if (args[0].equalsIgnoreCase("sethome")) {
             player.sendMessage("Sethome not yet added.");
@@ -174,28 +183,5 @@ public class TownCommand implements CommandExecutor {
         plugin.out( player, "/town payTaxes <optional: amount>");
         plugin.out( player, "/town bank (check the town bank balance)");
         plugin.out( player,"Future: /town vote");
-    }
-       
-    private String [] trimSplit (String [] split ) {
-        if (split.length > 7) {
-            plugin.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
-            return null; 
-        }
-        String [] rtn = new String[7];
-        int i = 0;
-        for (String entry: split) {
-            if (entry.equalsIgnoreCase(" ") ){
-                // do nothing (delete the empty space entries)
-            } else {
-                rtn[i++] = entry.trim();
-            }
-        }
-        String temp[] = rtn;
-        rtn = new String[i];
-        int j = 0;
-        for (String s: temp){
-            rtn[j++] = s;
-        }
-        return rtn;
     }
 }

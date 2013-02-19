@@ -41,7 +41,7 @@ public class TownAdminCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
-        String [] args = trimSplit(split);
+        String [] args = plugin.trimSplit(split);
         
         if (!(sender instanceof Player)) {
         } else { player = (Player) sender; }
@@ -194,28 +194,5 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.out(sender, "/townAdmin reload");  
             plugin.out(sender, "/townAdmin debug <off/on>");   
             plugin.out(sender, "/townAdmin SQLdebug <off/on>");   
-    }
-       
-    private String [] trimSplit (String [] split ) {
-        if (split.length > 7) {
-            plugin.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
-            return null; 
-        }
-        String [] rtn = new String[7];
-        int i = 0;
-        for (String entry: split) {
-            if (entry.equalsIgnoreCase(" ") ){
-                // do nothing (delete the empty space entries)
-            } else {
-                rtn[i++] = entry.trim();
-            }
-        }
-        String temp[] = rtn;
-        rtn = new String[i];
-        int j = 0;
-        for (String s: temp){
-            rtn[j++] = s;
-        }
-        return rtn;
     }
 }
