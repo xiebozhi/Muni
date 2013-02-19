@@ -56,7 +56,7 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.out(sender,"Dropping the database!  Then re-creating");
             plugin.dbwrapper.createDB(true);
             plugin.makeDefaultCitizens();
-            plugin.makeDefaultTowns();
+            plugin.makeTestTowns();
             return true;
         } else if (split[0].equalsIgnoreCase("reload") ) {
             plugin.out(sender, "Reloading config");
@@ -95,7 +95,7 @@ public class TownAdminCommand implements CommandExecutor {
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            temp.admin_makeCitizen(split[1] ) ;
+            temp.admin_makeCitizen(player, split[1] ) ;
             return true;
             
         }  else if (split[0].equalsIgnoreCase("removeTown")) {
@@ -112,7 +112,7 @@ public class TownAdminCommand implements CommandExecutor {
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            temp.admin_removeCitizen( split[1] );
+            temp.admin_removeCitizen( player, split[1] );
             return true;
         } else if (split[0].equalsIgnoreCase("checkBal")) {
             if (split.length != 2) {
@@ -194,18 +194,16 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Given location is invalid");
                 return false;
             }
-        }  else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            plugin.out(sender, "The command was: "+command.toString() );
-            return true;
-        } else if (split[0].equalsIgnoreCase("testEnum")) { //DELETE MEEEEEE
-            Citizen c = new Citizen (plugin);
-            plugin.out(sender, "The enum result is "+c.getRoleFromEnum(split[1] ) );
-            return true;
-        } else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
+        }  else if (split[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
             for (Town t : plugin.towns.values() ){
                 plugin.out(sender, "Displaying players for "+t.getName() );
                 t.listAllCitizens(player);
             }
+            return true;
+        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
+            
+            player.sendMessage("Here!");
+            player.sendMessage(plugin.getTownName("bobbshields") );
             return true;
         } else if (split[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
             for (String c : plugin.allCitizens.keySet() ){
@@ -217,19 +215,19 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         }
     }
-    private void displayHelp(CommandSender player){
-            plugin.out(player, "TownAdmin Help.  You can do these commands:");
-            plugin.out(player, "/townAdmin addTown");
-            plugin.out(player, "/townAdmin removeTown");
-            plugin.out(player, "/townAdmin setTax");
-            plugin.out(player, "/townAdmin addCitizen");
-            plugin.out(player, "/townAdmin removeCitizen");
-            plugin.out(player, "/townAdmin deputize");
-            plugin.out(player, "/townAdmin list");
-            plugin.out(player, "/townAdmin save");
-            plugin.out(player, "/townAdmin reload");
-            plugin.out(player, "/townAdmin checkBal");   
-            plugin.out(player, "/townAdmin debug (off/on)");   
+    private void displayHelp(CommandSender sender){
+            plugin.out(sender, "TownAdmin Help.  You can do these commands:");
+            plugin.out(sender, "/townAdmin addTown");
+            plugin.out(sender, "/townAdmin removeTown");
+            plugin.out(sender, "/townAdmin setTax");
+            plugin.out(sender, "/townAdmin addCitizen");
+            plugin.out(sender, "/townAdmin removeCitizen");
+            plugin.out(sender, "/townAdmin deputize");
+            plugin.out(sender, "/townAdmin list");
+            plugin.out(sender, "/townAdmin save");
+            plugin.out(sender, "/townAdmin reload");
+            plugin.out(sender, "/townAdmin checkBal");   
+            plugin.out(sender, "/townAdmin debug (off/on)");   
     }
    
 }

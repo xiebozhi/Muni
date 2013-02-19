@@ -47,7 +47,7 @@ public class TownCommand implements CommandExecutor {
         if (split.length == 0){
             displayHelp(sender);
             return false;
-        } else if (split[0].equalsIgnoreCase("list")) {
+        } else if (split[0].equalsIgnoreCase("list")) { //checked and working 10pm 28 Feb 13, seeking A.1 release
             if (split.length != 1) {
                 plugin.out(sender,"Incorrect number of parameters");
                 return false;
@@ -65,14 +65,14 @@ public class TownCommand implements CommandExecutor {
             }
             return true;
         } else if (split[0].equalsIgnoreCase("info")) {
-            if(split.length!=2){
-                plugin.out(sender,"Not the right number of parameters"); 
+            if(split.length>2){
+                plugin.out(sender,"/town info <town_Name> "+ChatColor.RED+"OR" +ChatColor.WHITE+" /town info (this is for your own town",ChatColor.WHITE); 
                 return false;
+            } else if (split.length==1){
+                plugin.getTown(plugin.getTownName(player.getName() ) ).info(sender);
+            }else { //split.length == 2
+                plugin.getTown( split[1] ).info(sender);
             }
-            plugin.out(sender, "Info on: " + split[1],ChatColor.BLUE );
-            //player.sendMessage( plugin.getTown( split[1] ).info() );
-            plugin.getTown( split[1] ).info(sender);
-                    
             return true;
         } else if (split[0].equalsIgnoreCase("help") ) {
             displayHelp(sender);
@@ -130,7 +130,7 @@ public class TownCommand implements CommandExecutor {
         }else if (split[0].equalsIgnoreCase("vote")) {
             player.sendMessage("Voting not yet added.");
             return true;
-        } else if (split[0].equalsIgnoreCase("checkBank")) {
+        } else if (split[0].equalsIgnoreCase("bank")) {
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal());
             return true;
@@ -145,15 +145,15 @@ public class TownCommand implements CommandExecutor {
     private void displayHelp(CommandSender player){
         plugin.out( player,ChatColor.LIGHT_PURPLE+"Muni Help.  You can do these commands:");
         plugin.out( player, "/town list");
-        plugin.out( player, "/town info");
-        plugin.out( player, "/town apply");
-        plugin.out( player, "/town accept");
+        plugin.out( player, "/town info <optional:townName");
+        plugin.out( player, "/town apply <townName>");
+        plugin.out( player, "/town accept <townName>");
         plugin.out( player, "/town leave");
-        //player.sendMessage("/town sethome");
-        //player.sendMessage("/town signCharter");
-        //player.sendMessage("/town vote");
-        plugin.out( player, "/town payTaxes");
-        plugin.out( player, "/town checkBank");
+        //plugin.out( player,"/town sethome");
+        //plugin.out( player,"/town signCharter");
+        plugin.out( player, "/town payTaxes <optional: amount>");
+        plugin.out( player, "/town bank (check the town bank balance)");
+        plugin.out( player,"Future: /town vote");
     }
    
 }

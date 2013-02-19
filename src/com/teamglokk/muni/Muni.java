@@ -28,6 +28,7 @@ import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.util.HashMap;
 import net.milkbowl.vault.economy.Economy;
 
 import java.util.TreeMap;
@@ -35,9 +36,6 @@ import java.util.TreeMap;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.event.Listener;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.ChatColor;
 
 import org.bukkit.command.CommandSender;
@@ -143,7 +141,7 @@ public class Muni extends JavaPlugin {
             this.getLogger().warning("Dropping database!");
             dbwrapper.createDB(true);
             makeDefaultCitizens();
-            makeDefaultTowns();
+            makeTestTowns();
         }
         // Ensure the database is there but does not drop tables
         dbwrapper.createDB(false);
@@ -193,7 +191,7 @@ public class Muni extends JavaPlugin {
     /**
      * For testing only, will be deleted closer to the beta
      */
-    public void makeDefaultTowns(){
+    public void makeTestTowns(){
         this.getLogger().info ("Making test towns");
         Town maker = new Town(this);
         maker = new Town (this,"TestTown","bobbshields",1,1005.0,100.0);
@@ -273,9 +271,8 @@ public class Muni extends JavaPlugin {
         
         if (towns.containsKey(town_Name) ){
             temp = towns.get(town_Name); 
-            this.getLogger().info("Town search result = "+temp.getName() );
-        }
-        this.getLogger().info("Town search result = not found"  );
+        } else { this.getLogger().info("Town search result: " +town_Name+" not found"  ); }
+        
         return temp;
         
     }
@@ -286,12 +283,9 @@ public class Muni extends JavaPlugin {
      * @return the town name where the player is a citizen
      */
     public String getTownName (String player){
-        
-        this.getLogger().severe("here: "+player);
-        String temp;
-        temp = "";
+        String temp ="";
         if ( allCitizens.containsKey( player ) ){
-        temp = allCitizens.get( player );
+            temp = allCitizens.get( player );
         } else { this.getLogger().info("allCitizen: "+player+" not found"); }
         return temp;
     }
