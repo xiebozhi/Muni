@@ -254,9 +254,8 @@ public class Muni extends JavaPlugin {
      * @param town_Name 
      */
     public void removeTown(String town_Name){
-        Town temp = new Town (this,town_Name);
-        if (towns.containsKey(temp.getName() ) ){
-            towns.remove(temp.getName());
+        if (towns.containsKey( town_Name ) ){
+            towns.remove( town_Name );
         }
         // if in database, remove from database
     }
@@ -292,11 +291,11 @@ public class Muni extends JavaPlugin {
     
     
     public boolean isOnline(String player) {
+        if (player.isEmpty() || player==null) { return false; }
+        
         if (this.getServer().getPlayer(player) != null ){
             return true;
-        } else {
-            return false; 
-        }
+        } else { return false; }
     }
        
     public String [] trimSplit (String [] split ) {

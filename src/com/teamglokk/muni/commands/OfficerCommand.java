@@ -27,6 +27,7 @@ import org.bukkit.entity.Player;
 
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import org.bukkit.ChatColor;
 /**
  * Handler for the /town command.
  * @author BobbShields
@@ -55,18 +56,23 @@ public class OfficerCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("help")  ) { //tested and working - 18 Feb 13
             displayHelp(sender, command.getName() );
             return true;
-        } else if (args[0].equalsIgnoreCase("found") || //not tested - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("found") || //tested and needed fixes - 19 Feb 13
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
             if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
+            }
+            if (plugin.towns.containsKey(args[1] ) ){
+                officer.sendMessage("That town already exists.  Please choose another name");
+                return true;
             }
             if (plugin.econwrapper.pay(officer, plugin.townRanks[1].getMoneyCost(),
                     plugin.townRanks[1].getItemCost(), "Founding a town" ) ){
                 Town t = new Town( plugin, args[1], officer.getName() );
                 plugin.towns.put(t.getName(), t );
                 plugin.allCitizens.put(officer.getName(), t.getName() );
-                
+                t.admin_makeMayor(officer.getName() );
+                t.saveToDB();
                 officer.sendMessage("You have founded "+t.getName());
             } else { officer.sendMessage("Could not found the town" ); }
             return true;
@@ -98,13 +104,12 @@ public class OfficerCommand implements CommandExecutor {
             temp.acceptApplication(args[1], officer);
             return true;
             
-        } else if (args[0].equalsIgnoreCase("delete")  //tested and not working think its now fixed - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("delete")  //tested and not working, think its now fixed - 19 Feb 13
                 || args[0].equalsIgnoreCase("disband")) {
             // this should verify intention before continuing.
-            // This does not but should remove all players from citizens who are members of town
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            temp.removeAllTownCits();
             plugin.removeTown(temp.getName() );
-            temp.removeCitizen(split[1], officer);
             temp.announce("Town removed by the mayor, "+ officer.getName() );
             return true;
         } else if (args[0].equalsIgnoreCase("checkTaxes")) {
@@ -112,18 +117,17 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.setTaxRate(Double.parseDouble(args[1]) );
+            temp.setTaxRate( plugin.parseD( args[1] ) );
             temp.announce(officer.getName()+" has set the tax rate for "+temp.getName()+ " to "+ args[1] );
             return true;
-        } else if (args[0].equalsIgnoreCase("kick")) {  //Assumed working (removed member, needs new output) - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("kick")) {  //Worked on bugs - 19 Feb 13
             if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            officer.sendMessage("The player is a "+temp.getRole( args[1] ) );
             if ( temp.removeCitizen(args[1], officer ) ){
-            } else { officer.sendMessage("Error"); }
+            }
             return true;
             
         } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
@@ -167,16 +171,16 @@ public class OfficerCommand implements CommandExecutor {
                         return false; 
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("deputize")) { // buggy - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("deputize")) { // buggy but working on it - 19 Feb 13
             if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) ); //throwing NPE
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) ); //throwing NPE - 19 Feb 13
             temp.makeDeputy( args[1] ,officer);
             return true;
             
-        } else if (args[0].equalsIgnoreCase("resign")) { //# of params was wrong, needs testing - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("resign")) { //working - 19 Feb 13
             if (args.length != 1) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
@@ -194,7 +198,7 @@ public class OfficerCommand implements CommandExecutor {
             temp.rankup(officer);
             return true;
             
-        } else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb
+        } else if (args[0].equalsIgnoreCase("setTax")) { //throwing error due to online player checking, might be fixed - 19 Feb
             if (args.length != 2) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
@@ -210,7 +214,7 @@ public class OfficerCommand implements CommandExecutor {
     }
     private void displayHelp(CommandSender sender, String subcmd){ // Tested and working - 18 feb
         if (subcmd.equalsIgnoreCase("deputy") ){
-            plugin.out(sender, "Deputy command help.  You can do these commands:");
+            plugin.out(sender, "Muni Deputy Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
             plugin.out(sender, "/deputy invite <playerName>");
             plugin.out(sender, "/deputy accept <playerName");
             plugin.out(sender, "/deputy decline <playerName>");
@@ -223,14 +227,14 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "**/deputy bank deposit");
             plugin.out(sender, "** (with perm) ");
         } else if (subcmd.equalsIgnoreCase("mayor") ){
-            plugin.out(sender, "Mayors may also do all the deputy commands (/deputy help)");
-            //plugin.out(player, "Mayor command help.  You can do all the above commands with /mayor and these:");
+            plugin.out(sender, "Muni Mayor Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
             plugin.out(sender, "/mayor bank");
             plugin.out(sender, "/mayor bank withdraw");
             plugin.out(sender, "/mayor deputize");
             plugin.out(sender, "/mayor resign");
             plugin.out(sender, "/mayor delete");
             plugin.out(sender, "/mayor rankup");
+            plugin.out(sender, "***Mayors may also do all the deputy commands (/deputy help)");
         }
     }
 }

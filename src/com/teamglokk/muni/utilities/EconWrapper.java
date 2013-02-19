@@ -122,12 +122,19 @@ public class EconWrapper extends Muni {
                     // then pay items and return the status
                     boolean rtn = payItem(player,plugin.getRankupItemID(),items);
                     if (rtn) {
+                        player.sendMessage("Took " +money+ " and " +items+" items as payment for " + reason);
                         Transaction t  = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),
                                 player.getName(),reason,money,items,true);
-                        player.sendMessage( "Transaction logged." );
+                    } else {
+                        double slack = items-player.getInventory().getItem(plugin.getRankupItemID()).getAmount();
+                        player.sendMessage("You need "+ slack +" more " + getItemName(plugin.getRankupItemID())+" to complete the transaction");
                     }
                     return rtn;
-                } else {return false;} // not enough money
+                } else {
+                    double slack = money-getBalance(player);
+                    player.sendMessage("You need "+ slack +" more "+getCurrName(slack)+" to complete the transaction");
+                    return false;
+                } 
             } else {return false;}  // didn't have enough items to test for money
         } else {return false;} // not online
     }
@@ -162,7 +169,7 @@ public class EconWrapper extends Muni {
      */
     public boolean payItem( Player player, int ItemID, int amount){ 
         if (player.getInventory().contains(ItemID,amount) ){
-            player.sendMessage("Taking "+amount+" items");
+           // player.sendMessage("Taking "+amount+" items");
             
             player.getInventory().removeItem( new ItemStack[] {
                 new ItemStack( Material.getMaterial(ItemID),amount ) } );

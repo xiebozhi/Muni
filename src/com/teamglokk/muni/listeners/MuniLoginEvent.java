@@ -19,7 +19,7 @@ public class MuniLoginEvent implements Listener{
         plugin = instance; 
     }
     @EventHandler
-    public void playerJoin(PlayerLoginEvent event) {
+    public void playerJoin(PlayerJoinEvent event) {
         event.getPlayer().sendMessage("[Muni] Login Message: "+event.getEventName() );
         // Will get changed to updating last login for citizens
         // if town officer, show applicants

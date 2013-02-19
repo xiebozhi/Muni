@@ -380,9 +380,9 @@ public class Town implements Comparable<Town> {
         if (plugin.isOnline( mayor.getName() ) ){
             online.add(plugin.getServer().getPlayer(mayor.getName() ) ) ;
         } 
-        for (Citizen c : deputies.values() ){
-            if (plugin.isOnline( c.getName() ) ){
-                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+        for (String c : deputies.keySet() ){
+            if (plugin.isOnline( c ) ){
+                online.add(plugin.getServer().getPlayer( c ) ) ;
             } 
         }
         for (Player p : online ){
@@ -393,19 +393,19 @@ public class Town implements Comparable<Town> {
     public void announce(String msg ) {
         messageOfficers(msg);
         ArrayList<Player> online = new ArrayList<Player>();
-        for (Citizen c : citizens.values() ){
-            if (plugin.isOnline( c.getName() ) ){
-                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+        for (String c : citizens.keySet() ){
+            if (plugin.isOnline( c ) ){
+                online.add(plugin.getServer().getPlayer( c ) ) ;
             } 
         }
-        for (Citizen c : invitees.values() ){
-            if (plugin.isOnline( c.getName() ) ){
-                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+        for (String c : invitees.keySet() ){
+            if (plugin.isOnline( c ) ){
+                online.add(plugin.getServer().getPlayer( c ) ) ;
             } 
         } 
-        for (Citizen c : applicants.values() ){
-            if (plugin.isOnline( c.getName() ) ){
-                online.add(plugin.getServer().getPlayer(c.getName() ) ) ;
+        for (String c : applicants.keySet() ){
+            if (plugin.isOnline( c ) ){
+                online.add(plugin.getServer().getPlayer( c ) ) ;
             } 
         }
         for (Player p : online ){
@@ -455,7 +455,7 @@ public class Town implements Comparable<Town> {
             citizensMap.remove(player.getName() );
             citizensMap.put(player.getName(), "citizen") ;
             announce(player.getName()+" has resigned as mayor");
-            saveToDB();
+            plugin.dbwrapper.updateRole(this,player.getName());
             // log a transaction here
             return true;
         } else {
@@ -477,7 +477,7 @@ public class Town implements Comparable<Town> {
             citizensMap.remove(player.getName() );
             citizensMap.put(player.getName(), "citizen") ;
             announce(player.getName()+" has resigned as deputy");
-            saveToDB();
+            plugin.dbwrapper.updateRole(this,player.getName());
             // log a transaction here
             return true;
         } else {
@@ -495,22 +495,21 @@ public class Town implements Comparable<Town> {
         boolean rtn = false;
         if (isCitizen( player ) ){
             citizens.remove( player );
-            saveCitizens();
             // log a transaction here
             rtn = true;
         } else if (isInvited( player ) ){
             invitees.remove( player );
-            saveCitizens();
             // log a transaction here
             rtn = true;
         } else if (isApplicant( player ) ){
             applicants.remove( player );
-            saveCitizens();
             // log a transaction here
             rtn = true;
         } 
-        if (rtn){officer.sendMessage("Player removed");
-            announce(player+" was kicked by "+ officer.getName() );
+        if (rtn){
+            plugin.dbwrapper.deleteCitizen(player);
+            plugin.allCitizens.remove(player);
+            announce(player+" was kicked from "+townName+" by "+ officer.getName() );
             if (plugin.isOnline(player ) ) {
                 Player p = plugin.getServer().getPlayer(player);
                 p.sendMessage("You have been kicked from "+townName+" by "+ officer.getName() );
@@ -534,16 +533,16 @@ public class Town implements Comparable<Town> {
         } else if ( isCitizen(player) ){
             if ( getMaxDeputies() > deputies.size() ){ // might have to adjust array...
                 //if ( plugin.econwrapper.hasPerm(player, "muni.deputy") || plugin.econwrapper.hasPerm(player, "muni.deputy") ){
-                    Citizen c = new Citizen (plugin, townName, player,"deputy",null );
+                    Citizen c = new Citizen (plugin, townName, player,"deputy", null );
                     c.saveToDB();
                     citizensMap.put(c.getName(), "deputy");
-                    citizens.remove(c);
+                    citizens.remove(player);
                     deputies.put(player,c );
                     announce(player+" has become a deputy!");
-                    saveToDB();
+                    plugin.dbwrapper.updateRole(this,player);
                     return true;
-                //} else { officer.sendMessage("You do not have permission to become a deputy."); }
-            } else { officer.sendMessage("Too many deputies, rank up or fire someone"); }
+                //} else { officer.sendMessage(player+" do not have permission to become a deputy."); }
+            } else { officer.sendMessage("Too many deputies, you can only have "+getMaxDeputies()+" deputies."); }
         } else { officer.sendMessage("You are not a member of "+ townName); }
         return false;
     }
@@ -577,7 +576,7 @@ public class Town implements Comparable<Town> {
             citizens.put( player.getName(), new Citizen(plugin,townName,player.getName() ) );
             invitees.remove(new Citizen(plugin,townName,player.getName() ) );
             announce(player+" has become a town member by invitation");
-            plugin.dbwrapper.updateRole(this, "citizen");
+            plugin.dbwrapper.updateRole(this, player.getName() );
             return true;
         } else {player.sendMessage("You have not been invited to " + townName); }
         return false; 
@@ -614,7 +613,7 @@ public class Town implements Comparable<Town> {
                 citizens.put(player, new Citizen(plugin,townName,player,"citizen", null ) );
                 applicants.remove( player );
                 announce(player+" has become a town member by application");
-                plugin.dbwrapper.updateRole(this, "citizen");
+                plugin.dbwrapper.updateRole(this, player );
                 return true;
             } else { officer.sendMessage( "The player is not an applicant" ); }
         } else { officer.sendMessage( "The player is already involved with " + plugin.allCitizens.get( player ) ); }
@@ -692,14 +691,10 @@ public class Town implements Comparable<Town> {
     public boolean admin_makeMayor(String player){
         if ( isMayor(player) ){
             return false;
-        }  else if ( isCitizen(player) ){
-            if ( getMaxDeputies() > deputies.size() ){ 
-                    mayor = new Citizen (plugin, townName, player );
-                    saveToDB();
-                    return true;
-            } 
-        } 
-        return false;
+        }  
+        mayor = new Citizen (plugin, townName, player,"mayor",null );
+        mayor.saveToDB();
+        return true;
     }
      /**
      * Turns the regular citizen into a deputy, if checks are passed
@@ -734,7 +729,7 @@ public class Town implements Comparable<Town> {
         } else if ( getMaxCitizens() > deputies.size() + citizens.size() ){ 
             Citizen c = new Citizen (plugin, townName, player, "citizen",null );
             citizens.put( player, c );
-            c.saveToDB();
+            plugin.dbwrapper.updateRole(this,player);
             return true;
         } else { sender.sendMessage( townName+" has too many citizens.  Wait for a vacancy"); }
         return false;
@@ -876,9 +871,24 @@ public class Town implements Comparable<Town> {
         }
     } */
     
-    public void removeThisTown(Player mayor) {
-        if (this.mayor.getName().equalsIgnoreCase(mayor.getName() ) ) {
-            plugin.towns.remove(this);
+    public void removeAllTownCits() {
+        ArrayList<String> cits = new ArrayList<String>();
+        cits.add(mayor.getName() );
+        for (String c : deputies.keySet() ){
+            cits.add(c);
+        }
+        for (String c : citizens.keySet() ){
+            cits.add(c);
+        }
+        for (String c : invitees.keySet() ){
+            cits.add(c);
+        }
+        for (String c : applicants.keySet() ){
+            cits.add(c);
+        }
+        for (String c : cits){
+            plugin.allCitizens.remove(c);
+            plugin.dbwrapper.deleteCitizen(c);
         }
     }
     

@@ -47,7 +47,7 @@ public class TownCommand implements CommandExecutor {
         
         if (args.length == 0){
             displayHelp(sender);
-            return false;
+            return true;
         } else if (args[0].equalsIgnoreCase("list")) { //tested and working - 18 Feb 13
             if (args.length != 1) {
                 plugin.out(sender,"/town list (no parameters allowed)");
@@ -65,10 +65,10 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(sender,current.getName() ) ;
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("info")) { //tested and mostly working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("info")) { //tested and working - 19 Feb 13
             if(args.length>2){
                 plugin.out(sender,"/town info <town_Name> "+ChatColor.RED+"OR" +ChatColor.WHITE+" /town info (this is for your own town",ChatColor.WHITE); 
-                return false;
+                return true;
             } else if (args.length==1){
                 if (sender instanceof Player && plugin.isCitizen(sender.getName() ) ) {
                     plugin.getTown(plugin.getTownName( sender.getName() ) ).info(sender);
@@ -99,7 +99,7 @@ public class TownCommand implements CommandExecutor {
                 rtn = temp.payTaxes(player);
             } 
             return rtn;
-        } else if (args[0].equalsIgnoreCase("apply")) { //denies existing citizens, more testing needed - 28 Feb 13
+        } else if (args[0].equalsIgnoreCase("apply")) { //tested and working well - 28 Feb 13
             if (args.length != 2) {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
@@ -115,7 +115,7 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("To clear your status, do /town leave");
                 return true;
             }
-        } else if (args[0].equalsIgnoreCase("accept")) { //untested - 18 Feb
+        } else if (args[0].equalsIgnoreCase("accept")) { //working - 19 Feb
             if (args.length != 1) {
                 player.sendMessage("/town accept (no parameters, do /town viewInvite)");
                 return false;
@@ -124,7 +124,7 @@ public class TownCommand implements CommandExecutor {
             temp.acceptInvite(player);
             
             return true;
-        } else if (args[0].equalsIgnoreCase("viewInvite")) { //untested - 18 Feb
+        } else if (args[0].equalsIgnoreCase("viewInvite")) { //seems to be working - 19 Feb
             if (args.length != 1) {
                 player.sendMessage("/town viewInvite (no parameters)");
                 return false;
@@ -140,7 +140,7 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(player,"You are not an invitee of " + temp.getName() );
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("leave")) { //infinite loop! - 18 Feb 
+        } else if (args[0].equalsIgnoreCase("leave")) { //working - 19 Feb
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.leave(player);
             temp.messageOfficers(player.getName() + " has left your town");
@@ -151,7 +151,7 @@ public class TownCommand implements CommandExecutor {
         }else if (args[0].equalsIgnoreCase("vote")) {
             player.sendMessage("Voting not yet added.");
             return true;
-        } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 28 Feb 13
+        } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal());
             return true;
@@ -164,9 +164,9 @@ public class TownCommand implements CommandExecutor {
         }
     }
     private void displayHelp(CommandSender player){
-        plugin.out( player,ChatColor.LIGHT_PURPLE+"Muni Help.  You can do these commands:");
+        plugin.out( player,"Muni Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
         plugin.out( player, "/town list");
-        plugin.out( player, "/town info <optional:townName");
+        plugin.out( player, "/town info <optional:townName>");
         plugin.out( player, "/town apply <townName>");
         plugin.out( player, "/town viewInvite");
         plugin.out( player, "/town accept");

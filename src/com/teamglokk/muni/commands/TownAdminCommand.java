@@ -28,6 +28,7 @@ import org.bukkit.entity.Player;
 
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import org.bukkit.ChatColor;
 /**
  * Handler for the /town command.
  * @author BobbShields
@@ -125,6 +126,8 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
+            Town temp = plugin.getTown(args[1] ) ;
+            temp.removeAllTownCits();
             plugin.removeTown( args[1] );
             plugin.out(sender, "Removed town: "+ args[1] );
             return true;
@@ -183,7 +186,7 @@ public class TownAdminCommand implements CommandExecutor {
         }
     }
     private void displayHelp(CommandSender sender){
-            plugin.out(sender, "TownAdmin Help.  You can do these commands:");
+            plugin.out(sender, "Muni TownAdmin Help.  You can do these commands:", ChatColor.LIGHT_PURPLE );
             plugin.out(sender, "/townAdmin addTown <townName> <mayorName>");
             plugin.out(sender, "/townAdmin removeTown <townName>");
             plugin.out(sender, "/townAdmin setTax <townName> <taxRate>");
