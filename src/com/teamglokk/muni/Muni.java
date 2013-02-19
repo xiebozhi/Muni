@@ -256,7 +256,7 @@ public class Muni extends JavaPlugin {
     public void removeTown(String town_Name){
         Town temp = new Town (this,town_Name);
         if (towns.containsKey(temp.getName() ) ){
-            towns.remove(temp);
+            towns.remove(temp.getName());
         }
         // if in database, remove from database
     }
@@ -426,6 +426,20 @@ public class Muni extends JavaPlugin {
     */
    public void setDebug(boolean value){ 
        DEBUG = value; 
+       this.getLogger().info("Debug changed to: " + String.valueOf(value) );
+   }
+   
+    /**
+     * Whether the plugin should output verbose debugging info to the log
+     * @return 
+     */
+   public boolean isSQLDebug() { return SQL_DEBUG; }
+   /**
+    * Set the debug value about whether to output verbose to the log
+    * @param value 
+    */
+   public void setSQLDebug(boolean value){ 
+       SQL_DEBUG = value; 
        this.getLogger().info("Debug changed to: " + String.valueOf(value) );
    }
     

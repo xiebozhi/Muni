@@ -48,57 +48,77 @@ public class TownAdminCommand implements CommandExecutor {
 
         if (split.length == 0){
             displayHelp(sender);
-            return false;
-        } else if (split[0].equalsIgnoreCase("help")  ) {
+            return true;
+        } else if (split[0].equalsIgnoreCase("help")  ) { // working - 18 Feb
             displayHelp(sender);
             return true;
-        } else if (split[0].equalsIgnoreCase("makeTest")  ) {
+        } else if (split[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
             plugin.out(sender,"Dropping the database!  Then re-creating");
             plugin.dbwrapper.createDB(true);
             plugin.makeDefaultCitizens();
             plugin.makeTestTowns();
             return true;
-        } else if (split[0].equalsIgnoreCase("reload") ) {
-            plugin.out(sender, "Reloading config");
+        } else if (split[0].equalsIgnoreCase("reload") ) { // Config reload tested good, towns reload added - 18 Feb
+            plugin.out(sender, "Reloading config & towns");
+            plugin.getLogger().info(sender.getName()+" issued the reload command");
             plugin.reloadConfig();
             plugin.getLogger().info("Config reloaded");
+            plugin.towns.clear();
+            plugin.getLogger().info("Towns cleared");
+            plugin.loadTowns();
+            plugin.getLogger().info("Towns reloaded");
+            plugin.out(sender, "Finished");
             return true;
-        } else if (split[0].equalsIgnoreCase("save")) {
+        } else if (split[0].equalsIgnoreCase("save")) { //tested and working - 18 Feb
             plugin.out(sender, "Saving Towns and Citizens to the database!");
             plugin.saveTowns();
             return true;
         } else if (split[0].equalsIgnoreCase("debug")) {
             if (split.length != 2) {
-                plugin.out(sender, "Incorrect number of parameters;");
-                return false;
+                plugin.out(sender, "/townadmin debug on|off");
             }
             if (split[1].equalsIgnoreCase("on") ){
                 plugin.setDebug(true);
             } else if (split[1].equalsIgnoreCase("off") ){
                 plugin.setDebug(false);
+            } else {
+                plugin.out(sender, "/townadmin debug on|off");
             }
             plugin.out(sender, "Debug changed to "+split[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("addTown")) {
+        } else if (split[0].equalsIgnoreCase("SQLdebug")) { //added but not tested - 18 Feb
+            if (split.length != 2) {
+                plugin.out(sender, "/townadmin SQLdebug on|off");
+            }
+            if (split[1].equalsIgnoreCase("on") ){
+                plugin.setSQLDebug(true);
+            } else if (split[1].equalsIgnoreCase("off") ){
+                plugin.setSQLDebug(false);
+            } else {
+                plugin.out(sender, "/townadmin SQLdebug on|off");
+            }
+            plugin.out(sender, "SQL_Debug changed to "+split[1] );
+            return true;
+        } else if (split[0].equalsIgnoreCase("addTown")) { //working but changed to save to db, not fully tested - 18 Feb
             if (split.length != 3) {
                 plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
                 return false;
             }
-                Town t = new Town (plugin,split[1],split[2] );
+                Town t = new Town (plugin,split[1],split[2], true );
                 plugin.towns.put( t.getName(), t ) ;
                 plugin.out(sender, "Added the town: "+split[1] );
                 return true; 
                 
-        } else if (split[0].equalsIgnoreCase("addCitizen")) {
+        } else if (split[0].equalsIgnoreCase("addCitizen")) { // not working at all, no error - 18 Feb
             if (split.length != 3) {
-                plugin.out(sender, "Incorrect number of parameters: /townadmin addcitizen townName playerName");
+                plugin.out(sender, "/townAdmin addCitizen <townName> <playerName>");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             temp.admin_makeCitizen(player, split[1] ) ;
             return true;
             
-        }  else if (split[0].equalsIgnoreCase("removeTown")) {
+        }  else if (split[0].equalsIgnoreCase("removeTown")) { // Throws a NPE error - 18 Feb
             if (split.length != 2) {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
@@ -106,75 +126,20 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.removeTown( split[1] );
             plugin.out(sender, "Removed town: "+ split[1] );
             return true;
-        } else if (split[0].equalsIgnoreCase("removeCitizen")) {
+        } else if (split[0].equalsIgnoreCase("removeCitizen")) { // changed, not tested - 18 Feb
             if (split.length != 2) {
-                plugin.out(sender, "Incorrect number of parameters;");
-                return false;
+                plugin.out(sender, "/townAdmin removeCitizens <townName> <playerName>");
+                return true;
             }
-            Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            temp.admin_removeCitizen( player, split[1] );
+            Town temp = plugin.getTown( plugin.getTownName( split[1] ) );
+            temp.admin_removeCitizen( player, split[2] );
             return true;
-        } else if (split[0].equalsIgnoreCase("checkBal")) {
-            if (split.length != 2) {
-                plugin.out(sender, "Incorrect number of parameters;");
-                return false;
-            }
-            // Check to see of the player is real and connected
-            Player temp = null;
-            temp = plugin.getServer().getPlayer(split[1]);            
-            if (temp != null){
-                if (split[1].equalsIgnoreCase(player.getName() ) ) {
-                    player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance(player));
-                } else {
-                    plugin.out(sender, "Your balance is "+ plugin.econwrapper.getBalance( temp ));
-                }
-            } else {
-                player.sendMessage("Could not check the offline player's balance");
-            }
-            player.sendMessage("Your balance is "+ plugin.econwrapper.getBalance(player));
-            
-            return true;
-        } else if (split[0].equalsIgnoreCase("pay")) {
-            double amount = Double.parseDouble(split[1]) ;
-            if (plugin.econwrapper.payMoneyR( player, amount,"Test" ) ){
-                return true;
-            } else {return false;}
-            
-        } else if (split[0].equalsIgnoreCase("payTest")) {
-            if (plugin.econwrapper.pay( player, 10.0, 16,"Test" ) ){
-                return true;
-            } else {return false;}
-            
-        } else if (split[0].equalsIgnoreCase("payItem")) {
-            int amount = Integer.parseInt( split[1] ) ;
-            if (plugin.econwrapper.payItemR( player, plugin.getRankupItemID(), amount,"Test" ) ){
-                return true;
-            } else {return false;}
-            
-        } else if (split[0].equalsIgnoreCase("check")) {
+        } else if (split[0].equalsIgnoreCase("check")) { // been working since early on - 18 Feb
             player.sendMessage("Checking build perms.");
             if (plugin.wgwrapper.checkBuildPerms(player) ){
                player.sendMessage("You may build here");
             } else{
                 player.sendMessage("You may not build here.");
-            }
-            return true;
-        } else if (split[0].equalsIgnoreCase("testperms")) {
-            if (split.length != 2) {
-                player.sendMessage("Incorrect number of parameters;");
-                return false;
-            }
-            if (player.hasPermission(split[1]) ){
-                player.sendMessage(player.getDisplayName()+" has permission: "+ split[1] );
-            }else {
-                player.sendMessage(player.getDisplayName()+" does not have permission: "+ split[1] );
-            }
-            return true;
-        }else if (split[0].equalsIgnoreCase("testop")) {
-            if (player.isOp() ){
-                plugin.out(player, player.getDisplayName()+" is Op" );
-            }else {
-                plugin.out(player, player.getDisplayName()+" is not Op" );
             }
             return true;
         } else if (split[0].equalsIgnoreCase("tp")) { //Transform to ticketing system in time
@@ -200,15 +165,15 @@ public class TownAdminCommand implements CommandExecutor {
                 t.listAllCitizens(player);
             }
             return true;
-        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            
-            player.sendMessage("Here!");
-            player.sendMessage(plugin.getTownName("bobbshields") );
-            return true;
         } else if (split[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
             for (String c : plugin.allCitizens.keySet() ){
                 plugin.out(sender,  c+" "+plugin.allCitizens.get(c) );
             }
+            return true;
+        } else if (split[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
+            
+            player.sendMessage("Here!");
+            player.sendMessage(plugin.getTownName("bobbshields") );
             return true;
         } else {
             displayHelp(sender);
@@ -217,17 +182,16 @@ public class TownAdminCommand implements CommandExecutor {
     }
     private void displayHelp(CommandSender sender){
             plugin.out(sender, "TownAdmin Help.  You can do these commands:");
-            plugin.out(sender, "/townAdmin addTown");
-            plugin.out(sender, "/townAdmin removeTown");
-            plugin.out(sender, "/townAdmin setTax");
-            plugin.out(sender, "/townAdmin addCitizen");
-            plugin.out(sender, "/townAdmin removeCitizen");
-            plugin.out(sender, "/townAdmin deputize");
-            plugin.out(sender, "/townAdmin list");
+            plugin.out(sender, "/townAdmin addTown <townName> <mayorName>");
+            plugin.out(sender, "/townAdmin removeTown <townName>");
+            plugin.out(sender, "/townAdmin setTax <townName> <taxRate>");
+            plugin.out(sender, "/townAdmin addCitizen <townName> <playerName>");
+            plugin.out(sender, "/townAdmin removeCitizen <townName> <playerName>");
+            plugin.out(sender, "/townAdmin deputize <playerName> ");
             plugin.out(sender, "/townAdmin save");
-            plugin.out(sender, "/townAdmin reload");
-            plugin.out(sender, "/townAdmin checkBal");   
-            plugin.out(sender, "/townAdmin debug (off/on)");   
+            plugin.out(sender, "/townAdmin reload");  
+            plugin.out(sender, "/townAdmin debug <off/on>");   
+            plugin.out(sender, "/townAdmin SQLdebug <off/on>");   
     }
    
 }

@@ -100,6 +100,27 @@ public class Town implements Comparable<Town> {
         taxRate = 10;
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
+    }/**
+     * Constructor for starting a new town with specified player as the mayor
+     * @param instance
+     * @param town_Name
+     * @param player 
+     */
+    
+    public Town (Muni instance, String town_Name, String player, boolean autosave ){
+        
+        plugin = instance;
+        if (plugin.isDebug() ) plugin.getLogger().info("Town with mayor: "+town_Name+", "+player);
+        townName = town_Name;
+        townMayor = player; 
+        townRank = 1;
+        townBankBal = 5;
+        taxRate = 10;
+        if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
+        
+        if (autosave){
+            this.saveToDB();
+        }
     }
     
     /**
@@ -462,7 +483,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean makeDeputy(String player, Player officer){
-        if ( !plugin.getServer().getPlayer( player ).isOnline() ){
+        if ( !plugin.getServer().getPlayer( player ).isOnline() ){ //throwing NPE
             plugin.getLogger().warning("Player "+player+" is not online to make a deputy of " +townName );
             return false;
         }
@@ -576,7 +597,7 @@ public class Town implements Comparable<Town> {
     
     public boolean leave(Player player){
         if ( plugin.allCitizens.get(player.getName () ).equalsIgnoreCase(townName ) ){
-            if (isCitizen(player) ){
+            if ( isCitizen(player) ){
                 plugin.allCitizens.remove(player.getName() );
                 citizensMap.remove(player.getName() ); 
                 citizens.remove( player.getName() );
@@ -851,7 +872,7 @@ public class Town implements Comparable<Town> {
      * @param player
      * @return 
      */
-    public boolean rankup(Player mayor){
+    public boolean rankup(Player mayor){ //need to fix (-amount when over money) and mention sponges - 18 Feb 13
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
@@ -898,7 +919,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean tb_deposit(Player player, double amount){
-        if ( plugin.econwrapper.payMoney(player,amount) ){
+        if ( plugin.econwrapper.pay(player,amount,0,"TB Deposit") ){
             townBankBal = townBankBal + amount;
             return true;
         } else {return false; }
@@ -910,15 +931,20 @@ public class Town implements Comparable<Town> {
      * @param amount
      * @return 
      */
-    public boolean tb_withdrawl(Player officer, double amount){
+    public boolean tb_withdraw(Player officer, double amount){
         if ( townBankBal >= amount ){
-            if (plugin.econwrapper.giveMoney(officer,amount) ) {
+            if (plugin.econwrapper.giveMoney(officer,amount, "TB Withdraw") ) {
                 townBankBal = townBankBal - amount;
                 return true;
-            } else { return false; }
-        } else { return false; }
+            } 
+        } 
+        return false; 
     }
     
+    public void checkTownBank(CommandSender sender) {
+            sender.sendMessage(townName+"'s town bank has a balance of "+ getBankBal()+" "+
+                    plugin.econwrapper.getCurrName( getBankBal()) );
+    }
     /**
      * Player pays the set amount of taxes
      * @param player

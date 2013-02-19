@@ -96,7 +96,6 @@ public class EconWrapper extends Muni {
         if ( payMoney(player,amount) ){
             player.sendMessage("You paid "+amount+" "+econ.currencyNamePlural()+
                     " for "+reason);
-            // make a new transaction here
             Transaction t = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),player.getName(),reason,amount,0,true);
             return true;
         } else { 
@@ -125,7 +124,7 @@ public class EconWrapper extends Muni {
                     if (rtn) {
                         Transaction t  = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),
                                 player.getName(),reason,money,items,true);
-                        player.sendMessage( t.toString() );
+                        player.sendMessage( "Transaction logged." );
                     }
                     return rtn;
                 } else {return false;} // not enough money
@@ -193,6 +192,22 @@ public class EconWrapper extends Muni {
     public boolean giveMoney( Player player, double amount){ 
         er = econ.depositPlayer(player.getName(), amount );
             if(er.transactionSuccess()) {
+                return true;
+            } else {
+                return false;
+            } 
+    }             
+    /**
+     * Gives the player money
+     * @param player
+     * @param amount
+     * @return 
+     */
+    public boolean giveMoney( Player player, double amount,String reason){ 
+        er = econ.depositPlayer(player.getName(), amount );
+            if(er.transactionSuccess()) {
+                Transaction t = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),player.getName(),reason,-amount,0,true);
+                player.sendMessage( "Transaction logged." );
                 return true;
             } else {
                 return false;
