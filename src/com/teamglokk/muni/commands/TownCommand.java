@@ -74,8 +74,9 @@ public class TownCommand implements CommandExecutor {
                     plugin.getTown(plugin.getTownName( sender.getName() ) ).info(sender);
                 } else { plugin.out(sender, "You must specify a town"); }
             }else if (args.length == 2) { 
-                // if ( plugin.isTown() ) // error occurs when invalid town name is entered
-                plugin.getTown( args[1] ).info(sender);
+                if ( plugin.towns.containsKey(args[1]) ) {
+                    plugin.getTown( args[1] ).info(sender);
+                } else { player.sendMessage(args[1]+" is not a valid town.  (/town list)"); }
             }
             return true;
         } else if (args[0].equalsIgnoreCase("help") ) { //tested and working - 18 Feb 13
@@ -104,9 +105,10 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
+            // need to make sure the application is to a valid town, throws NPE currently
             if (!plugin.isCitizen(player.getName()) ){
                 Town temp = plugin.getTown( args[1] );
-                temp.apply ( player );
+                temp.apply ( player ); //NPE
                 player.sendMessage("Application to "+temp.getName()+" was sent.");
                 temp.messageOfficers(player.getName() + " has applied to your town");
                 return true;
@@ -142,8 +144,9 @@ public class TownCommand implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("leave")) { //working - 19 Feb
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            temp.leave(player);
-            temp.messageOfficers(player.getName() + " has left your town");
+            if ( temp.leave(player) ){
+                temp.messageOfficers(player.getName() + " has left your town");
+            }
             return true;
         }else if (args[0].equalsIgnoreCase("sethome")) {
             player.sendMessage("Sethome not yet added.");
@@ -152,8 +155,12 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Voting not yet added.");
             return true;
         } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
+            if (!plugin.isCitizen(player) ){ 
+                player.sendMessage("You are not a member of a town" ); 
+                return true;
+            }
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
-            player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal());
+            player.sendMessage(temp.getName()+" has bank balance of "+temp.getBankBal()); //NPE if player doesn't have town
             return true;
         }  else if (args[0].equalsIgnoreCase("signCharter")) {
             player.sendMessage("Charters not yet enabled ");

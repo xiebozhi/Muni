@@ -349,7 +349,7 @@ public class Town implements Comparable<Town> {
             list = list + c+", ";
         }
         if (list.length() == 0){
-            plugin.out( player, "There are no members");
+            plugin.out( player, "There are no citizens");
         } else {
             plugin.out( player, "Citizens: "+list.substring(0, list.length()-2));
         }
@@ -412,7 +412,7 @@ public class Town implements Comparable<Town> {
             p.sendMessage(msg);
         }
         
-    }
+    } 
     /**
      * Makes the player into the town mayor, if checks are passed
      * @param player
@@ -493,6 +493,15 @@ public class Town implements Comparable<Town> {
      */
     public boolean removeCitizen ( String player, Player officer ){
         boolean rtn = false;
+        if (!plugin.getTownName(player).equalsIgnoreCase(townName) ){
+            officer.sendMessage(player+" is not a member of your town");
+            return true;
+        }
+        if (isDeputy( player) && isMayor( officer.getName() ) ){
+            deputies.remove(player);
+            // log a transaction here
+            rtn = true;
+        }
         if (isCitizen( player ) ){
             citizens.remove( player );
             // log a transaction here
@@ -510,7 +519,7 @@ public class Town implements Comparable<Town> {
             plugin.dbwrapper.deleteCitizen(player);
             plugin.allCitizens.remove(player);
             announce(player+" was kicked from "+townName+" by "+ officer.getName() );
-            if (plugin.isOnline(player ) ) {
+            if ( plugin.isOnline( player ) ) {
                 Player p = plugin.getServer().getPlayer(player);
                 p.sendMessage("You have been kicked from "+townName+" by "+ officer.getName() );
             }
@@ -543,7 +552,7 @@ public class Town implements Comparable<Town> {
                     return true;
                 //} else { officer.sendMessage(player+" do not have permission to become a deputy."); }
             } else { officer.sendMessage("Too many deputies, you can only have "+getMaxDeputies()+" deputies."); }
-        } else { officer.sendMessage("You are not a member of "+ townName); }
+        } else { officer.sendMessage(player+" is not a regular citizen of "+ townName); }
         return false;
     }
     
@@ -649,11 +658,11 @@ public class Town implements Comparable<Town> {
                 citizensMap.remove(player.getName() ); 
                 citizens.remove( player.getName() );
                 announce(player+" has left the town");
-                player.sendMessage("You have given up any type of membership in " +townName);
+                player.sendMessage("You have given up your citizenship to " +townName);
                 plugin.dbwrapper.deleteCitizen(player.getName() );
                 return true;
-            } else {player.sendMessage("You are not a citizen of the town " ); }
-        } else {player.sendMessage("You are not a member of this town"); }
+            } else {player.sendMessage("You are not a regular citizen of the town.  Officers need to resign first." ); }
+        } else {player.sendMessage("You are not in this town"); }
         
         //If we make it to here, see if the player has something pending and clear it
         return clearPending(player);
@@ -664,21 +673,21 @@ public class Town implements Comparable<Town> {
      * @param player
      * @return 
      */
-    public boolean clearPending (Player player) {
+    public boolean clearPending (Player player) {  
         boolean rtn = false; 
         if ( isInvited(player) ){
-            applicants.remove(new Citizen (plugin,townName,player.getName() ));
+            applicants.remove( player.getName() );
             plugin.allCitizens.remove( player.getName() );
             rtn = true;
         }
         if ( isApplicant(player) ){
-            invitees.remove(new Citizen (plugin,townName,player.getName() ));
+            invitees.remove( player.getName() );
             plugin.allCitizens.remove( player.getName() );
             rtn = true;
         }
         if (rtn){
-            plugin.dbwrapper.deleteCitizen(player.getName() );
-            player.sendMessage("You have cleared your application or invitation to "+townName);
+            plugin.dbwrapper.deleteCitizen( player.getName() );
+            player.sendMessage("Your application or invitation to "+townName+" was cleared");
         }
         return rtn;
     }
@@ -690,8 +699,13 @@ public class Town implements Comparable<Town> {
      */
     public boolean admin_makeMayor(String player){
         if ( isMayor(player) ){
-            return false;
+            return true;
         }  
+        if (mayor!=null && !mayor.getName().equalsIgnoreCase("empty") ){
+            citizens.put(mayor.getName(),mayor);
+            plugin.dbwrapper.updateRole(this, mayor.getName() );
+        }
+        plugin.dbwrapper.deleteCitizen(player);
         mayor = new Citizen (plugin, townName, player,"mayor",null );
         mayor.saveToDB();
         return true;
@@ -703,15 +717,12 @@ public class Town implements Comparable<Town> {
      */
     public boolean admin_makeDeputy(String player){
         if ( isMayor(player) || isDeputy (player) ){
-            return false;
-        } else if ( isCitizen(player) ){
-            if ( getMaxDeputies() > deputies.size() ){ // might have to adjust array...
-                deputies.put(player,new Citizen (plugin, townName, player ) );
-                plugin.dbwrapper.updateRole(this, player);
-                return true; 
-            } 
+            return true;
         } 
-        return false;
+        Citizen cit = new Citizen (plugin, townName, player, "deputy", null);
+        cit.saveToDB();
+        deputies.put(player, cit );
+        return true; 
     }
     
     /**
@@ -722,21 +733,20 @@ public class Town implements Comparable<Town> {
      */
     public boolean admin_makeCitizen(CommandSender sender, String player){
         if ( isMayor(player) ||  isDeputy(player ) || isCitizen(player) ) {
-            return false;
-        } else if ( plugin.allCitizens.containsValue( player ) ) {
-            sender.sendMessage( player+ " is already a member of a town.");
-            return false;
-        } else if ( getMaxCitizens() > deputies.size() + citizens.size() ){ 
-            Citizen c = new Citizen (plugin, townName, player, "citizen",null );
-            citizens.put( player, c );
-            plugin.dbwrapper.updateRole(this,player);
             return true;
-        } else { sender.sendMessage( townName+" has too many citizens.  Wait for a vacancy"); }
-        return false;
+        } else if ( plugin.allCitizens.containsValue( player ) ) {
+            sender.sendMessage( player+ " is a member of a town, deleting membership first!.");
+            plugin.allCitizens.remove(player);
+            plugin.dbwrapper.deleteCitizen(player);
+        } 
+        Citizen c = new Citizen (plugin, townName, player, "citizen",null );
+        c.saveToDB();
+        citizens.put( player, c );
+        return true;
     }
-    public boolean admin_removeCitizen(CommandSender sender, String player){
+    public boolean admin_removeCitizenship(CommandSender sender, String player){
         boolean rtn = false; 
-        if (plugin.allCitizens.get(player).equalsIgnoreCase(townName) ){
+        if (plugin.isCitizen(townName, player) ){
             if (isMayor(player) ) {
                 mayor = new Citizen (plugin, townName, "empty") ;
             }
@@ -948,7 +958,7 @@ public class Town implements Comparable<Town> {
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
-        if ( rankCost <= townBankBal ){
+        if ( rankCost <= townBankBal && townRank <= plugin.getTotalTownRanks () ){
             if (plugin.econwrapper.payItemR( mayor, plugin.rankupItemID, rankCostItem,"Rankup" ) ) {
                 mayor.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
                 return payFromTB(rankCost); //Payment of money taken after sponges are confirmed
@@ -982,6 +992,13 @@ public class Town implements Comparable<Town> {
      */
     public int getRank(){
         return townRank;
+    }
+    /**
+     * Gets the town rank
+     * @return 
+     */
+    public String getTitle(){
+        return plugin.townRanks[townRank].getName();
     }
     
     /**
@@ -1038,7 +1055,7 @@ public class Town implements Comparable<Town> {
         if ( plugin.econwrapper.pay(player, amount, 0, "Taxes for "+townName ) ){
             townBankBal = townBankBal + amount;
             player.sendMessage("You have paid your taxes to "+townName+" of amount "+ amount+" "+plugin.econwrapper.getCurrName(amount) );
-            messageOfficers(player.getName() +"has pad " +amount+ " in taxes");
+            messageOfficers(player.getName() +"has paid " +amount+ " in taxes");
             return true;
         } else { return false; }
     }
@@ -1140,62 +1157,3 @@ public class Town implements Comparable<Town> {
 }
 
 
-
-    /**
-     * Adds the town to the database
-     * @param mayor
-     * @param town_Name
-     * @return 
-     */ /*
-    public boolean db_addTown(Player mayor, String town_Name){
-        if ( !plugin.econwrapper.payMoney(mayor,1000) ){
-            mayor.sendMessage("Not enough money to found the town");
-            return false;
-        }
-        townName = town_Name;
-        townMayor = mayor.getName(); 
-        townBankBal = 0;
-        taxRate = 10;
-        
-        if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-            plugin.dbwrapper.insert("towns",toDB_Cols(),toDB_Vals() );
-            return true;
-        } else {
-            return false;
-        }
-    }*/
-
-
-    
-    /**
-     * Turns the player into a regular citizen, if not citizen elsewhere
-     * @param player
-     * @param officer
-     * @return 
-     */ /*
-    public boolean makeCitizen(Player player){
-        if ( !plugin.getServer().getPlayer(player.getName() ).isOnline() ){
-            plugin.getLogger().warning("Player "+player.getName()+" is not online to make a citizen of " +townName );
-            return false;
-        }
-        if ( isMayor(player) ){
-            player.sendMessage("You are already the mayor of "+townName);
-            return false;
-        } else if ( isDeputy(player ) ){
-            player.sendMessage("You are already a deputy of "+townName);
-            return false;
-        } else if ( plugin.allCitizens.containsValue( player.getName() ) ) {
-            player.sendMessage("You are already a member of a town.");
-            return false;
-        } else if ( getMaxCitizens() > deputies.size() + citizens.size() ){ // might have to adjust array...
-                if ( plugin.econwrapper.hasPerm(player, "muni.citizen") ){
-                    Citizen c = new Citizen (plugin, townName, player.getName(),"citizen", null ) ;
-                    c.saveToDB();
-                    citizensMap.put(c.getName(), "citizen");
-                    citizens.put(c.getName(), c);
-                    return true;
-                } else { player.sendMessage("You do not have permission to become a citizen."); }
-        } else { player.sendMessage(townName+" has too many citizens.  Wait for a vacancy"); }
-        return false;
-    } */
-    

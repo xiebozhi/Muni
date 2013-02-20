@@ -41,7 +41,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 /**
- * Muni.java: Startup and shutdown for the Muni plugin
+ * The Muni plugin
+ * Ties in with bukkit server to provide town functionality
+ * Some helper functions 
  * 
  * @author bobbshields
  */
@@ -353,6 +355,24 @@ public class Muni extends JavaPlugin {
      */
     public boolean isCitizen ( String player ){
         return allCitizens.containsKey(player);
+    }
+    
+    /**
+     * Returns whether the player is a citizen of given town
+     * @param player
+     * @return 
+     */
+    public boolean isCitizen ( String town, String player ){
+        return allCitizens.get(player).equalsIgnoreCase(town);
+    }
+    
+    /**
+     * Returns whether the player is a citizen of any town
+     * @param player
+     * @return 
+     */
+    public Town getTownFromCitizen ( String player ){
+        return towns.get( allCitizens.get(player) );
     }
     
     /**

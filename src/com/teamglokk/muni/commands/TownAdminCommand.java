@@ -66,6 +66,8 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.getLogger().info("Config reloaded");
             plugin.towns.clear();
             plugin.getLogger().info("Towns cleared");
+            plugin.towns.clear();
+            plugin.allCitizens.clear();
             plugin.loadTowns();
             plugin.getLogger().info("Towns reloaded");
             plugin.out(sender, "Finished");
@@ -137,7 +139,7 @@ public class TownAdminCommand implements CommandExecutor {
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
-            temp.admin_removeCitizen( player, args[2] );
+            temp.admin_removeCitizenship( player, args[2] ); //NPE
             return true;
         } else if (args[0].equalsIgnoreCase("check")) { // been working since early on - 18 Feb
             player.sendMessage("Checking build perms.");

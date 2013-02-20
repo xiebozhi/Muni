@@ -4,13 +4,13 @@
  */
 package com.teamglokk.muni.listeners;
 
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import com.teamglokk.muni.Muni;
 /**
  *
- * @author shieldsr
+ * @author bobbshields
  */
 public class MuniLoginEvent implements Listener{
     Muni plugin;
