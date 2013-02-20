@@ -375,6 +375,10 @@ public class Town implements Comparable<Town> {
         }
     }
       
+    /**
+     * Messages all the online officers
+     * @param msg 
+     */
     public void messageOfficers(String msg ) {
         ArrayList<Player> online = new ArrayList<Player>();
         if (plugin.isOnline( mayor.getName() ) ){
@@ -390,6 +394,11 @@ public class Town implements Comparable<Town> {
         }
         
     }  
+    
+    /**
+     * Messages all the online players for THIS town
+     * @param msg 
+     */
     public void announce(String msg ) {
         messageOfficers(msg);
         ArrayList<Player> online = new ArrayList<Player>();
@@ -658,6 +667,11 @@ public class Town implements Comparable<Town> {
         return false; 
     }
     
+    /**
+     * A regular citizen or below of this town can leave
+     * @param player
+     * @return 
+     */
     public boolean leave(Player player){
         if ( plugin.allCitizens.get(player.getName () ).equalsIgnoreCase(townName ) ){
             if ( isCitizen(player) ){
@@ -700,7 +714,7 @@ public class Town implements Comparable<Town> {
     }
     
      /**
-     * Turns the regular citizen into a deputy, if checks are passed
+     * Forces a player into the mayor role, does not check appropriately
      * @param player
      * @return 
      */
@@ -720,7 +734,7 @@ public class Town implements Comparable<Town> {
         return true;
     }
      /**
-     * Turns the regular citizen into a deputy, if checks are passed
+     * Forces a player into the deputy role, does not check appropriately
      * @param player
      * @return 
      */
@@ -735,7 +749,7 @@ public class Town implements Comparable<Town> {
     }
     
     /**
-     * Turns the player into a regular citizen, if not citizen elsewhere
+     * Forces a player into the citizen role, does not check appropriately
      * @param player
      * @param officer
      * @return 
@@ -753,6 +767,13 @@ public class Town implements Comparable<Town> {
         citizens.put( player, c );
         return true;
     }
+    
+    /**
+     * Forces a player out of the town
+     * @param sender
+     * @param player
+     * @return 
+     */
     public boolean admin_removeCitizenship(CommandSender sender, String player){
         boolean rtn = false; 
         if (plugin.isCitizen(townName, player) ){
@@ -851,10 +872,20 @@ public class Town implements Comparable<Town> {
         return citizens.containsKey ( player ) ;
     }
     
+    /**
+     * Checks whether the player is an officer of this town
+     * @param player
+     * @return 
+     */
     public boolean isOfficer (Player player){
         return isOfficer( player.getName() );
     }
     
+    /**
+     * Checks whether the player is an officer of this town
+     * @param player
+     * @return 
+     */
     public boolean isOfficer (String player){
         if (isMayor(player) || isDeputy(player) ){
             return true;
@@ -862,34 +893,45 @@ public class Town implements Comparable<Town> {
         return false; 
     }
     
+    /**
+     * Checks whether a player is an applicant of this town
+     * @param player
+     * @return 
+     */
     public boolean isApplicant (Player player) {
         return isApplicant(player.getName() );
     }
     
+    /**
+     * Checks whether a player is an applicant of this town
+     * @param player
+     * @return 
+     */
     public boolean isApplicant (String player) {
         return applicants.containsKey ( player ) ;
     }
     
+    /**
+     * Checks whether the player is an invitee of this town
+     * @param player
+     * @return 
+     */
     public boolean isInvited (Player player) {
         return isInvited( player.getName() );
     }
+    
+    /**
+     * Checks whether the player is an invitee of this town
+     * @param player
+     * @return 
+     */
     public boolean isInvited (String player) {
         return invitees.containsKey ( player );
     }
         
     /**
-     * Adds this town to the database
-     * @return 
-     */ /*
-    public boolean db_addTown(){
-        if (!plugin.dbwrapper.checkExistence("towns","townName", townName) ) {
-            plugin.dbwrapper.insert("towns",toDB_Cols(),toDB_Vals() );
-            return true;
-        } else {
-            return false;
-        }
-    } */
-    
+     * Removes all the citizens from this town, used when mayor/admin does delete
+     */
     public void removeAllTownCits() {
         ArrayList<String> cits = new ArrayList<String>();
         cits.add(mayor.getName() );
@@ -1045,6 +1087,10 @@ public class Town implements Comparable<Town> {
         return false; 
     }
     
+    /**
+     * Messages the sender the balance of the town bank
+     * @param sender 
+     */
     public void checkTownBank(CommandSender sender) {
             sender.sendMessage(townName+"'s town bank has a balance of "+ getBankBal()+" "+
                     plugin.econwrapper.getCurrName( getBankBal()) );
@@ -1104,6 +1150,18 @@ public class Town implements Comparable<Town> {
         }
     }
     
+    /*
+    public Location getCenter (){
+        return townCenter;
+    }
+    public boolean setCenter (Location center ){
+        if (center != null) {
+            townCenter = center;
+            return true;
+        } else {return false;}
+      
+    }*/
+    
     /**
      * Gets the town name
      * @return 
@@ -1122,12 +1180,21 @@ public class Town implements Comparable<Town> {
         return true;
     }
     
+    /**
+     * Custom hashcode 
+     * @return 
+     */
     @Override
     public int hashCode() {
         return new HashCodeBuilder(7, 31). 
             append(townName).toHashCode();
     }
     
+    /**
+     * Custom equals
+     * @param obj
+     * @return 
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null){
@@ -1138,10 +1205,21 @@ public class Town implements Comparable<Town> {
             return false;
         } else { return false;}
     }
+    
+    /**
+     * Custom string
+     * @return 
+     */
     @Override
     public String toString(){
         return townName;
     }
+    
+    /**
+     * Custom comparison
+     * @param t
+     * @return 
+     */
     @Override
     public int compareTo(Town t){
         return this.getName().toLowerCase().compareTo( t.getName().toLowerCase() );
@@ -1155,18 +1233,6 @@ public class Town implements Comparable<Town> {
         } else { return 0;}
         */
     }
-    
-    /*
-    public Location getCenter (){
-        return townCenter;
-    }
-    public boolean setCenter (Location center ){
-        if (center != null) {
-            townCenter = center;
-            return true;
-        } else {return false;}
-      
-    }*/
 }
 
 
