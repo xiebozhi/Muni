@@ -583,8 +583,8 @@ public class Town implements Comparable<Town> {
         if (!player.isOnline() ) { return false; }
         if (invitees.containsKey(player.getName() ) ){
             citizens.put( player.getName(), new Citizen(plugin,townName,player.getName() ) );
-            invitees.remove(new Citizen(plugin,townName,player.getName() ) );
-            announce(player+" has become a town member by invitation");
+            invitees.remove(player.getName() );
+            announce(player.getName()+" has become a town member by invitation");
             plugin.dbwrapper.updateRole(this, player.getName() );
             return true;
         } else {player.sendMessage("You have not been invited to " + townName); }
@@ -644,7 +644,7 @@ public class Town implements Comparable<Town> {
     public boolean declineApplication(String player, Player officer ){
         if (!officer.isOnline() ) { return false; }
         if ( applicants.containsKey( player ) ){
-            applicants.remove(new Citizen(plugin,townName,player ) );
+            applicants.remove(player );
             plugin.allCitizens.remove( player );
             plugin.dbwrapper.deleteCitizen( player );
             messageOfficers( player+ "'s application has been declined by "+officer.getName() );
@@ -707,11 +707,13 @@ public class Town implements Comparable<Town> {
     public boolean admin_makeMayor(String player){
         if ( isMayor(player) ){
             return true;
-        }  
-        if (mayor!=null && !mayor.getName().equalsIgnoreCase("empty") ){
+        }  /*
+        if (mayor!=null ){
+            if ( !mayor.getName().equalsIgnoreCase("empty") ) { //NPE
             citizens.put(mayor.getName(),mayor);
             plugin.dbwrapper.updateRole(this, mayor.getName() );
-        }
+            }
+        }*/
         plugin.dbwrapper.deleteCitizen(player);
         mayor = new Citizen (plugin, townName, player,"mayor",null );
         mayor.saveToDB();
@@ -904,7 +906,7 @@ public class Town implements Comparable<Town> {
             cits.add(c);
         }
         for (String c : cits){
-            plugin.allCitizens.remove(c);
+            plugin.allCitizens.remove(c); //NPE
             plugin.dbwrapper.deleteCitizen(c);
         }
     }
@@ -962,6 +964,10 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean rankup(Player mayor){ //needs better output but working - 18 Feb 13
+        if (townRank+1 > plugin.getTotalTownRanks() ) {
+            mayor.sendMessage("You are already at the highest rank!");
+            return true;
+        }
         double rankCost = plugin.townRanks[townRank+1].getMoneyCost();
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
@@ -1032,7 +1038,7 @@ public class Town implements Comparable<Town> {
         if ( townBankBal >= amount ){
             if (plugin.econwrapper.giveMoney(officer,amount, "TB Withdraw") ) {
                 townBankBal = townBankBal - amount;
-            messageOfficers(officer.getName()+" witndrew "+amount+" into the town bank");
+            messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
                 return true;
             } 
         } 

@@ -293,7 +293,7 @@ public class Muni extends JavaPlugin {
     
     
     public boolean isOnline(String player) {
-        if (player.isEmpty() || player==null) { return false; }
+        if (player.isEmpty() || player==null) { return false; } //NPE
         
         if (this.getServer().getPlayer(player) != null ){
             return true;

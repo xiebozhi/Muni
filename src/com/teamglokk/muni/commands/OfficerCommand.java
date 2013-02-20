@@ -59,8 +59,8 @@ public class OfficerCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("found") || //tested and needed fixes - 19 Feb 13
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
             if (args.length != 2) {
-                officer.sendMessage("Incorrect number of parameters");
-                return false;
+                officer.sendMessage("/mayor found <TownName>");
+                return true;
             }
             if (plugin.towns.containsKey(args[1] ) ){
                 officer.sendMessage("That town already exists.  Please choose another name");
@@ -85,6 +85,10 @@ public class OfficerCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             if (temp.invite( args[1],officer) ){
                 temp.messageOfficers("An invitation to "+args[1]+" was sent by "+officer.getName() );
+                if (plugin.isOnline(args[1]) ) {
+                    plugin.getServer().getPlayer(args[1]).sendMessage("You have been invited to "
+                            +temp.getName()+". Do /town accept OR /town leave"); 
+                }
             }
             return true;
             
@@ -237,8 +241,10 @@ public class OfficerCommand implements CommandExecutor {
         } else if (subcmd.equalsIgnoreCase("mayor") ){
             plugin.out(sender, "Muni Mayor Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
             plugin.out(sender, "/mayor bank");
-            plugin.out(sender, "/mayor bank withdraw");
-            plugin.out(sender, "/mayor deputize");
+            plugin.out(sender, "/mayor bank check");
+            plugin.out(sender, "/mayor bank deposit <amount>");
+            plugin.out(sender, "/mayor bank withdraw <amount>");
+            plugin.out(sender, "/mayor deputize <citizen>");
             plugin.out(sender, "/mayor resign");
             plugin.out(sender, "/mayor delete");
             plugin.out(sender, "/mayor rankup");

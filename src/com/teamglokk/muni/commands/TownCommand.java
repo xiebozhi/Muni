@@ -76,7 +76,7 @@ public class TownCommand implements CommandExecutor {
             }else if (args.length == 2) { 
                 if ( plugin.towns.containsKey(args[1]) ) {
                     plugin.getTown( args[1] ).info(sender);
-                } else { player.sendMessage(args[1]+" is not a valid town.  (/town list)"); }
+                } else { sender.sendMessage(args[1]+" is not a valid town.  (/town list)"); }
             }
             return true;
         } else if (args[0].equalsIgnoreCase("help") ) { //tested and working - 18 Feb 13
@@ -108,6 +108,10 @@ public class TownCommand implements CommandExecutor {
             // need to make sure the application is to a valid town, throws NPE currently
             if (!plugin.isCitizen(player.getName()) ){
                 Town temp = plugin.getTown( args[1] );
+                if (temp == null) { 
+                    player.sendMessage("Check the spelling"); 
+                    return true; 
+                }
                 temp.apply ( player ); //NPE
                 player.sendMessage("Application to "+temp.getName()+" was sent.");
                 temp.messageOfficers(player.getName() + " has applied to your town");
