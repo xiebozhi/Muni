@@ -625,8 +625,15 @@ public class Town implements Comparable<Town> {
                 plugin.dbwrapper.updateRole(this, player );
                 return true;
             } else { officer.sendMessage( "The player is not an applicant" ); }
-        } else { officer.sendMessage( "The player is already involved with " + plugin.allCitizens.get( player ) ); }
-        return false; 
+        } else { 
+            String temp = plugin.allCitizens.get( player );
+            if (temp != null){
+                officer.sendMessage( "The player is already involved with " + temp ); 
+            } else{
+                officer.sendMessage( "There is no record for " + player+ ", check the spelling" ); 
+            }
+        }
+        return false;
     }
     
     /**

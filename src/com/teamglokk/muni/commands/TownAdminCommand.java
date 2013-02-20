@@ -53,12 +53,6 @@ public class TownAdminCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("help")  ) { // working - 18 Feb
             displayHelp(sender);
             return true;
-        } else if (args[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
-            plugin.out(sender,"Dropping the database!  Then re-creating");
-            plugin.dbwrapper.createDB(true);
-            plugin.makeDefaultCitizens();
-            plugin.makeTestTowns();
-            return true;
         } else if (args[0].equalsIgnoreCase("reload") ) { // Config reload tested good, towns reload added - 18 Feb
             plugin.out(sender, "Reloading config & towns");
             plugin.getLogger().info(sender.getName()+" issued the reload command");
@@ -166,7 +160,16 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Given location is invalid");
                 return false;
             }
-        }  else if (args[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
+        } else if (args[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
+            plugin.out(sender,"Dropping the database!  Then re-creating");
+            plugin.towns.clear();
+            plugin.allCitizens.clear();
+            plugin.dbwrapper.createDB(true);
+            plugin.makeDefaultCitizens();
+            plugin.makeTestTowns();
+            plugin.loadTowns();
+            return true;
+        } else if (args[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
             for (Town t : plugin.towns.values() ){
                 plugin.out(sender, "Displaying players for "+t.getName() );
                 t.listAllCitizens(player);
