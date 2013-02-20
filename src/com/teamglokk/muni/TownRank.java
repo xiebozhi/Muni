@@ -25,24 +25,38 @@ package com.teamglokk.muni;
 public class TownRank {
     protected String rankName = "default";
     protected int rank = 0;
+    protected double moneyCost = 100;
+    protected int itemCost = 10;
+    
     protected int maxDeputies = 5;
     protected int minCitizens = 0;
     protected int maxCitizens = 100;
-    protected double moneyCost = 100;
-    protected int itemCost = 10;
+    
+    protected int outposts = 0;
+    protected int restaurants = 0;
+    protected int hospitals = 0;
+    protected int mines = 0;
+    protected int embassies = 0;
     
     /**
      * The constructor is the only way to insert data to the class, called from Muni's main class
      * @author bobbshields
      */
-    public TownRank (int id, String name, int max_Deputies, int min_Citizens, int max_Citizens, double money_Cost, int item_Cost){
+    public TownRank (int id, String name, int max_Deputies, int min_Citizens, int max_Citizens, double money_Cost, int item_Cost,
+            int outposts, int restaurants, int hospitals, int mines, int embassies){
         if ( id > 0 ) {rank = id;}
         if (!name.trim().contains("\\s")) {rankName=name; } // disallow spaces in the name
         if (max_Deputies > 0)  { maxDeputies = max_Deputies; }
         if (min_Citizens >= 0) { minCitizens = min_Citizens; }
         if (max_Citizens >= 0) { maxCitizens = max_Citizens; }
         if (money_Cost > 0 ) { moneyCost = money_Cost; }
-        if (item_Cost > 0 ) { itemCost = item_Cost; }       
+        if (item_Cost > 0 ) { itemCost = item_Cost; }   
+        
+        if (outposts >= 0 ) { this.outposts = outposts; }    
+        if (restaurants >= 0 ) { this.restaurants = restaurants; }    
+        if (hospitals >= 0 ) { this.hospitals = hospitals; }    
+        if (mines >= 0 ) { this.mines = mines; }    
+        if (embassies >= 0 ) { this.embassies = embassies; }     
     }
     
     public String getName(){
@@ -66,5 +80,19 @@ public class TownRank {
     public int getItemCost(){
         return itemCost;
     }
-    
+    public int getOutposts(){
+        return outposts;
+    }
+    public int getRestaurants(){
+        return restaurants;
+    }
+    public int getHospitals(){
+        return hospitals;
+    }
+    public int getMines(){
+        return mines;
+    }
+    public int getEmbassies(){
+        return embassies;
+    }
 }

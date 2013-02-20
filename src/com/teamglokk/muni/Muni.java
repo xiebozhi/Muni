@@ -28,12 +28,12 @@ import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import java.util.HashMap;
 import net.milkbowl.vault.economy.Economy;
 
 import java.util.TreeMap;
 
 import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
@@ -56,10 +56,6 @@ public class Muni extends JavaPlugin {
     public static EconWrapper econwrapper = null;
     
     public static dbWrapper dbwrapper = null;
-
-    //Config file path  (Believe this is not needed, testing)
-    //private static final String MUNI_DATA_FOLDER = "plugins" + File.separator + "Muni";
-    //private static final String MUNI_CONFIG_PATH = MUNI_DATA_FOLDER + File.separator + "config.yml";
    
     //Global options to be pulled from config
     private static double CONFIG_VERSION = .01;
@@ -81,6 +77,7 @@ public class Muni extends JavaPlugin {
     
     protected static double maxTaxRate = 10000;
     protected static int rankupItemID = 19;
+    protected static double rankupItemValueEach = 1; 
     protected static double maxTBbal = -1;
     protected static int totalTownRanks = 5;
     public static double getMaxTaxRate () { return maxTaxRate; }
@@ -117,9 +114,7 @@ public class Muni extends JavaPlugin {
     public void onEnable() {
         getLogger().info("Starting Up");
         
-        // Hooks in Vault Economy regions
-        // Hooks in World Guard
-        // Initializes Muni wrappers
+        // Hooks in Vault, World Guard, Muni wrappers
         hookInDependencies();
         
         //Load the configuration file
@@ -165,10 +160,9 @@ public class Muni extends JavaPlugin {
             
             for (String curr : dbwrapper.getSingleCol("towns", "townName") ){
                 if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
-                //Town copyTown = new Town (this);
                 copyTown.loadFromDB( curr );
                 towns.put(copyTown.getName(), new Town ( copyTown ) );
-                copyTown = new Town (this); // trying to fix a bug with this
+                copyTown = new Town (this); 
             }
         } catch (NullPointerException ex){
             this.getLogger().severe("Loading towns: "+ex.getMessage() );
@@ -181,14 +175,6 @@ public class Muni extends JavaPlugin {
             t.loadFromDB(t.getName() );
         }
     }
-    
-    /**
-     * Returns the use_op config option, which allows/denies players with OP and no perms
-     * @return 
-     */
-    public boolean useOP(){ return USE_OP; }
-    public boolean isSQLdebug(){ return SQL_DEBUG; }
-    public boolean useMysql() { return useMYSQL; } 
     
     /**
      * For testing only, will be deleted closer to the beta
@@ -250,6 +236,14 @@ public class Muni extends JavaPlugin {
     public void addTown( Town addition ) {
         towns.put(addition.getName(),addition);
     }
+    /**
+     * Returns true if the town is in the towns map
+     * @param town
+     * @return 
+     */
+    public boolean isTown( String town ) {
+        return towns.containsKey(town);
+    }
     
     /**
      * Removes a town from the collection
@@ -299,7 +293,27 @@ public class Muni extends JavaPlugin {
             return true;
         } else { return false; }
     }
+    
+    /**
+     * Check to see if the player is online or offline
+     * The player must have logged into the server to be 'valid'
+     * @param player
+     * @return 
+     */
+    public boolean isValidPlayer( String player ) {
+        if (isOnline(player) ) { return true;}
+        OfflinePlayer p = this.getServer().getOfflinePlayer(player);
+        if (p!=null){
+            return true;
+        }
+        return false;
+    }
        
+    /**
+     * Takes an array of strings, deletes empty or null elements, and trims the remaining elements
+     * @param split the array to be parsed
+     * @return trimmed and cleaned array of strings
+     */
     public String [] trimSplit (String [] split ) {
         if (split.length == 0 ){
             return new String [0];
@@ -324,29 +338,36 @@ public class Muni extends JavaPlugin {
         }
         return rtn;
     }
-    public Double parseD (String dbl) {
+    /**
+     * Parses a double safely
+     * @param dbl
+     * @return 
+     */
+    public Double parseD (String num) {
     
-        double rtn = Double.parseDouble(dbl);
+        double rtn = Double.parseDouble(num);
         return rtn;
-        
-    }
-    public int parseI (String dbl) {
-    
-        int rtn = Integer.parseInt(dbl);
-        return rtn;
-        
     }
     
     /**
-     * Gets whether the player is a citizen of any town
+     * Parses an integer safely
+     * @param num
+     * @return 
+     */
+    public int parseI (String num) {
+    
+        int rtn = Integer.parseInt(num);
+        return rtn;
+    }
+    
+    /**
+     * Gets whether the player name  is a citizen of any town
      * @param player
      * @return 
      */
     public boolean isCitizen (Player player){
-        if (allCitizens.containsKey(player.getName() ) ){
-            return true;
-        } else { return false; } 
-    }
+        return isCitizen(player.getName() );
+    }    
     
     /**
      * Returns whether the player is a citizen of any town
@@ -363,16 +384,20 @@ public class Muni extends JavaPlugin {
      * @return 
      */
     public boolean isCitizen ( String town, String player ){
+        if (!isCitizen(player) ){ return false; }
         return allCitizens.get(player).equalsIgnoreCase(town);
     }
     
     /**
-     * Returns whether the player is a citizen of any town
+     * Returns the town where a player is involved
      * @param player
      * @return 
      */
     public Town getTownFromCitizen ( String player ){
-        return towns.get( allCitizens.get(player) );
+        if (isCitizen(player) ){
+            return towns.get( allCitizens.get(player) );
+        }
+        return null;
     }
     
     /**
@@ -457,6 +482,7 @@ public class Muni extends JavaPlugin {
                     
         maxTaxRate = this.getConfig().getDouble("townsGlobal.maxTaxRate"); 
         rankupItemID = this.getConfig().getInt("townsGlobal.rankupItemID");    
+        rankupItemValueEach = this.getConfig().getDouble("townsGlobal.rankupItemValueEach");
         maxTBbal = this.getConfig().getDouble("townsGlobal.maxTownBankBalance");  
         totalTownRanks = this.getConfig().getInt("townsGlobal.maxRanks"); 
 
@@ -471,7 +497,12 @@ public class Muni extends JavaPlugin {
                     this.getConfig().getInt   ("townRanks."+(i)+".minCitizens"),
                     this.getConfig().getInt   ("townRanks."+(i)+".maxCitizens"),
                     this.getConfig().getDouble("townRanks."+(i)+".moneyCost"),
-                    this.getConfig().getInt   ("townRanks."+(i)+".itemCost") );
+                    this.getConfig().getInt   ("townRanks."+(i)+".itemCost"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".outposts"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".restaurants"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".hospitals"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".mines"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".embassies") );
                     if ( isDebug() ) { getLogger().info( townRanks[i].getName()+
                             " config settings were loaded"); }
         }
@@ -479,6 +510,24 @@ public class Muni extends JavaPlugin {
         
    }
    
+    /**
+     * Used by permissions to decided whether to let Ops continue
+     * @return 
+     */
+    public boolean useOP(){ return USE_OP; }
+    
+    /**
+     * DBwrapper checks this before logging 
+     * @return 
+     */
+    public boolean isSQLdebug(){ return SQL_DEBUG; }
+    
+    /**
+     * DBwrapper uses this to decide where to send DB queries
+     * @return 
+     */
+    public boolean useMysql() { return useMYSQL; } 
+    
     /**
      * Whether the plugin should output verbose debugging info to the log
      * @return 

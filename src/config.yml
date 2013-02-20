@@ -1,27 +1,35 @@
 # Muni configuration file
 # Authored by bobbshields
 #
-#####
+#################################################################
 # Descriptions of certain nodes
+#####
 # config_version: not to be changed except by the dev
 # debug: true will output more to the console
+# sql_debug: true outputs the SQL statements and allows DB warnings
+# use_op: true means that ops can run any command, false means Ops need to be given Muni permissions
 #
-# database #
+# database 
+#####
 # use-mysql: false means Muni will use SQL-lite
-#
-# townsGlobal #
+# townsGlobal
+##### 
 # maxTaxRate: town officials can't set a higher rate, set to -1 for no limit
 # rankupItemID: defaults to 19 = sponges, set to -1 for no item cost for rankup
+# rankupItemValueEach: the average price of one of the rankup items, to be used for town rankings
 # maxTownBankBalance: set to -1 for no limit
 # maxRanks: set this to the number of townRanks nodes that you have defined
 #
-# townRanks #
-# title: server admin can change the display names (the plugin uses the integer of the rank)
-# minCitizens: you must have this number of citizens to progress to the next rank, -1 for no min
-# maxCitizens: the max your town will accept until the next rank, -l for no max
+# townRanks 
 #####
+# title: server admin can change the display names (the plugin uses the integer of the rank)
+# minCitizens: to rankup, a town needs the minCitzens of the next higher rank (so to get rank2, you need rank 2's min citizens)
+# maxCitizens: the max your town will accept until the next rank ( be sure its high enough to allow for the next rank's min)
+# The rest of the options are how many of each special region are allowed at that rank
+# mines: will likely be an integration with MineResetLite 
+#################################################################
 
-config_version: .02
+config_version: .03
 debug: false
 sql_debug: false
 use_op: true
@@ -35,41 +43,68 @@ database:
 townsGlobal:
     maxTaxRate: 10000 
     rankupItemID: 19 
+    rankupItemValueEach: 10
     maxTownBankBalance: -1 
     maxRanks: 5 
 townRanks:
     1: 
          title: Hamlet 
+         moneyCost: 1000
+         itemCost: 64
          maxDeputies: 1 
-         minCitizens: 2 
+         minCitizens: 1 
          maxCitizens: 5 
-         moneyCost: 100
-         itemCost: 10
+         outposts: 0 
+         restaurants: 1
+         hospitals: 1
+         mines: 0
+         embassies: 0
+         arenas: 0
     2: 
          title: Village
+         moneyCost: 5000
+         itemCost: 128
          maxDeputies: 2   
          minCitizens: 4
          maxCitizens: 10
-         moneyCost: 100
-         itemCost: 10
+         outposts: 1 
+         restaurants: 1
+         hospitals: 1
+         mines: 1
+         embassies: 0
     3: 
          title: Town
+         moneyCost: 10000
+         itemCost: 256
          maxDeputies: 3
          minCitizens: 8
          maxCitizens: 15
-         moneyCost: 100
-         itemCost: 10
+         outposts: 2 
+         restaurants: 2
+         hospitals: 2
+         mines: 1
+         embassies: 1
     4: 
          title: City
+         moneyCost: 20000
+         itemCost: 512
          maxDeputies: 4
          minCitizens: 12
          maxCitizens: 20
-         moneyCost: 100
-         itemCost: 10
+         outposts: 2 
+         restaurants: 3
+         hospitals: 3
+         mines: 2
+         embassies: 2
     5: 
          title: Metropolis
+         moneyCost: 40000
+         itemCost: 1024
          maxDeputies: 5
          minCitizens: 16
          maxCitizens: 25
-         moneyCost: 100
-         itemCost: 10
+         outposts: 3 
+         restaurants: 4
+         hospitals: 4
+         mines: 3
+         embassies: 3

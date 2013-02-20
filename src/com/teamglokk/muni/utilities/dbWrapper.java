@@ -22,6 +22,7 @@ package com.teamglokk.muni.utilities;
 import com.teamglokk.muni.Citizen;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -517,45 +518,4 @@ public class dbWrapper extends Muni {
         }
         return rtn;
     }
-    
-    /*
-    public void MySQL(String[] args) {
-
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        String url = "jdbc:mysql://localhost:3306/testdb";
-        String user = "testuser";
-        String password = "test623";
-
-        try {
-            con = DriverManager.getConnection(url, user, password);
-            st = con.createStatement();
-            rs = st.executeQuery("SELECT VERSION()");
-
-            if (rs.next()) {
-                System.out.println(rs.getString(1));
-            }
-
-        } catch (SQLException ex) {
-                plugin.getLogger().severe( ex.getMessage() );
-
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
-
-            } catch (SQLException ex) {
-                plugin.getLogger().warning( ex.getMessage() );
-            }
-        }
-    } */
 }

@@ -1,24 +1,24 @@
 name: Muni
 main: com.teamglokk.muni.Muni
-version: PreAlpha_0.5
+version: PreAlpha_0.6
 authors: [BobbShields]
 commands:
     town:
         description: Town creation, taxes, and info
         aliases: []
-        usage: /town [params]
+        usage: /town help
     mayor:
         description: For mayors to administer their towns
         aliases: []
-        usage: /mayor [params]
+        usage: /mayor help
     deputy:
         description: So deputies may work with towns
         aliases: []
-        usage: /deputy [params]
+        usage: /deputy help
     townadmin:
         description: For server staff, overrides cost and some checks
         aliases: []
-        usage: /townadmin [params]
+        usage: /townadmin help
 permissions:
     muni.*:
         description: Gives access to all Muni permissions

@@ -77,12 +77,7 @@ public class EconWrapper extends Muni {
      */
     public boolean payMoney( Player player, double amount){ 
         er = econ.withdrawPlayer(player.getName(), amount );
-            if(er.transactionSuccess()) {
-                return true;
-            } else {
-                player.sendMessage("You don't have enough money");
-                return false;
-            } 
+        return (er.transactionSuccess());
     }
     
     /**
@@ -94,8 +89,7 @@ public class EconWrapper extends Muni {
      */
     public boolean payMoneyR(Player player, double amount, String reason){
         if ( payMoney(player,amount) ){
-            player.sendMessage("You paid "+amount+" "+econ.currencyNamePlural()+
-                    " for "+reason);
+            player.sendMessage("You paid "+amount+" "+econ.currencyNamePlural()+" for "+reason);
             Transaction t = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),player.getName(),reason,amount,0,true);
             return true;
         } else { 
@@ -119,23 +113,23 @@ public class EconWrapper extends Muni {
             if (player.getInventory().contains(plugin.getRankupItemID(),items) ){
                 // then pay money (checks to make sure they have enough)
                 if (payMoney(player,money) ){
-                    // then pay items and return the status
-                    boolean rtn = payItem(player,plugin.getRankupItemID(),items);
-                    if (rtn) {
-                        player.sendMessage("Took " +money+ " and " +items+" items as payment for " + reason);
-                        Transaction t  = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),
-                                player.getName(),reason,money,items,true);
-                    } else {
-                        double slack = items-player.getInventory().getItem(plugin.getRankupItemID()).getAmount();
-                        player.sendMessage("You need "+ slack +" more " + getItemName(plugin.getRankupItemID())+" to complete the transaction");
-                    }
-                    return rtn;
+                    // then pay items and messages the user
+                    payItem(player,plugin.getRankupItemID(),items);
+                    String itemString = items==0? " and "+items+" "+getItemName(plugin.getRankupItemID() ):"" ;
+                    player.sendMessage("Took " +money+ itemString+ " as payment for " + reason);
+                    Transaction t  = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),
+                            player.getName(),reason,money,items,true);
+                    return true;
                 } else {
                     double slack = money-getBalance(player);
                     player.sendMessage("You need "+ slack +" more "+getCurrName(slack)+" to complete the transaction");
                     return false;
                 } 
-            } else {return false;}  // didn't have enough items to test for money
+            } else {
+                double slack = items-player.getInventory().getItem(plugin.getRankupItemID()).getAmount();
+                player.sendMessage("You need "+ slack +" more " + getItemName(plugin.getRankupItemID())+" to complete the transaction");
+                return false;
+            }  
         } else {return false;} // not online
     }
     
@@ -176,7 +170,7 @@ public class EconWrapper extends Muni {
             
             return true;
         } else{
-            player.sendMessage("You did not have enough "+getItemName( ItemID ) );
+            //player.sendMessage("You did not have enough "+getItemName( ItemID ) );
             return false;
         }
     }
@@ -290,6 +284,7 @@ public class EconWrapper extends Muni {
      * @return 
      */
     public String getItemName(int itemNumber){
-        return Material.getMaterial(plugin.getRankupItemID()).toString();
+        String s = (itemNumber>1) ? "s":"" ;
+        return Material.getMaterial(plugin.getRankupItemID()).toString()+s;
     }
 }
