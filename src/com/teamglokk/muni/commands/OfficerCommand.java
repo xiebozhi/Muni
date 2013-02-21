@@ -97,7 +97,7 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
             if (!plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ||!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
-            officer.sendMessage("You do not have permission to run /deputy subcommands");
+            officer.sendMessage("You do not have permission to set the taxs");
             return true; 
         }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
@@ -158,6 +158,7 @@ public class OfficerCommand implements CommandExecutor {
                     } else if (args[1].equalsIgnoreCase("withdraw") || args[1].equalsIgnoreCase("w") ){
                         if ( !plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ) {
                             officer.sendMessage("You do not have permission to withdraw from the town bank");
+                            return true;
                         }
                         double amount = Double.parseDouble( args[2] );
                         if (temp.tb_withdraw(officer, amount) ) {
@@ -178,10 +179,15 @@ public class OfficerCommand implements CommandExecutor {
                         return false; 
             }
             return true;
-        } else if (!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
+        }
+        
+        // Mayor-only commands from here on out
+        if (!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
             officer.sendMessage("You do not have permission to do /mayor subcommands"); 
             return true; 
-        } else if (args[0].equalsIgnoreCase("found") || //tested and needed fixes - 19 Feb 13
+        } 
+        
+        if (args[0].equalsIgnoreCase("found") || //tested and needed fixes - 19 Feb 13
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
             if (args.length != 2) {
                 officer.sendMessage("/mayor found <TownName>");
@@ -215,29 +221,25 @@ public class OfficerCommand implements CommandExecutor {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
             }
+            if (!plugin.isCitizen(officer) ){ 
+                officer.sendMessage("You are not a citizen anywhere"); 
+                return true;
+            }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) ); //throwing NPE - 19 Feb 13
             temp.makeDeputy( args[1] ,officer);
             return true;
             
         } else if (args[0].equalsIgnoreCase("rankup")) { //working but needs better output - 18 Feb 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.rankup(officer);
-            plugin.getServer().broadcastMessage(temp.getName()+" has ranked to "+temp.getTitle() );
+            if ( temp.rankup(officer) ){
+                plugin.getServer().broadcastMessage(temp.getName()+" has been ranked to "+temp.getTitle()+" by " + officer.getName() );
+            }
             return true;
             
-        } else if (args[0].equalsIgnoreCase("setTax")) { //throwing error due to online player checking, might be fixed - 19 Feb
-            if (args.length != 2) {
-                officer.sendMessage("Incorrect number of parameters");
-                return false;
-            }
-            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.setTaxRate(Double.parseDouble(args[1]) ) ;
-            return true;
         } else {
             displayHelp( officer, args[0] );
             return true;
         }
-        return false;
     }
     private void displayHelp(CommandSender sender, String subcmd){ // Tested and working - 18 feb
         if (subcmd.equalsIgnoreCase("deputy") ){

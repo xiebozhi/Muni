@@ -50,7 +50,7 @@ permissions:
         default: false
         children:
             muni.town: true
-            muni.deputy.changetax: true    
+            muni.deputy.changetax: false    
     muni.deputy.changetax:
         description: This allows the deputies to change tax rates
         default: false    

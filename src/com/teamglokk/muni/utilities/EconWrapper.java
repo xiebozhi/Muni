@@ -27,6 +27,7 @@ import org.bukkit.Material;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import java.util.Map;
 
 /**
  * Makes the Vault and Bukkit perm commands easier to work with
@@ -115,8 +116,11 @@ public class EconWrapper extends Muni {
                 if (payMoney(player,money) ){
                     // then pay items and messages the user
                     payItem(player,plugin.getRankupItemID(),items);
-                    String itemString = items==0? " and "+items+" "+getItemName(plugin.getRankupItemID() ):"" ;
-                    player.sendMessage("Took " +money+ itemString+ " as payment for " + reason);
+                    String itemString = "";
+                    if (items>=0) {
+                        itemString = " and "+items+" "+getItemName(plugin.getRankupItemID() ) ;
+                    }
+                    player.sendMessage("Took " +money+" "+ getCurrName(money)+ itemString+ " as payment for " + reason);
                     Transaction t  = new Transaction (plugin,plugin.allCitizens.get( player.getName() ),
                             player.getName(),reason,money,items,true);
                     return true;
@@ -126,11 +130,25 @@ public class EconWrapper extends Muni {
                     return false;
                 } 
             } else {
-                double slack = items-player.getInventory().getItem(plugin.getRankupItemID()).getAmount();
+                double slack = items - checkRankupItemAmount(player);
                 player.sendMessage("You need "+ slack +" more " + getItemName(plugin.getRankupItemID())+" to complete the transaction");
                 return false;
             }  
         } else {return false;} // not online
+    }
+    
+    /**
+     * Returns the number of rankup items the player has in their inventory
+     * @param player
+     * @return 
+     */
+    public int checkRankupItemAmount (Player player) {
+        int rtn = 0;
+        Map<Integer, ? extends ItemStack> mapping = player.getInventory().all( plugin.getRankupItemID() );
+        for (ItemStack i : mapping.values() ){
+            rtn = rtn + i.getAmount();
+        }
+        return rtn; 
     }
     
     /**
@@ -284,7 +302,9 @@ public class EconWrapper extends Muni {
      * @return 
      */
     public String getItemName(int itemNumber){
+        char[] item = Material.getMaterial(plugin.getRankupItemID()).toString().toLowerCase().trim().toCharArray();
+        item[0] = Character.toUpperCase(item[0] ) ;
         String s = (itemNumber>1) ? "s":"" ;
-        return Material.getMaterial(plugin.getRankupItemID()).toString()+s;
+        return item+s;
     }
 }

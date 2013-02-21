@@ -255,6 +255,47 @@ public class Town implements Comparable<Town> {
     }
     
     /**
+     * Returns a list of all current invitees
+     * @return comma separated list of invitees
+     */
+    public String getAllInvitees(){
+        String rtn = "";
+        for (String curr : invitees.keySet() ){
+            rtn = rtn + curr+", ";
+        }
+        if (rtn.length()>2){
+            return rtn.substring(0, rtn.length()-2);
+        }
+        return "";
+    }
+    /**
+     * Returns a list of all current applicants
+     * @return comma separated list of invitees
+     */
+    public String getAllApplicants(){
+        String rtn = "";
+        for (String curr : applicants.keySet() ){
+            rtn = rtn + curr+", ";
+        }
+        return rtn.substring(0, rtn.length()-2);
+    }
+    
+    /**
+     * Shows whether the applicants map is empty
+     * @return 
+     */
+    public boolean hasApplicants(){
+        return !applicants.isEmpty();
+    }
+    /**
+     * Shows whether the applicants map is empty
+     * @return 
+     */
+    public boolean hasInvitees(){
+        return !invitees.isEmpty();
+    }
+    
+    /**
      * Saves the data for the citizens to the database 
      * @return 
      */

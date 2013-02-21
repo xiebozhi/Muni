@@ -57,8 +57,8 @@ public class TownCommand implements CommandExecutor {
             // iteration will be required here
             Iterator<Town> itr = plugin.towns.values().iterator();
             if (!itr.hasNext() ){
-                plugin.out(sender,"No towns to check");
-                return false;
+                plugin.out(sender,"There are no towns to check");
+                return true;
             }
             while (itr.hasNext() ){
                 Town current = itr.next();

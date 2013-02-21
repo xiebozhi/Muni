@@ -255,12 +255,12 @@ public class dbWrapper extends Muni {
             return false;
             
         } catch (SQLException ex){
-            plugin.getLogger().severe( "getTownCits: "+ex.getMessage() ); 
+            plugin.getLogger().severe( "updateRole: "+ex.getMessage() ); 
             rtn = false;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( "getTownCits: "+ex.getMessage() ); 
+                plugin.getLogger().warning( "updateRole: "+ex.getMessage() ); 
                 rtn = false;
             } finally{}
         }
@@ -286,12 +286,12 @@ public class dbWrapper extends Muni {
             return false;
             
         } catch (SQLException ex){
-            plugin.getLogger().severe( "getTownCits: "+ex.getMessage() ); 
+            plugin.getLogger().severe( "deleteCitizen: "+ex.getMessage() ); 
             rtn = false;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( "getTownCits: "+ex.getMessage() ); 
+                plugin.getLogger().warning( "deleteCitizen: "+ex.getMessage() ); 
                 rtn = false;
             } finally{}
         }
