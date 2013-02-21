@@ -6,33 +6,30 @@ http://dev.bukkit.org/server-mods/muni
 
 Development Roadmap
 ===================
-First Alpha ( Pre-Alpha 0.02 Released 4 Feb 2013 )( Pre-Alpha 0.04 Released 19 Feb 2013 ) 
+First Alpha ( Alpha v0.1 Released 21 Feb 2013 )
 ===========
-1) Command executors responds with messages (Done a few days ago - 27 Jan) 
+1) Command executors responds with messages 
 
-2) Town class stores and changes the town data and can read/write into a sql flat file ( Class created, needs to read / write to database - 27 Jan ) 
-( Working pretty well with SQLite - 4 Feb ) (SQLite working solid except for occasional on disable saves where DB locks.  MySQL not yet tested but believe may work - 18 Feb ) 
+2) Town class stores and changes the town data and can read/write into a sql flat file
+(SQLite working solid except for occasional on disable saves where DB locks.  MySQL not yet tested but believe may work - 18 Feb ) 
 
-3) Proof of working with economy (items taken directly from player's inventory) ( Working and somewhat tested - 27 Jan )
-( Tested more extensively - 4 Feb ) (Future: expand the DB for rankup item bank account and add to town class - 18 Feb )
+3) Works with money and player inventory
+(Future: expand the DB for rankup item bank account and add to town class - 18 Feb )
 
-4) Reads and writes global variables to config.yml (Done but needs testing - 27 Jan)
-( Satisfied with operation - 4 Feb ) 
+4) Reads and writes global variables to config.yml 
 
 5) Command Executors work for everything but world guard region functionality
-( This is the current stage of development - 4 Feb ) 
-(Commands are using Maps for quick access to town data, currently debugging.  Comments added to each command and made help output more verbose. 18 Feb ) 
+(There may still be some bugs in this area)
 
-6) Town Bank ( Should be working, testing to come with command implementation - 4 Feb ) 
-(Seems to be working with recent changes - 18 Feb )
+6) Town Bank (/town bank, /mayor bank deposit, /mayor bank withdraw)
 
-7) Taxes working in a basic fashion (Working well - 18 Feb ) 
+7) Taxes working in a basic fashion (/town paytaxes, /mayor settax) 
 
 8) Transactions reporting (Working very well 18 Feb) 
 *_needs to have in game lookup commands added_*
 
 
-Second Alpha
+Second Alpha (*Development has started*)
 ============
 
 Add World Guard Region functionality

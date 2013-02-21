@@ -19,19 +19,28 @@
 */
 package com.teamglokk.muni.utilities;
 
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import org.bukkit.util.Vector;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 //import static com.sk89q.worldguard.bukkit.BukkitUtil.*;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
+import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.databases.RegionDBUtil;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
+import java.util.List;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.CommandException;
 /**
  * Makes the World Guard Commands easier to work with
  * @author BobbShields
@@ -49,7 +58,154 @@ public class WGWrapper extends Muni {
         plugin = instance;
         //wg =  plugin.wgp.; 
     }
-  
+    
+    //https://github.com/sk89q/worldguard/blob/master/src/main/java/com/sk89q/worldguard/bukkit/commands/RegionCommands.java
+    //https://github.com/sk89q/worldguard/blob/master/src/main/java/com/sk89q/worldguard/bukkit/commands/RegionMemberCommands.java
+    //https://github.com/sk89q/worldedit/blob/master/src/main/java/com/sk89q/worldedit/commands/SelectionCommands.java
+    //http://docs.sk89q.com/worldguard/apidocs/
+    
+    /**
+     * Deletes a region 
+     * @param regionName
+     * @return 
+     */
+    public boolean deleteRegion (String regionName) {
+        
+        return true; 
+    }
+    /**
+     * Makes a region that belongs to the player
+     * @param player
+     * @param regionName
+     * @return 
+     */
+    public boolean makeRegion (Player player, String regionName ) {
+        if (ProtectedRegion.isValidId(regionName ) ) {
+            player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
+            return false; 
+        }
+        if (regionName.equalsIgnoreCase("__global__")){
+            player.sendMessage("The region cannot be named __global__" ) ;
+            return false; 
+        }
+        RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
+        if (mgr.hasRegion(regionName)) {
+            player.sendMessage("There is already a region by that name" );
+            return false;
+        }
+        ProtectedRegion region = null;
+        int sa = 10;
+        Vector shift = new Vector (sa,player.getWorld().getMaxHeight(),sa);
+        Location loc1 = player.getLocation().add(shift);
+        shift = shift.multiply(-1);
+        shift.setY(0);
+        Location loc2 = player.getLocation().add(shift);
+        CuboidSelection sel = new CuboidSelection(player.getWorld(),loc1,loc2);
+        
+        
+        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
+        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
+        region = new ProtectedCuboidRegion(regionName, min, max);
+            
+        mgr.addRegion(region);
+
+        try {
+            mgr.save();
+            player.sendMessage(ChatColor.YELLOW + "Region saved as " + regionName + ".");
+        } catch (ProtectionDatabaseException e) {
+            player.sendMessage("Failed to write region: "  + e.getMessage() );
+        }
+        return true; 
+    }
+    
+    public boolean makeMembers(String worldName, String regionName, List<Player> players){
+        World world = plugin.getServer().getWorld(worldName);
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        ProtectedRegion region = mgr.getRegion(regionName);
+
+        if (region == null) {
+            plugin.getLogger().info("Could not find a region called: "+regionName);
+        }
+
+        String [] newMembers = new String[players.size()];
+        int i = 0;
+        
+        for (Player localplayer : players ){
+            newMembers[i++] = localplayer.getName();
+        }
+        
+        RegionDBUtil.addToDomain(region.getMembers(), newMembers, 0);
+
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            throw new CommandException("Failed to write regions: "
+                    + e.getMessage());
+        }
+        return true; 
+    }
+    
+    public boolean makeOwners(String worldName, String regionName, List<Player>players){
+        World world = plugin.getServer().getWorld(worldName);
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        ProtectedRegion region = mgr.getRegion(regionName);
+
+        if (region == null) {
+            plugin.getLogger().info("Could not find a region called: "+regionName);
+        }
+
+        String [] newOwners = new String[players.size()];
+        int i = 0;
+        
+        for (Player localplayer : players ){
+            newOwners[i++] = localplayer.getName();
+        }
+        
+        RegionDBUtil.addToDomain(region.getOwners(), newOwners, 0);
+
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            throw new CommandException("Failed to write regions: "
+                    + e.getMessage());
+        }
+        return true; 
+    }
+    
+    public boolean setParent (ProtectedRegion child, ProtectedRegion parent){
+        try{
+            child.setParent(parent);
+            return true;
+        } catch (CircularInheritanceException e){
+            plugin.getLogger().severe("Could not set "+parent.getId()+" as parent region for " +child.getId() );
+            plugin.getLogger().severe(e.getMessage() );
+            return false; 
+        }
+    }
+    
+    public String getParent (ProtectedRegion child){
+        return child.getParent().getId();
+    }
+    
+    public ProtectedRegion getRegion (String regionName){
+        ProtectedRegion rtn = null;
+        
+        return rtn;
+    }
+    /**
+     * Gets a list of regions at the player's current location 
+     * @param player
+     * @return 
+     */
+    public String getRegions (Player player)
+    {
+        //return this.wgp.getRegionManager(null).
+         //       canBuild(player,
+          //  player.getLocation().getBlock().getRelative(0, -1, 0));
+        return "nothing";
+    }
+    
+    
     /**
      * Expands the specified region in one direction by the rules defined in config
      * @return 
@@ -84,18 +240,7 @@ public class WGWrapper extends Muni {
         return this.wgp.canBuild(player,
             player.getLocation().getBlock().getRelative(0, -1, 0));
     }
-    /**
-     * Gets a list of regions at the player's current location 
-     * @param player
-     * @return 
-     */
-    public String getRegions (Player player)
-    {
-        //return this.wgp.getRegionManager(null).
-         //       canBuild(player,
-          //  player.getLocation().getBlock().getRelative(0, -1, 0));
-        return "nothing";
-    }
+    
    public ApplicableRegionSet getARS(Player player) {
         return plugin.wgp.getRegionManager( player.getWorld() )
                 .getApplicableRegions(player.getLocation() );
@@ -129,6 +274,14 @@ public class WGWrapper extends Muni {
         
     }
     
+    /**
+     * Sets the boolean flag for the region 
+     * @param player
+     * @param region
+     * @param flag
+     * @param value
+     * @return 
+     */
     public boolean setflag (Player player, ProtectedRegion region,
                 Flag flag, boolean value){
         region.setFlag(flag, value);
