@@ -133,7 +133,7 @@ public class TownAdminCommand implements CommandExecutor {
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
-            temp.admin_removeCitizenship( player, args[2] ); //NPE
+            temp.admin_removeCitizenship( player, args[2] ); //NPE --------------20 feb
             return true;
         } else if (args[0].equalsIgnoreCase("check")) { // been working since early on - 18 Feb
             player.sendMessage("Checking build perms.");
