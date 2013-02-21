@@ -30,6 +30,11 @@ permissions:
     muni.admin:
         description: Gives access to all abilities with no costs
         default: false
+        children:
+            muni.deputy: true
+            muni.town: true
+            muni.mayor.remove: true
+            muni.mayor: true
     muni.mayor:
         description: Grants access to mayor and deputy commands.  Required to start a town
         default: true

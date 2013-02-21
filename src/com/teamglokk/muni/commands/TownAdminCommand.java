@@ -45,7 +45,13 @@ public class TownAdminCommand implements CommandExecutor {
         String [] args = plugin.trimSplit(split);
         
         if (!(sender instanceof Player)) {
-        } else { player = (Player) sender; }
+        } else { 
+            player = (Player) sender; 
+            if (!plugin.econwrapper.hasPerm(player, "muni.admin") ){
+                player.sendMessage("You do not have permission to run /townadmin subcommands");
+                return true; 
+            }
+        }
 
         if (args.length == 0){
             displayHelp(sender);
@@ -202,5 +208,6 @@ public class TownAdminCommand implements CommandExecutor {
             plugin.out(sender, "/townAdmin reload");  
             plugin.out(sender, "/townAdmin debug <off/on>");   
             plugin.out(sender, "/townAdmin SQLdebug <off/on>");   
+            plugin.out(sender, "/townAdmin makeTest (Temp! makes a test database)");   
     }
 }

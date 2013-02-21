@@ -88,7 +88,13 @@ public class TownCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             sender.sendMessage("You cannot send that command from the console");
             return true;
-        } else { player = (Player) sender; }
+        } else { 
+            player = (Player) sender; 
+            if (!plugin.econwrapper.hasPerm(player, "muni.town") ){
+                player.sendMessage("You do not have permission to run /town subcommands");
+                return true; 
+            }
+        }
         
         if (args[0].equalsIgnoreCase("payTaxes")) { //tested and working - 18 Feb 13 
             boolean rtn = false; 
