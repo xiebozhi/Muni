@@ -105,19 +105,19 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
             }
-            // need to make sure the application is to a valid town, throws NPE currently
+            
             if (!plugin.isCitizen(player.getName()) ){
                 Town temp = plugin.getTown( args[1] );
                 if (temp == null) { 
                     player.sendMessage("Check the spelling"); 
                     return true; 
                 }
-                temp.apply ( player ); //NPE
+                temp.apply ( player ); 
                 player.sendMessage("Application to "+temp.getName()+" was sent.");
                 temp.messageOfficers(player.getName() + " has applied to your town");
                 return true;
             } else { 
-                player.sendMessage("You are already engaged with "+plugin.allCitizens.get(player.getName() ) );
+                player.sendMessage("You are already engaged with "+ plugin.allCitizens.get(player.getName() ) );
                 player.sendMessage("To clear your status, do /town leave");
                 return true;
             }
@@ -149,7 +149,6 @@ public class TownCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("leave")) { //working - 19 Feb
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if ( temp.leave(player) ){
-                temp.messageOfficers(player.getName() + " has left your town");
             }
             return true;
         }else if (args[0].equalsIgnoreCase("sethome")) {

@@ -678,7 +678,7 @@ public class Town implements Comparable<Town> {
                 plugin.allCitizens.remove(player.getName() );
                 citizensMap.remove(player.getName() ); 
                 citizens.remove( player.getName() );
-                announce(player+" has left the town");
+                announce(player.getName()+" has left the town");
                 player.sendMessage("You have given up your citizenship to " +townName);
                 plugin.dbwrapper.deleteCitizen(player.getName() );
                 return true;
@@ -1142,7 +1142,7 @@ public class Town implements Comparable<Town> {
      */ // need to add player to the parameters and check for officership
     public boolean setTaxRate(double rate){
         // verify the rate is above 0 and below the hard max
-        if (rate < plugin.maxTaxRate && rate > 0){
+        if (rate < plugin.maxTaxRate && rate > 0 ){
             taxRate = rate;
             return true;
         } else{

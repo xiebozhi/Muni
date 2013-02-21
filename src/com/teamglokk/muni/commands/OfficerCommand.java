@@ -124,8 +124,10 @@ public class OfficerCommand implements CommandExecutor {
         }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             try {
-                temp.setTaxRate( plugin.parseD( args[1] ) );
-                temp.announce(officer.getName()+" has set the tax rate for "+temp.getName()+ " to "+ args[1] );
+                if (temp.isOfficer(officer ) ){
+                    temp.setTaxRate( plugin.parseD( args[1] ) );
+                    temp.announce(officer.getName()+" has set the tax rate for "+temp.getName()+ " to "+ args[1] );
+                } else{ officer.sendMessage("You are not an officer of "+temp.getName() ); }
                 return true;
             } catch (Exception ex) {
                 officer.sendMessage("You should write an actual number next time");
@@ -234,7 +236,7 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "/deputy resign");
             //plugin.out(player, "/deputy regions");
             //plugin.out(player, "/deputy setRegion");
-            //plugin.out(player, "/deputy checkTaxes");
+            plugin.out(sender, "/deputy setTax <money> <sponges>");
             //plugin.out(player, "**/deputy pushBorder");
             plugin.out(sender, "**/deputy bank deposit");
             plugin.out(sender, "** (with perm) ");
