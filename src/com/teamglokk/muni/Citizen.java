@@ -79,11 +79,11 @@ public class Citizen implements Comparable<Citizen> {
      * Self-loading constructor (gets data from DB) 
      * @param instance
      * @param player 
-     */
+     *//*
     public Citizen (Muni instance, Player player){
         plugin = instance; 
         loadFromDB ( player.getName() );
-    }
+    } */
     /**
      * Self-loading constructor (gets data from DB)
      * @param instance
@@ -132,6 +132,17 @@ public class Citizen implements Comparable<Citizen> {
         this.invitedBy = cit.getInviteOfficer();
         //this.sentDate = cit;
     }
+    
+    public boolean isValid(){
+        boolean rtn = true;
+        if (townName == null || name == null )
+        {
+            rtn = false; 
+        }
+        
+        return rtn;
+    }
+    
     /**
      * Loads an instance of a Citizen from the database then copies that into own fields
      * @param player

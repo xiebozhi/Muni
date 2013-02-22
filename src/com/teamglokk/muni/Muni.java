@@ -184,19 +184,19 @@ public class Muni extends JavaPlugin {
     public void makeTestTowns(){
         this.getLogger().info ("Making test towns");
         Town maker = new Town(this);
-        maker = new Town (this,"TestTown","bobbshields",1,1005.0,100.0);
+        maker = new Town (this,"TestTown","bobbshields","world",1,1005.0,100.0);
         //maker.setMaxDeputies(5); maker.setRank(0); Removed from the town class
         maker.setTaxRate(105.5);
         
         maker.saveToDB();
         
-        maker = new Town (this,"SecondTest","astickynote",2,1000,100);
+        maker = new Town (this,"SecondTest","astickynote","world",2,1000,100);
         maker.saveToDB();
         
         maker.loadFromDB("TestTown");
         this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
         
-        maker = new Town (this,"SecondTest");
+        maker.loadFromDB("SecondTest");
         this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
     }
     

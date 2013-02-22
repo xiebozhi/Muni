@@ -199,7 +199,7 @@ public class OfficerCommand implements CommandExecutor {
             }
             if (plugin.econwrapper.pay(officer, plugin.townRanks[1].getMoneyCost(),
                     plugin.townRanks[1].getItemCost(), "Found: "+args[1] ) ){
-                Town t = new Town( plugin, args[1], officer.getName() );
+                Town t = new Town( plugin, args[1], officer.getName(),officer.getWorld().getName() );
                 plugin.towns.put(t.getName(), t );
                 plugin.allCitizens.put(officer.getName(), t.getName() );
                 t.admin_makeMayor(officer.getName() );

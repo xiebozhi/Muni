@@ -107,7 +107,7 @@ public class TownAdminCommand implements CommandExecutor {
                 plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
                 return false;
             }
-                Town t = new Town (plugin,args[1],args[2]);
+                Town t = new Town (plugin,args[1],args[2],null);
                 t.saveToDB();
                 plugin.towns.put( t.getName(), t ) ;
                 plugin.out(sender, "Added the town: "+args[1] );

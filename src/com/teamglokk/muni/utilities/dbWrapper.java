@@ -305,7 +305,7 @@ public class dbWrapper extends Muni {
             db_open();
             if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             rs = stmt.executeQuery(SQL);
-            temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"),
+            temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"), rs.getString("world"),
                     rs.getInt("townRank"),rs.getDouble("bankBal"),rs.getDouble("taxRate") );
         } catch (SQLException ex){
             plugin.getLogger().info ( "getTown: "+ townName+" not found in database" );

@@ -69,7 +69,10 @@ public class WGWrapper extends Muni {
      * @param regionName
      * @return 
      */
-    public boolean deleteRegion (String regionName) {
+    public boolean deleteRegion (String worldName, String regionName) {
+        World world = plugin.getServer().getWorld(worldName);
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        ProtectedRegion region = mgr.getRegion(regionName);
         
         return true; 
     }
@@ -84,13 +87,13 @@ public class WGWrapper extends Muni {
             player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
             return false; 
         }
-        if (regionName.equalsIgnoreCase("__global__")){
+        if (regionName.equalsIgnoreCase( "__global__" )){
             player.sendMessage("The region cannot be named __global__" ) ;
             return false; 
         }
         RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
         if (mgr.hasRegion(regionName)) {
-            player.sendMessage("There is already a region by that name" );
+            player.sendMessage( "There is already a region by that name" );
             return false;
         }
         ProtectedRegion region;

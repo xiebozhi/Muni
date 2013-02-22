@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -39,26 +41,26 @@ public class Town implements Comparable<Town> {
     // Database table is $db_prefix_ towns
     //private int db_pk;
     private String townName;
-    //private Location townCenter;   
+    private Location townCenter;   
     private double townBankBal;
     private double taxRate;
     private int townRank;
+    private String townWorld;
      
     // Stored in (prefix)_citizens	
-    private String townMayor;
+    //private String townMayor;
     protected Citizen mayor = new Citizen(plugin);
     protected TreeMap<String,Citizen> deputies   = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
     protected TreeMap<String,Citizen> citizens   = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
     protected TreeMap<String,Citizen> applicants = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
     protected TreeMap<String,Citizen> invitees   = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
+    protected HashMap<String,String> citizensMap = new HashMap<String,String>();
     
-    //private int maxDeputies = 5;
+    
     
     private Timestamp createdDate;
-    /**
-     * The citizens who are in this town mapped to their role
-     */
-    protected HashMap<String,String> citizensMap = new HashMap<String,String>();
+    
+    
     
     /**
      * Default constructor with no data
@@ -74,7 +76,6 @@ public class Town implements Comparable<Town> {
      */
     public Town (Town copy){
         townName = copy.getName();
-        townMayor = copy.getMayor(); 
         townRank = copy.getRank();
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
@@ -83,6 +84,7 @@ public class Town implements Comparable<Town> {
         citizens = copy.citizens;
         applicants = copy.applicants;
         invitees = copy.invitees;
+        townWorld = copy.townWorld;
     }
     
     /**
@@ -91,15 +93,16 @@ public class Town implements Comparable<Town> {
      * @param town_Name
      * @param player 
      */
-    public Town (Muni instance, String town_Name, String player ){
+    public Town (Muni instance, String town_Name, String player , String world){
         
         plugin = instance;
         if (plugin.isDebug() ) plugin.getLogger().info("Town with mayor: "+town_Name+", "+player);
         townName = town_Name;
-        townMayor = player; 
+        mayor = new Citizen (plugin,townName,player,"mayor",null); 
         townRank = 1;
         townBankBal = 5;
         taxRate = 10;
+        townWorld = world;
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }    
@@ -108,31 +111,30 @@ public class Town implements Comparable<Town> {
      * 
      * @author bobbshields
      */
-    public Town (Muni instance, String town_Name, String mayor,
+    public Town (Muni instance, String town_Name, String mayor, String world,
             int rank, double bankBal, double tax){
         
         plugin = instance;
         if (plugin.isDebug() ) plugin.getLogger().info("Begin Muni Constructor: "+mayor+", "+town_Name);
         townName = town_Name;
-        townMayor = mayor; 
-        this.mayor = new Citizen (plugin, mayor);
+        this.mayor = new Citizen (plugin,townName, mayor,"mayor",null);
         townRank = rank;
         townBankBal = bankBal;
         taxRate = tax;
+        townWorld = world;
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }
     
-    /* Loads the class instance variables from the database using the passed town name.
-     * 
-     * @author bobbshields
-     */
-    public Town (Muni instance, String town_Name ){
+    public boolean isValid(){
+        boolean rtn = true;
+        if (townName == null || !mayor.isValid() ){
+            rtn = false; 
+        }
         
-        plugin = instance;
-        //loadFromDB(town_Name);
+        return rtn;
         
-    }    
+    }
     
     /**
      * Loads the town data from the database
@@ -142,14 +144,14 @@ public class Town implements Comparable<Town> {
     public boolean loadFromDB(String town_Name){
         Town copy = plugin.dbwrapper.getTown(town_Name);
         //plugin = copy.plugin;
-        townMayor = copy.getMayor(); 
         townName = copy.getName();
         townRank = copy.getRank();
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
         
+        
+        if ( copy.getMayor() == null ) {return false;}
         mayor = new Citizen (plugin, townName, copy.getMayor(),"mayor",null );
-        if ( mayor.getName() == null ) {return false;}
         plugin.allCitizens.put(copy.getMayor(),townName);
         
          if (!plugin.dbwrapper.checkExistence("citizens", "townName", townName) ){
@@ -330,7 +332,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public static String toDB_Cols(){
-        return "townName,mayor,townRank,bankBal,taxRate";
+        return "townName,mayor,townRank,bankBal,taxRate,world";
     }
     
     /**
@@ -338,9 +340,10 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public String toDB_Vals(){
-        return "'"+townName +"','"+townMayor+"','"+
+        return "'"+townName +"','"+mayor.getName()+"','"+
                Integer.toString(townRank) +"','"+
-               Double.toString(townBankBal) +"','"+ Double.toString(taxRate)+"'";
+               Double.toString(townBankBal) +"','"+Double.toString(taxRate)+"','"+
+               townWorld+"'";
     }  
     
     /**
@@ -348,7 +351,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */ 
     public String toDB_UpdateRowVals(){
-        return "townName='"+townName+"', townRank='"+townRank+"', bankBal='"+
+        return "townName='"+townName+"', mayor='"+mayor.getName()+"', townRank='"+townRank+"', bankBal='"+
                 Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+"' ";
     }
     
@@ -1218,7 +1221,7 @@ public class Town implements Comparable<Town> {
         }
     }
     
-    /*
+    
     public Location getCenter (){
         return townCenter;
     }
@@ -1228,8 +1231,18 @@ public class Town implements Comparable<Town> {
             return true;
         } else {return false;}
       
-    }*/
+    }
+    public boolean setCenter (World world, int X, int Y, int Z ){
+        if ( world != null) {
+            townCenter = new Location(world, X, Y, Z);
+            return true;
+        } else {return false;}
+      
+    }
     
+    public String getWorld(){
+        return townWorld;
+    }
     /**
      * Gets the town name
      * @return 
