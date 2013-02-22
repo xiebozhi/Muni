@@ -193,6 +193,10 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("makeRegion")) { //DELETE MEEEEEE
             if (plugin.wgwrapper.makeRegion(player, args[1] )){
+                plugin.wgwrapper.makeOwners(player.getWorld().getName(), args[1], 
+                        plugin.getTownFromCitizen(player.getName() ).getOfficerList() );
+                plugin.wgwrapper.makeMembers(player.getWorld().getName(), args[1], 
+                        plugin.getTownFromCitizen(player.getName() ).getRegCitsList() );
                 player.sendMessage("Region created!");
             }
             player.sendMessage(plugin.getTownName("bobbshields") );

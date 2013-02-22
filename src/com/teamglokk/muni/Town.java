@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.bukkit.command.CommandSender;
@@ -369,7 +370,32 @@ public class Town implements Comparable<Town> {
         plugin.out( player, "The town bank balance is "+townBankBal+" and the tax rate is "+taxRate+".");
         listAllCitizens(player);
     }
-    
+    public List<String> getOfficerList(){
+        List<String> rtn = new ArrayList<String>();
+        rtn.add(mayor.getName());
+        for (String name : deputies.keySet() ){
+            rtn.add(name);
+        }
+        
+        return rtn;
+    }
+    public List<String> getRegCitsList(){
+        return getCitizenList(false);
+    }
+    public List<String> getAllCitsList () {
+        return getCitizenList(true);
+    }
+    public List<String> getCitizenList(boolean officersToo){
+        List<String> rtn ;
+        if (officersToo){ 
+            rtn = getOfficerList();
+        } else { rtn = new ArrayList<String>(); }
+        for (String name : citizens.keySet() ){
+            rtn.add(name);
+        }
+        
+        return rtn;
+    }
     /**
      * Gives a string of user-friendly information about the town
      * @return 

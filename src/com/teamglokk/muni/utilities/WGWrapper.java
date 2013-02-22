@@ -121,7 +121,7 @@ public class WGWrapper extends Muni {
         return true; 
     }
     
-    public boolean makeMembers(String worldName, String regionName, List<Player> players){
+    public boolean makeMembers(String worldName, String regionName, List<String> players){
         World world = plugin.getServer().getWorld(worldName);
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
         ProtectedRegion region = mgr.getRegion(regionName);
@@ -133,8 +133,9 @@ public class WGWrapper extends Muni {
         String [] newMembers = new String[players.size()];
         int i = 0;
         
-        for (Player localplayer : players ){
-            newMembers[i++] = localplayer.getName();
+        for (String localplayer : players ){
+            newMembers[i++] = localplayer;
+            
         }
         
         RegionDBUtil.addToDomain(region.getMembers(), newMembers, 0);
@@ -148,7 +149,7 @@ public class WGWrapper extends Muni {
         return true; 
     }
     
-    public boolean makeOwners(String worldName, String regionName, List<Player>players){
+    public boolean makeOwners(String worldName, String regionName, List<String>players){
         World world = plugin.getServer().getWorld(worldName);
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
         ProtectedRegion region = mgr.getRegion(regionName);
@@ -160,12 +161,12 @@ public class WGWrapper extends Muni {
         String [] newOwners = new String[players.size()];
         int i = 0;
         
-        for (Player localplayer : players ){
-            newOwners[i++] = localplayer.getName();
+        for (String localplayer : players ){
+            newOwners[i++] = localplayer;
         }
         
         RegionDBUtil.addToDomain(region.getOwners(), newOwners, 0);
-
+        
         try {
             mgr.save();
         } catch (ProtectionDatabaseException e) {

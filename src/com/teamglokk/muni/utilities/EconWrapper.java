@@ -302,8 +302,8 @@ public class EconWrapper extends Muni {
      * @return 
      */
     public String getItemName(int itemNumber){
-        char[] item = Material.getMaterial(plugin.getRankupItemID()).toString().toLowerCase().trim().toCharArray();
-        item[0] = Character.toUpperCase(item[0] ) ;
+        char[] item = Material.getMaterial(plugin.getRankupItemID()).toString()
+                .toLowerCase().trim().toCharArray();
         String s = (itemNumber>1) ? "s":"" ;
         return item+s;
     }
