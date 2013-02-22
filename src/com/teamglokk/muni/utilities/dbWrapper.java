@@ -464,7 +464,7 @@ public class dbWrapper extends Muni {
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
             "id INTEGER "+ spk + serial +", " + 
             "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, " + 
-            "bankBal DOUBLE, taxRate DOUBLE, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
+            "bankBal DOUBLE, itemBal INTEGER, taxRate DOUBLE, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
             "tcZ INTEGER "+ mpk + ");";
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
             "id INTEGER "+ spk + serial +", " + 

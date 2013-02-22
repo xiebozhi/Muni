@@ -31,10 +31,10 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 //import static com.sk89q.worldguard.bukkit.BukkitUtil.*;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
+import com.teamglokk.muni.Town;
 import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -59,11 +59,6 @@ public class WGWrapper extends Muni {
         wg =  plugin.wgp; 
     }
     
-    //https://github.com/sk89q/worldguard/blob/master/src/main/java/com/sk89q/worldguard/bukkit/commands/RegionCommands.java
-    //https://github.com/sk89q/worldguard/blob/master/src/main/java/com/sk89q/worldguard/bukkit/commands/RegionMemberCommands.java
-    //https://github.com/sk89q/worldedit/blob/master/src/main/java/com/sk89q/worldedit/commands/SelectionCommands.java
-    //http://docs.sk89q.com/worldguard/apidocs/
-    
     /**
      * Deletes a region 
      * @param regionName
@@ -72,18 +67,151 @@ public class WGWrapper extends Muni {
     public boolean deleteRegion (String worldName, String regionName) {
         World world = plugin.getServer().getWorld(worldName);
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
-        ProtectedRegion region = mgr.getRegion(regionName);
+        
+        if (!mgr.hasRegion(regionName)) {
+            return false;
+        }
+        
+        mgr.removeRegion(regionName);
+
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            plugin.getLogger().warning("Failed to delete region: "  + e.getMessage() );
+        }
+        return true; 
+    }
+    
+    /**
+     * This will be used to check a square area for other regions
+     * @param player
+     * @param radius
+     * @param excludedRegions
+     * @return 
+     */
+    public boolean checkSquareArea (Player player, int radius, List<String> excludedRegions){
         
         return true; 
     }
+    
     /**
-     * Makes a region that belongs to the player
+     * Makes a square region of a specified size 
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @return 
+     */
+    public ProtectedRegion makeSubRegion (Town town, Player player, String subRegionName, int halfSize ){
+        World world = plugin.getServer().getWorld( town.getWorld() );
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        ProtectedRegion parent = mgr.getRegion( town.getName() );
+        ProtectedRegion child = null;
+            
+        if (makeRegion (player.getLocation(),subRegionName,halfSize) ){
+            mgr = wg.getGlobalRegionManager().get( world );
+            child = mgr.getRegion( subRegionName );
+            setParent(parent,child);
+        }
+        return child;
+    }
+    
+    /**
+     * Makes a PVP-safe zone outside of any border that has the town as its primary region
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @param SRdisplayName
+     * @return 
+     */
+    public boolean makeOutpost (Town town, Player player, String subRegionName, String SRdisplayName) {
+        boolean rtn = true;
+        ProtectedRegion region = makeSubRegion(town,player,subRegionName,12);
+        
+        // require outside of any protections 
+        
+        return rtn;
+    }
+    
+    /**
+     * Makes a food regen region only inside of the town's border
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @param SRdisplayName
+     * @return 
+     */
+    public boolean makeRestaurant (Town town, Player player, String subRegionName, String SRdisplayName) {
+        boolean rtn = true;
+        ProtectedRegion region = makeSubRegion(town,player,subRegionName,4);
+        
+        // check inside main town
+        // set food regen
+        
+        return rtn;
+    }
+    
+    /**
+     * Makes a health regen region only inside of the town's border
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @param SRdisplayName
+     * @return 
+     */
+    public boolean makeHospital (Town town, Player player, String subRegionName, String SRdisplayName) {
+        boolean rtn = true;
+        ProtectedRegion region = makeSubRegion(town,player,subRegionName,6);
+        
+        // check inside main town
+        // set heath regen
+        
+        return rtn;
+    }
+    
+    /**
+     * Makes a region inside a foreign town protection that is only buildable by the original town's members
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @param SRdisplayName
+     * @return 
+     */
+    public boolean makeEmbassy (Town town, Player player, String subRegionName, String SRdisplayName) {
+        boolean rtn = true;
+        ProtectedRegion region = makeSubRegion(town,player,subRegionName,10);
+        
+        // require inside of another town's main protection (no embassy in an outpost)
+        
+        return rtn;
+    }
+    
+    /**
+     * Makes a PVP region only inside of the town's border
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @param SRdisplayName
+     * @return 
+     */
+    public boolean makeArena (Town town, Player player, String subRegionName, String SRdisplayName) {
+        boolean rtn = true;
+        ProtectedRegion region = makeSubRegion(town,player,subRegionName,4);
+        
+        // check inside main town
+        // set PVP
+        
+        return rtn;
+    }
+    
+    /**
+     * Makes a 25x(vert)x25 region centered on the player
      * @param player
      * @param regionName
      * @return 
      */
-    public boolean makeRegion ( Player player, String regionName ) {
-        if (!ProtectedRegion.isValidId(regionName ) ) {
+    public boolean makeTownBorder ( Player player, String regionName ) {
+         RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
+         if (!ProtectedRegion.isValidId(regionName ) ) {
             player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
             return false; 
         }
@@ -91,40 +219,80 @@ public class WGWrapper extends Muni {
             player.sendMessage("The region cannot be named __global__" ) ;
             return false; 
         }
-        RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
         if (mgr.hasRegion(regionName)) {
             player.sendMessage( "There is already a region by that name" );
             return false;
         }
-        ProtectedRegion region;
-        int sa = 10;
+        return makeRegion (player.getLocation(), regionName, 12);
+    }
+    
+    /**
+     * Future planning: highlight with wool or glowstone along the ground at the border
+     * may only replace grass, dirt, and stone along that path
+     * needs to be a temporary function (client side if possible)
+     * 
+     * @param town
+     * @return 
+     */
+    public boolean highlightTownBorder( Town town) {
         
-        Vector shift = new Vector (sa,0,sa);
-        Location loc1 = player.getLocation().add(shift);
-        loc1.setY(player.getWorld().getMaxHeight() );
-        shift = new Vector (-sa,0,-sa);
-        Location loc2 = player.getLocation().add(shift);
+        return true; 
+    }
+    
+    /**
+     * Makes a region that centered on the player
+     * @param player
+     * @param regionName
+     * @return 
+     */
+    public boolean makeRegion ( Location loc, String regionName, int halfSize ) {
+        if (!ProtectedRegion.isValidId(regionName ) ) {
+            return false; 
+        }
+        if (regionName.equalsIgnoreCase( "__global__" )){
+            return false; 
+        }
+        
+        //Set a cuboid selection with a square area 
+        Vector shift = new Vector (halfSize,0,halfSize);
+        Location loc1 = loc.add(shift);
+        loc1.setY(loc.getWorld().getMaxHeight() );
+        shift = new Vector (-halfSize,0,-halfSize);
+        Location loc2 = loc.add(shift);
         loc2.setY(0);
         
-        CuboidSelection sel = new CuboidSelection(player.getWorld(),loc1,loc2);
         
-        
+        ProtectedRegion newRegion;
+        CuboidSelection sel = new CuboidSelection(loc.getWorld(),loc1,loc2);
         BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
         BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
-        region = new ProtectedCuboidRegion(regionName, min, max);
+        newRegion = new ProtectedCuboidRegion(regionName, min, max);
             
-        mgr.addRegion(region);
+        RegionManager mgr = wg.getGlobalRegionManager().get(loc.getWorld());
+        
+        if (mgr.hasRegion(regionName)) {
+            return false;
+        }
+        mgr.addRegion(newRegion);
 
         try {
             mgr.save();
-            player.sendMessage(ChatColor.YELLOW + "Region saved as " + regionName + ".");
         } catch (ProtectionDatabaseException e) {
-            player.sendMessage("Failed to write region: "  + e.getMessage() );
+            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
         }
         return true; 
     }
     
+    /**
+     * Takes a list of players and ensures they are members of a region
+     * @param worldName
+     * @param regionName
+     * @param players
+     * @return 
+     */
     public boolean makeMembers(String worldName, String regionName, List<String> players){
+        if (players.size() == 0 ) {return false; } 
+        
         World world = plugin.getServer().getWorld(worldName);
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
         ProtectedRegion region = mgr.getRegion(regionName);
@@ -137,12 +305,15 @@ public class WGWrapper extends Muni {
         int i = 0;
         
         for (String localplayer : players ){
-            newMembers[i++] = localplayer;
-            
+            if (!region.isMember(localplayer) ){
+                newMembers[i++] = localplayer;
+            }        
         }
         
-        RegionDBUtil.addToDomain(region.getMembers(), newMembers, 0);
-
+        if (newMembers.length != 0) {
+            RegionDBUtil.addToDomain(region.getMembers(), newMembers, 0);
+        } else { return true; } //all listed members are already members
+        
         try {
             mgr.save();
         } catch (ProtectionDatabaseException e) {
@@ -152,7 +323,16 @@ public class WGWrapper extends Muni {
         return true; 
     }
     
+    /**
+     * Takes a list of players and ensures they are owners of a region
+     * @param worldName
+     * @param regionName
+     * @param players
+     * @return 
+     */
     public boolean makeOwners(String worldName, String regionName, List<String>players){
+        if (players.size() == 0 ) {return false; } 
+        
         World world = plugin.getServer().getWorld(worldName);
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
         ProtectedRegion region = mgr.getRegion(regionName);
@@ -165,10 +345,13 @@ public class WGWrapper extends Muni {
         int i = 0;
         
         for (String localplayer : players ){
-            newOwners[i++] = localplayer;
+            if (!region.isOwner(localplayer) ) {
+                newOwners[i++] = localplayer;
+            }
         }
-        
-        RegionDBUtil.addToDomain(region.getOwners(), newOwners, 0);
+        if (newOwners.length != 0) {
+            RegionDBUtil.addToDomain(region.getOwners(), newOwners, 0);
+        } else {return true;} // all listed owners are already owners
         
         try {
             mgr.save();
@@ -179,7 +362,13 @@ public class WGWrapper extends Muni {
         return true; 
     }
     
-    public boolean setParent (ProtectedRegion child, ProtectedRegion parent){
+    /**
+     * Establishes the parent / child relationship
+     * @param child
+     * @param parent
+     * @return 
+     */
+    public boolean setParent (ProtectedRegion parent, ProtectedRegion child){
         try{
             child.setParent(parent);
             return true;
@@ -194,8 +383,18 @@ public class WGWrapper extends Muni {
         return child.getParent().getId();
     }
     
-    public ProtectedRegion getRegion (String regionName){
+    /**
+     * Returns the valid region from the world guard manager
+     * @param worldName
+     * @param regionName
+     * @return 
+     */
+    public ProtectedRegion getRegion (String worldName, String regionName){
         ProtectedRegion rtn = null;
+        World world = plugin.getServer().getWorld(worldName);
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        
+        rtn = mgr.getRegion(regionName);
         
         return rtn;
     }
@@ -217,28 +416,18 @@ public class WGWrapper extends Muni {
      * Expands the specified region in one direction by the rules defined in config
      * @return 
      */
-    public boolean expandRegion ( /*Player.location() player,*/) { 
-
-/*
-            ProtectedRegion town = getRegion("test");
-
-            region.setFlag(flag, flag.parseInput(plugin, sender, value))
-
-            ? parseInput(WorldGuardPlugin plugin, CommandSender sender, String input)
-            //where ? is the relevant data type for that flag
-
-            //WorldGuardPlugin worldGuard = getWorldGuard();
-            //Vector pt = toVector(block); // This also takes a location
-
-            RegionManager regionManager = worldGuard.getRegionManager(world);
-            ApplicableRegionSet set = regionManager.getApplicableRegions(pt);
-            return set.canBuild(localPlayer);
-        */
+    public boolean expandRegion ( Player player, String regionName ) {
+        int expansion = 10;
+        
+        //get the current region size
+        //expand the selection by 10 in the direction the player is facing
+        //save again (do not delete then save fresh, would lose flags)
+        
         return true;
     } 
     
     /**
-     * Checks the World Guard build permisison at the player's current location
+     * Checks the World Guard build permission at the player's current location
      * @param player
      * @return 
      */
@@ -253,28 +442,25 @@ public class WGWrapper extends Muni {
                 .getApplicableRegions(player.getLocation() );
     }
 
-   //requires if string.equals("pvp") { getflag(DefaultFlag.PVP }; elseif...
    /**
-    * Gets whether the specified region has the specified flag
+    * Gets whether the player can use the specified flag at his/her location
     * @param player
     * @param flag
     * @return 
     */
-    public boolean getflag (Player player, StateFlag flag ){
+    public boolean isFlagged (Player player, StateFlag flag ){
         //region.getFlag(flag, flag.parseInput(plugin.wgp, player, flag));
         return getARS(player).allows(flag);
     }
     
     /**
      * Sets the flag for the region 
-     * @param player
      * @param region
      * @param flag
      * @param value
      * @return 
      */
-    public boolean setflag (Player player, ProtectedRegion region,
-                Flag flag, String value){
+    public boolean setFlag (ProtectedRegion region, Flag flag, String value){
             //Check that the user has ownership
             region.setFlag(flag,value );
             return true;
@@ -283,16 +469,77 @@ public class WGWrapper extends Muni {
     
     /**
      * Sets the boolean flag for the region 
-     * @param player
      * @param region
      * @param flag
      * @param value
      * @return 
      */
-    public boolean setflag (Player player, ProtectedRegion region,
-                Flag flag, boolean value){
+    public boolean setflag (ProtectedRegion region, Flag flag, boolean value){
         region.setFlag(flag, value);
         return true;
+    }
+    
+    /**
+     * Sets the Entry message for the region 
+     * @param region
+     * @param message
+     * @return 
+     */
+    public boolean setMSG_Entry(ProtectedRegion region,String message){
+        
+        return true;
+    }
+    
+    /**
+     * Sets the Exit message for the region 
+     * @param region
+     * @param message
+     * @return 
+     */
+    public boolean setMSG_Exit(ProtectedRegion region, String message) {
+        
+        return true; 
+    }
+    
+    /**
+     * Sets the PVP flag for the region to the value of the toggle parameter
+     * @param region
+     * @param toggle
+     * @return 
+     */
+    public boolean setPVP(ProtectedRegion region, boolean toggle){
+        
+        return true; 
+    }
+    
+    /**
+     * Sets the health regeneration of the region to a predetermined value 
+     * @param region
+     * @return 
+     */
+    public boolean setRegen_Health(ProtectedRegion region){
+        
+        return true; 
+    }
+    
+    /**
+     * Sets the food regeneration of the region to a predetermined value 
+     * @param region
+     * @return 
+     */
+    public boolean setRegen_Food(ProtectedRegion region){
+        
+        return true; 
+    }
+    
+    /**
+     * Sets all the flags to a basic state
+     * @param region
+     * @return 
+     */
+    public boolean resetToStandardFlags(ProtectedRegion region){
+        
+        return true; 
     }
 
 }

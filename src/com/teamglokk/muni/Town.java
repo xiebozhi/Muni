@@ -44,6 +44,8 @@ public class Town implements Comparable<Town> {
     private Location townCenter;   
     private double townBankBal;
     private double taxRate;
+    private int townBankItemBal;
+    private int taxItemRate;
     private int townRank;
     private String townWorld;
      
@@ -1127,6 +1129,18 @@ public class Town implements Comparable<Town> {
         return plugin.townRanks[townRank].getName();
     }
     
+    public boolean tb_depositItems(Player player, int amount){
+        
+        return true;
+    }
+    public boolean tb_withdrawItems(Player player, int amount) {
+        
+        return true;
+    }
+    public void setItemTaxRate(int amount){
+        taxItemRate = amount; 
+    }
+    
     /**
      * Player deposits funds into the town bank
      * @param player
@@ -1196,6 +1210,10 @@ public class Town implements Comparable<Town> {
      */
     public double getBankBal (){
         return townBankBal;
+    }
+    
+    public int getBankItemBal() {
+        return townBankItemBal;
     }
     
     /**
