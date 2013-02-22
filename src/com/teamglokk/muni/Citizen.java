@@ -156,13 +156,16 @@ public class Citizen implements Comparable<Citizen> {
     public boolean saveToDB(){
         // if exists, update; else insert
         //db_updateRow(String table, String key_col, String key, String colsANDvals
+        if (name==null || townName ==null){
+            return false; 
+        }
         if ( plugin.dbwrapper.checkExistence("citizens", "playerName", name) ){
             if (plugin.isDebug()) { plugin.getLogger().info(toDB_UpdateRowVals());}
             return plugin.dbwrapper.updateRow("citizens", "playerName", name, toDB_UpdateRowVals() );
         } else {
             if (plugin.isDebug()) { plugin.getLogger().info(toDB_Vals());}
             if (plugin.dbwrapper.insert("citizens", toDB_Cols(), toDB_Vals() ) ) {
-                plugin.allCitizens.put(name, townName);
+                plugin.allCitizens.put(name, townName); //NPE
                 return true;
             } else {return false; }
         }

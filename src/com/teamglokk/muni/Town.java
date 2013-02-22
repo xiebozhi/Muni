@@ -148,6 +148,7 @@ public class Town implements Comparable<Town> {
         taxRate = copy.getTaxRate();
         
         mayor = new Citizen (plugin, townName, copy.getMayor(),"mayor",null );
+        if ( mayor.getName() == null ) {return false;}
         plugin.allCitizens.put(copy.getMayor(),townName);
         
          if (!plugin.dbwrapper.checkExistence("citizens", "townName", townName) ){

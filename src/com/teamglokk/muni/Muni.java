@@ -58,7 +58,7 @@ public class Muni extends JavaPlugin {
     public static dbWrapper dbwrapper = null;
    
     //Global options to be pulled from config
-    private static double CONFIG_VERSION = .01;
+    private static double CONFIG_VERSION = .03;
     private static boolean DEBUG = true;
     private static boolean SQL_DEBUG = true;
     private static boolean USE_OP = true;
@@ -70,6 +70,8 @@ public class Muni extends JavaPlugin {
     protected static String db_pass = "defaultpass"; 
     protected static String db_prefix = "defaultpass"; 
     protected static String db_URL = null;
+    public static String getDB_dbName() { return db_database;}
+    public static String getDB_host() { return db_host;}
     public static String getDB_URL() { return db_URL;}
     public static String getDB_user() {return db_user;}
     public static String getDB_pass() { return db_pass;}

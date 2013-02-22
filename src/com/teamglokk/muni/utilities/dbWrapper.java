@@ -31,13 +31,6 @@ import java.sql.Statement;
 
 import java.util.ArrayList;
 
-//import org.sqlite.JDBC;
-//import com.mysql.jdbc.Driver;
-
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-
-
 //import com.teamglokk.muni;
 /**
  * Wraps the database functions to provide simple functions
@@ -64,15 +57,16 @@ public class dbWrapper extends Muni {
             String temp = plugin.useMysql() ? "Opening DB (mysql)":"Opening DB (sqlite)" ;
             plugin.getLogger().info(temp);
         }
-        String driver = plugin.useMysql() ?"org.mysql.jdbc.Driver" :"org.sqlite.JDBC" ;
+        String driver = plugin.useMysql() ?"com.mysql.jdbc.Driver" :"org.sqlite.JDBC" ;
         try {
-            Class.forName(driver);
+                Class.forName(driver).newInstance();
             
-            } catch (ClassNotFoundException ex){
-                plugin.getLogger().severe("db_open (db driver " +driver+ " not found): "+ ex.getMessage() );
+            } catch (Exception ex){
+                plugin.getLogger().severe("db_open: driver " +driver+ " not found");
+                plugin.getLogger().severe("db_open: "+ex.getMessage() );
             }
-            conn = DriverManager.getConnection(plugin.getDB_URL(),plugin.getDB_user(),plugin.getDB_pass());
-            // MySQL is not yet tested!!! 31 Jan 2013 RJS
+        conn = DriverManager.getConnection(plugin.getDB_URL(),plugin.getDB_user(),plugin.getDB_pass());
+        // MySQL is not yet tested!!! 31 Jan 2013 RJS
         
         stmt = conn.createStatement();
     }
@@ -106,7 +100,9 @@ public class dbWrapper extends Muni {
             rs = stmt.executeQuery(SQL); 
             //rs.next();
             String temp = rs.getString(1);
-            if (value.equalsIgnoreCase(temp) ){
+            plugin.getLogger().info("Here: " + temp ) ;
+            if (temp == null || temp.equals("")||temp.equals(null)) {return false; } //NPE fix?
+            if (value.equalsIgnoreCase(temp) ){ //NPE on null player
             rtn = true ;
             if(this.isSQLdebug() ){plugin.getLogger().info("checkExistence: value = "+temp);}
             } 
@@ -460,7 +456,8 @@ public class dbWrapper extends Muni {
         String DROP3 = "DROP TABLE IF EXISTS "+prefix+"transactions;";
         String DROP4 = "DROP TABLE IF EXISTS "+prefix+"votes;";
         String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;";
-        String SQL00= "GRANT ALL PRIVILEGES ON minecraft.* TO user@host BY 'password';";
+        String SQL00= "GRANT ALL ON "+plugin.getDB_dbName()+".* TO '"+
+                plugin.getDB_user()+"'@'"+plugin.getDB_host()+"'" ;//+"' IDENTIFY BY '"+plugin.getDB_pass()+"';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
             "id INTEGER "+ spk + serial +", " + 
             "townName VARCHAR(30) UNIQUE, mayor VARCHAR(16), townRank INTEGER, " + 
@@ -492,7 +489,8 @@ public class dbWrapper extends Muni {
             } // could do an else: check existence here
             if (plugin.useMysql() ){ 
                 stmt.executeUpdate(SQL0); 
-                stmt.executeUpdate(SQL00); 
+                //plugin.getLogger().warning(SQL00);
+                //stmt.executeUpdate(SQL00); 
                 if(plugin.isSQLdebug()){plugin.getLogger().info("Made the DB (mysql)");}
             }
             if(plugin.isSQLdebug()){plugin.getLogger().info("Making towns table if doesn't exist. ");}

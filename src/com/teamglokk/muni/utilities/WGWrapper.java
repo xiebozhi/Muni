@@ -56,7 +56,7 @@ public class WGWrapper extends Muni {
      */
     public WGWrapper(Muni instance) {
         plugin = instance;
-        //wg =  plugin.wgp.; 
+        wg =  plugin.wgp; 
     }
     
     //https://github.com/sk89q/worldguard/blob/master/src/main/java/com/sk89q/worldguard/bukkit/commands/RegionCommands.java
@@ -79,8 +79,8 @@ public class WGWrapper extends Muni {
      * @param regionName
      * @return 
      */
-    public boolean makeRegion (Player player, String regionName ) {
-        if (ProtectedRegion.isValidId(regionName ) ) {
+    public boolean makeRegion ( Player player, String regionName ) {
+        if (!ProtectedRegion.isValidId(regionName ) ) {
             player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
             return false; 
         }
@@ -93,13 +93,16 @@ public class WGWrapper extends Muni {
             player.sendMessage("There is already a region by that name" );
             return false;
         }
-        ProtectedRegion region = null;
+        ProtectedRegion region;
         int sa = 10;
-        Vector shift = new Vector (sa,player.getWorld().getMaxHeight(),sa);
+        
+        Vector shift = new Vector (sa,0,sa);
         Location loc1 = player.getLocation().add(shift);
-        shift = shift.multiply(-1);
-        shift.setY(0);
+        loc1.setY(player.getWorld().getMaxHeight() );
+        shift = new Vector (-sa,0,-sa);
         Location loc2 = player.getLocation().add(shift);
+        loc2.setY(0);
+        
         CuboidSelection sel = new CuboidSelection(player.getWorld(),loc1,loc2);
         
         
