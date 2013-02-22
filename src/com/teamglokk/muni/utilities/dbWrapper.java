@@ -306,7 +306,8 @@ public class dbWrapper extends Muni {
             if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             rs = stmt.executeQuery(SQL);
             temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"), rs.getString("world"),
-                    rs.getInt("townRank"),rs.getDouble("bankBal"),rs.getDouble("taxRate") );
+                    rs.getBoolean("democracy"),rs.getInt("townRank"),rs.getDouble("bankBal"),
+                    rs.getDouble("taxRate"),  rs.getInt("itemBal"), rs.getInt("itemTaxRate") );
         } catch (SQLException ex){
             plugin.getLogger().info ( "getTown: "+ townName+" not found in database" );
         } finally {
@@ -463,8 +464,8 @@ public class dbWrapper extends Muni {
         //        plugin.getDB_user()+"'@'"+plugin.getDB_host()+"'" ;//+"' IDENTIFY BY '"+plugin.getDB_pass()+"';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
             "id INTEGER "+ spk + serial +", " + 
-            "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, " + 
-            "bankBal DOUBLE, itemBal INTEGER, taxRate DOUBLE, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
+            "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, democracy BOOLEAN" + 
+            "bankBal DOUBLE, taxRate DOUBLE, itemBal INTEGER, itemTaxRate INTEGER, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
             "tcZ INTEGER "+ mpk + ");";
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
             "id INTEGER "+ spk + serial +", " + 

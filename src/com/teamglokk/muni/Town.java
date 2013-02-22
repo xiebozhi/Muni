@@ -48,6 +48,7 @@ public class Town implements Comparable<Town> {
     private int taxItemRate;
     private int townRank;
     private String townWorld;
+    private boolean democracy;
      
     // Stored in (prefix)_citizens	
     //private String townMayor;
@@ -80,8 +81,11 @@ public class Town implements Comparable<Town> {
         townName = copy.getName();
         townRank = copy.getRank();
         townBankBal = copy.getBankBal();
+        townBankItemBal = copy.getBankItemBal();
+        taxItemRate = copy.taxItemRate;
         taxRate = copy.getTaxRate();
         mayor = copy.mayor;
+        this.democracy = copy.democracy;
         deputies = copy.deputies;
         citizens = copy.citizens;
         applicants = copy.applicants;
@@ -101,9 +105,12 @@ public class Town implements Comparable<Town> {
         if (plugin.isDebug() ) plugin.getLogger().info("Town with mayor: "+town_Name+", "+player);
         townName = town_Name;
         mayor = new Citizen (plugin,townName,player,"mayor",null); 
+        this.democracy = false;
         townRank = 1;
-        townBankBal = 5;
-        taxRate = 10;
+        townBankBal = 0;
+        taxRate = 100;
+        townBankItemBal = 0;
+        taxItemRate = 16;
         townWorld = world;
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
@@ -113,16 +120,19 @@ public class Town implements Comparable<Town> {
      * 
      * @author bobbshields
      */
-    public Town (Muni instance, String town_Name, String mayor, String world,
-            int rank, double bankBal, double tax){
+    public Town (Muni instance, String town_Name, String mayor, String world, boolean democracy,
+            int rank, double bankBal, double tax, int itemBal, int itemTax){
         
         plugin = instance;
         if (plugin.isDebug() ) plugin.getLogger().info("Begin Muni Constructor: "+mayor+", "+town_Name);
         townName = town_Name;
         this.mayor = new Citizen (plugin,townName, mayor,"mayor",null);
+        this.democracy = democracy;
         townRank = rank;
         townBankBal = bankBal;
         taxRate = tax;
+        townBankItemBal = itemBal;
+        taxItemRate = itemTax;
         townWorld = world;
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
@@ -334,7 +344,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public static String toDB_Cols(){
-        return "townName,mayor,townRank,bankBal,taxRate,world";
+        return "townName,mayor,townRank,democracy,bankBal,taxRate,itemBal,itemTaxRate,world";
     }
     
     /**
@@ -343,8 +353,9 @@ public class Town implements Comparable<Town> {
      */
     public String toDB_Vals(){
         return "'"+townName +"','"+mayor.getName()+"','"+
-               Integer.toString(townRank) +"','"+
+               Integer.toString(townRank) +"','"+"','"+Boolean.toString(democracy) +"','"+
                Double.toString(townBankBal) +"','"+Double.toString(taxRate)+"','"+
+               Integer.toString(townBankItemBal) + "','"+Integer.toString(taxItemRate)+"','"+
                townWorld+"'";
     }  
     
@@ -353,8 +364,11 @@ public class Town implements Comparable<Town> {
      * @return 
      */ 
     public String toDB_UpdateRowVals(){
-        return "townName='"+townName+"', mayor='"+mayor.getName()+"', townRank='"+townRank+"', bankBal='"+
-                Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+"' ";
+        return "townName='"+townName+"', mayor='"+mayor.getName()+"', townRank='"+townRank
+                +"', democracy='"+Boolean.toString(democracy)+"', bankBal='"+
+                Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+
+                "', itemBal='"+ Integer.toString(townBankItemBal) +"', itemTaxRate='"+ Integer.toString(taxItemRate) +
+                "', world='"+townWorld+"' ";
     }
     
     /**
@@ -1129,13 +1143,26 @@ public class Town implements Comparable<Town> {
         return plugin.townRanks[townRank].getName();
     }
     
-    public boolean tb_depositItems(Player player, int amount){
-        
-        return true;
+    public boolean tb_depositItems(Player officer, int amount){
+        if (plugin.econwrapper.payItem(officer, plugin.getRankupItemID(), amount) ){
+            townBankItemBal = townBankItemBal + amount;
+            messageOfficers(officer.getName()+" deposited "+amount+" " +
+                    plugin.econwrapper.getItemName(plugin.getRankupItemID()) + " from the town bank");
+            saveToDB();
+            return true; 
+        }
+        return false;
     }
-    public boolean tb_withdrawItems(Player player, int amount) {
-        
-        return true;
+    public boolean tb_withdrawItems(Player officer, int amount) {
+        if (townBankItemBal >= amount){
+            plugin.econwrapper.giveItem(officer, plugin.getRankupItemID(), amount);
+            townBankItemBal = townBankItemBal - amount;
+            messageOfficers(officer.getName()+" withdrew "+amount+" " +
+                    plugin.econwrapper.getItemName(plugin.getRankupItemID()) + " from the town bank");
+            saveToDB();
+            return true; 
+        }
+        return false;
     }
     public void setItemTaxRate(int amount){
         taxItemRate = amount; 
@@ -1151,6 +1178,7 @@ public class Town implements Comparable<Town> {
         if ( plugin.econwrapper.pay(player,amount,0,"TB Deposit") ){
             townBankBal = townBankBal + amount;
             messageOfficers(player.getName()+" deposited "+amount+" into the town bank");
+            saveToDB();
             return true;
         } else {return false; }
     }
@@ -1165,7 +1193,8 @@ public class Town implements Comparable<Town> {
         if ( townBankBal >= amount ){
             if (plugin.econwrapper.giveMoney(officer,amount, "TB Withdraw") ) {
                 townBankBal = townBankBal - amount;
-            messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
+                messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
+                saveToDB();
                 return true;
             } 
         } 
@@ -1186,7 +1215,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean payTaxes(Player player){
-        return payTaxes(player,taxRate);
+        return payTaxes(player,taxRate,taxItemRate);
     }
     
     /**
@@ -1195,10 +1224,11 @@ public class Town implements Comparable<Town> {
      * @param amount
      * @return 
      */
-    public boolean payTaxes(Player player, Double amount){
-        if ( plugin.econwrapper.pay(player, amount, 0, "Taxes for "+townName ) ){
+    public boolean payTaxes(Player player, Double amount,int itemAmount){
+        if ( plugin.econwrapper.pay(player, amount, itemAmount, "Taxes for "+townName ) ){
             townBankBal = townBankBal + amount;
-            player.sendMessage("You have paid your taxes to "+townName+" of amount "+ amount+" "+plugin.econwrapper.getCurrName(amount) );
+            player.sendMessage("You have paid taxes to "+townName+" of "+ amount+" "+plugin.econwrapper.getCurrName(amount) +
+            " and "+ itemAmount+" " + plugin.econwrapper.getItemName(itemAmount)+".");
             messageOfficers(player.getName() +"has paid " +amount+ " in taxes");
             return true;
         } else { return false; }
@@ -1280,7 +1310,7 @@ public class Town implements Comparable<Town> {
     }
     
     /**
-     * Custom hashcode 
+     * Custom hashCode 
      * @return 
      */
     @Override

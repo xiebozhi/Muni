@@ -101,7 +101,7 @@ public class TownCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if (args.length == 2 ) {
                 Double amount = plugin.parseD( args[1] );
-                rtn = temp.payTaxes(player, amount );
+                rtn = temp.payTaxes(player, amount, 0 );
             } else if ( args.length == 1 ){
                 rtn = temp.payTaxes(player);
             } 
