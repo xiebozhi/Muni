@@ -455,29 +455,45 @@ public class dbWrapper extends Muni {
         String DROP2 = "DROP TABLE IF EXISTS "+prefix+"citizens;";
         String DROP3 = "DROP TABLE IF EXISTS "+prefix+"transactions;";
         String DROP4 = "DROP TABLE IF EXISTS "+prefix+"votes;";
+        String DROP4a = "DROP TABLE IF EXISTS "+prefix+"ballots;";
+        String DROP5 = "DROP TABLE IF EXISTS "+prefix+"contractors;";
+        String DROP6 = "DROP TABLE IF EXISTS "+prefix+"subregions;";
         String SQL0 = "CREATE DATABASE IF NOT EXISTS minecraft;";
-        String SQL00= "GRANT ALL ON "+plugin.getDB_dbName()+".* TO '"+
-                plugin.getDB_user()+"'@'"+plugin.getDB_host()+"'" ;//+"' IDENTIFY BY '"+plugin.getDB_pass()+"';";
+        //String SQL00= "GRANT ALL ON "+plugin.getDB_dbName()+".* TO '"+
+        //        plugin.getDB_user()+"'@'"+plugin.getDB_host()+"'" ;//+"' IDENTIFY BY '"+plugin.getDB_pass()+"';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
             "id INTEGER "+ spk + serial +", " + 
-            "townName VARCHAR(30) UNIQUE, mayor VARCHAR(16), townRank INTEGER, " + 
-            "bankBal DOUBLE, taxRate DOUBLE, tcX INTEGER, tcY INTEGER, "+
+            "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, " + 
+            "bankBal DOUBLE, taxRate DOUBLE, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
             "tcZ INTEGER "+ mpk + ");";
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
             "id INTEGER "+ spk + serial +", " + 
-            "playerName VARCHAR(16) UNIQUE, " +"townName VARCHAR(25), " +
+            "playerName VARCHAR(16) UNIQUE NOT NULL, " +"townName VARCHAR(25), " +
             "role VARCHAR(10), invitedBy VARCHAR(16), "+
-            "sentDate DATETIME, lastLogin DATETIME "+ mpk +");";
+            "sentDate DATETIME, lastLogin DATETIME, homeX INTEGER, homeY INTEGER, "+
+            "homeZ INTEGER "+ mpk +");";
         String SQL3 = "CREATE TABLE IF NOT EXISTS "+prefix+"transactions ( "  + 
             "id INTEGER "+ spk + serial +", " + 
-            "playerName VARCHAR(16), " +
+            "playerName VARCHAR(16) NOT NULL, " +
             "townName VARCHAR(30), timestamp DATETIME,  " +
             "type VARCHAR(30), amount DOUBLE, item_amount INTEGER, " +
             "notes VARCHAR(350) "+ mpk +");";
         String SQL4 = "CREATE TABLE IF NOT EXISTS "+prefix+"votes ( "  + 
             "id INTEGER "+ spk + serial +", " + 
-            "playerName VARCHAR(16), townName VARCHAR(30), timestamp DATETIME,  " +
-            "issue VARCHAR(30), answer BOOLEAN "+ mpk +");";
+            "playerName VARCHAR(16) NOT NULL, townName VARCHAR(30) NOT NULL, timestamp DATETIME,  " +
+            "ballotID INTEGER NOT NULL, answer BOOLEAN NOT NULL "+ mpk +");";
+        String SQL4a = "CREATE TABLE IF NOT EXISTS "+prefix+"ballots ( "  + 
+            "id INTEGER "+ spk + serial +", " + "townName VARCHAR(30) NOT NULL, endTime DATETIME,  " +
+            "action VARCHAR(30), description VARCHAR(80), status BOOLEAN NOT NULL, result BOOLEAN "+ mpk +");";
+        String SQL5 = "CREATE TABLE IF NOT EXISTS "+prefix+"contractors ( "  + 
+            "id INTEGER "+ spk + serial +", " + 
+                "playerName VARCHAR(16) NOT NULL, townName VARCHAR(30) NOT NULL, endTime DATETIME " 
+                +mpk +");";
+        String SQL6 = "CREATE TABLE IF NOT EXISTS "+prefix+"subregions ( "  + 
+            "id INTEGER "+ spk + serial +", " + 
+                "town VARCHAR(30) NOT NULL , region VARCHAR(30) NOT NULL, "+
+                "world VARCHAR(30) NOT NULL, type VARCHAR(15) " 
+                +mpk +");";
         try {
             db_open();
             if (drops){ 
@@ -486,6 +502,9 @@ public class dbWrapper extends Muni {
                 stmt.executeUpdate(DROP2);
                 stmt.executeUpdate(DROP3);
                 stmt.executeUpdate(DROP4);
+                stmt.executeUpdate(DROP4a);
+                stmt.executeUpdate(DROP5);
+                stmt.executeUpdate(DROP6);
             } // could do an else: check existence here
             if (plugin.useMysql() ){ 
                 stmt.executeUpdate(SQL0); 
@@ -502,6 +521,12 @@ public class dbWrapper extends Muni {
             rtn = true;
             if(plugin.isSQLdebug()){plugin.getLogger().info("Making voting table if doesn't exist. ");}
             stmt.executeUpdate(SQL4);
+            if(plugin.isSQLdebug()){plugin.getLogger().info("Making ballots table if doesn't exist. ");}
+            stmt.executeUpdate(SQL4a);
+            if(plugin.isSQLdebug()){plugin.getLogger().info("Making contractor table if doesn't exist. ");}
+            stmt.executeUpdate(SQL5);
+            if(plugin.isSQLdebug()){plugin.getLogger().info("Making sub regions table if doesn't exist. ");}
+            stmt.executeUpdate(SQL6);
             rtn = true;
             
         } catch (SQLException ex){
