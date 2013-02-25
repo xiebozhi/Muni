@@ -103,7 +103,7 @@ public class Transaction {
      * Gets the valid database column names
      * @return 
      */
-    private String db_Cols(){
+    public String toDB_Cols(){
         return "playerName,townName,timestamp,type,amount,item_amount,notes";
     }
     
@@ -111,7 +111,7 @@ public class Transaction {
      * Gets the database values in the order of db_Cols()
      * @return 
      */
-    private String db_Vals(){
+    public String toDB_Vals(){
         return "'"+playerName+"', '"+townName+"', '"+datetime+"', '"+type
                 +"', '"+amount+"', '"+item_amount+"', '"+notes+"'";
     }
@@ -121,7 +121,7 @@ public class Transaction {
      * @return 
      */
     public boolean saveTrans(){
-        if (plugin.dbwrapper.insert("transactions", db_Cols(), db_Vals() )){
+        if (plugin.dbwrapper.insert("transactions", toDB_Cols(), toDB_Vals() )){
             return true;
         } else {
             plugin.getLogger().severe("Could not insert the transaction into the database:");

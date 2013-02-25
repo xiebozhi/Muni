@@ -65,6 +65,13 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(sender,current.getName() ) ;
             }
             return true;
+        } else if (args[0].equalsIgnoreCase("rankings")) { //tested and working - 18 Feb 13
+            if (args.length != 1) {
+                plugin.out(sender,"/town rankings (no parameters allowed)");
+                return false;
+            }
+            plugin.displayTownRankings(sender);
+            return true;
         } else if (args[0].equalsIgnoreCase("info")) { //tested and working - 19 Feb 13
             if(args.length>2){
                 plugin.out(sender,"/town info <town_Name> "+ChatColor.RED+"OR" +ChatColor.WHITE+" /town info (this is for your own town",ChatColor.WHITE); 
@@ -182,6 +189,7 @@ public class TownCommand implements CommandExecutor {
     private void displayHelp(CommandSender player){
         plugin.out( player,"Muni Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
         plugin.out( player, "/town list");
+        plugin.out( player, "/town rankings");
         plugin.out( player, "/town info <optional:townName>");
         plugin.out( player, "/town apply <townName>");
         plugin.out( player, "/town viewInvite");

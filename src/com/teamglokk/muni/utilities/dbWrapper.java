@@ -434,6 +434,32 @@ public class dbWrapper extends Muni {
         return rtn;
     }
 
+    public ArrayList<Transaction> getTaxHistory (Town t, String player){
+        ArrayList<Transaction> rtn = new ArrayList<Transaction>();
+        
+        Transaction temp = new Transaction(plugin);
+        String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"transactions "+
+                " WHERE playerName='"+player+"'";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            temp = new Transaction(plugin, rs.getString("townName"), rs.getString("playerName"), 
+                    rs.getString("type"), rs.getDouble("amount"),
+                    rs.getInt("item_amount") ); //, rs.getString("notes"),rs.getTimestamp("timestamp")
+            rtn.add(temp);
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getTaxHistory "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getTaxHistory: "+ ex.getMessage() ); 
+            } 
+        }
+        
+        return rtn;
+    }
     /**
      * Creates the database specifically for Muni 
      * @param drops true means the tables will be dropped before creating them again

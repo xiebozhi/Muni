@@ -28,6 +28,10 @@ import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import net.milkbowl.vault.economy.Economy;
 
 import java.util.TreeMap;
@@ -235,8 +239,12 @@ public class Muni extends JavaPlugin {
      * Adds a town to the collection
      * @param addition 
      */
-    public void addTown( Town addition ) {
-        towns.put(addition.getName(),addition);
+    public boolean addTown( Town addition ) {
+        if ( addition.isValid() ){
+            towns.put(addition.getName(),addition);
+            return true; 
+        }
+        return false; 
     }
     /**
      * Returns true if the town is in the towns map
@@ -257,6 +265,7 @@ public class Muni extends JavaPlugin {
         }
         // if in database, remove from database
     }
+    
     /**
      * Searches for town by name
      * @param town_Name
@@ -412,6 +421,33 @@ public class Muni extends JavaPlugin {
             temp = temp + curr.getName() +", ";
         }
         return temp;
+    }
+    
+    public void displayTownRankings(CommandSender sender) {
+        // if player then bool color = true, then use color in the rankings
+        sender.sendMessage("Here are the town rankings:");
+        int lastRank = totalTownRanks + 1;
+        int place = 1;
+        for (Town t : getTownRankings() ){
+            if (t.getRank() < lastRank ){
+                sender.sendMessage("Rank "+t.getRank()+": ");
+                lastRank = t.getRank();
+            }
+            sender.sendMessage(place++ + " " + t.getName() );
+        }
+        
+    }
+    public List<Town> getTownRankings() {
+        List<Town> rtn = new ArrayList<Town>();
+        for (Town t : towns.values() ){
+            rtn.add(t);
+        }
+        Collections.sort( rtn, new TownRankingsComparator() );
+        return rtn;
+    }
+    
+    public double getRankupItemValueEach(){
+        return rankupItemValueEach;
     }
 
     /**
@@ -652,5 +688,33 @@ public class Muni extends JavaPlugin {
             player.sendMessage(color+msg);
             return true;
         }
+    }
+}
+
+/**
+ * Used to compare town rankings 
+ * First decision is which has a higher rank
+ * If same rank, who has more value in the bank.
+ * Ranking value = (money in bank) + (item value multiplier * items in bank)
+ * @author bobbshields
+ */
+class TownRankingsComparator implements Comparator<Town>{
+    @Override
+    public int compare(Town t1, Town t2){
+        int rtn;
+        if ( t1.getRank() < t2.getRank() ){
+            rtn = -1;
+        } else if ( t1.getRank() == t2.getRank() ) {
+            if (t1.getRankingValue() < t2.getRankingValue() ){
+                rtn = 1;
+            } else if (t1.getRankingValue() == t2.getRankingValue() ) {
+                rtn = 0;
+            } else { // t1 ranking value > t2 ranking value
+                rtn = -1;
+            }
+        } else { // t1 rank > t2 rank
+            rtn = 1;
+        }
+        return rtn;
     }
 }

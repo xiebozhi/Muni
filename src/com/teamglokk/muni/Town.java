@@ -208,6 +208,14 @@ public class Town implements Comparable<Town> {
     }
     
     /**
+     * Gets the rankings value for this town to be compared against other towns of the same rank
+     * @return Town's money bal + (item bal * rankup value per item)  
+     */
+    public double getRankingValue(){
+        return townBankBal+ plugin.getRankupItemValueEach()*townBankItemBal;
+    }
+    
+    /**
      * Saves the data for the mayor to the database 
      * @return 
      */
@@ -1225,7 +1233,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean payTaxes(Player player, Double amount,int itemAmount){
-        if ( plugin.econwrapper.pay(player, amount, itemAmount, "Taxes for "+townName ) ){
+        if ( plugin.econwrapper.pay(player, amount, itemAmount, "taxes" ) ){
             townBankBal = townBankBal + amount;
             player.sendMessage("You have paid taxes to "+townName+" of "+ amount+" "+plugin.econwrapper.getCurrName(amount) +
             " and "+ itemAmount+" " + plugin.econwrapper.getItemName(itemAmount)+".");

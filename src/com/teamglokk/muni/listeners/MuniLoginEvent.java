@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.entity.Player;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import org.bukkit.event.EventPriority;
 
 /**
  * The custom Muni Login Event
@@ -25,7 +26,7 @@ public class MuniLoginEvent implements Listener{
      * Displays relevant town info to players as they log in. 
      * @param event 
      */
-    @EventHandler
+    @EventHandler (priority = EventPriority.LOW)
     public void playerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (plugin.isCitizen( player ) ){
