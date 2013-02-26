@@ -30,6 +30,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 //import com.teamglokk.muni;
 /**
@@ -317,6 +319,47 @@ public class dbWrapper extends Muni {
             } finally{}
         }
         return temp;
+    }
+    
+    public boolean saveTowns(Collection<Town> towns){
+        boolean rtn = false; 
+        List<String> updates = new ArrayList<String>();
+        List<String> inserts = new ArrayList<String>();
+        
+        for (Town t : towns){
+            if (checkExistence("towns","townName",t.getName() ) ){
+                updates.add("UPDATE "+plugin.getDB_prefix()+"towns SET "+
+                    t.toDB_UpdateRowVals()+" WHERE townName='"+t.getName()+"';");
+            } else {
+                inserts.add("INSERT INTO "+plugin.getDB_prefix()+"towns ("+
+                        t.toDB_Cols()+") VALUES ("+t.toDB_Vals()+");");
+            }
+        }
+        
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info("DB: Saving all towns");}
+            if (!updates.isEmpty() ){
+                for (String SQL : updates ) {
+                    stmt.executeUpdate(SQL); 
+                }
+            } 
+            if (!inserts.isEmpty() ){
+                for (String SQL : inserts){
+                    stmt.executeQuery(SQL);
+                }
+            }
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_saveTowns: "+ ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_saveTowns: "+ ex.getMessage() ); 
+                rtn = false;
+            } 
+        }
+        return rtn; 
     }
     
     /**

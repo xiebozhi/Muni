@@ -230,9 +230,10 @@ public class Muni extends JavaPlugin {
      * Saves all towns to the database
      */
     public void saveTowns() {
-        for (Town curr: towns.values()) {
+        /*for (Town curr: towns.values()) {
             curr.saveToDB();
-        }
+        } */
+        this.dbwrapper.saveTowns( towns.values() );
     }
     
     /**

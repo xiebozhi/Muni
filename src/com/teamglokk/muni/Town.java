@@ -352,7 +352,7 @@ public class Town implements Comparable<Town> {
      * Gives a string that has all the valid database column names
      * @return 
      */
-    public static String toDB_Cols(){
+    public String toDB_Cols(){
         return "townName,mayor,townRank,democracy,bankBal,taxRate,itemBal,itemTaxRate,world";
     }
     
