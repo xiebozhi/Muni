@@ -458,7 +458,7 @@ public class Town implements Comparable<Town> {
     public void info(CommandSender player){
         plugin.out( player, townName+" is a "+plugin.townRanks[townRank].getName() );
         plugin.out( player, "The town bank balance is "+townBankBal+" and the tax rate is "+taxRate+".");
-        plugin.out( player, "The town vault "+townBankItemBal+" "+
+        plugin.out( player, "The town vault has "+townBankItemBal+" "+
                 plugin.econwrapper.getRankupItemName() +" and the item tax rate is "+taxItemRate+".");
         listAllCitizens(player);
     }
@@ -1222,7 +1222,7 @@ public class Town implements Comparable<Town> {
         if (plugin.econwrapper.payItem(officer, plugin.getRankupItemID(), amount) ){
             townBankItemBal = townBankItemBal + amount;
             messageOfficers(officer.getName()+" deposited "+amount+" " +
-                    plugin.econwrapper.getItemName(plugin.getRankupItemID()) + " from the town bank");
+                    plugin.econwrapper.getItemName(plugin.getRankupItemID()) + " into the town bank");
             saveToDB();
             return true; 
         }

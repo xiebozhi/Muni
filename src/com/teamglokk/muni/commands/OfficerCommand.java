@@ -158,7 +158,9 @@ public class OfficerCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             switch (args.length){
                 case 1:
-                    plugin.getTown(plugin.getTownName( officer.getName() ) ).checkTownBank(officer);
+                    if (plugin.isCitizen(officer) ) {
+                        plugin.getTown(plugin.getTownName( officer.getName() ) ).checkTownBank(officer); 
+                    } else {officer.sendMessage("You are not part of a town"); }
                     break;
                 case 2:
                     temp.checkTownBank(officer);
@@ -276,8 +278,8 @@ public class OfficerCommand implements CommandExecutor {
                 || args[0].equalsIgnoreCase("disband")) {
             // this should verify intention before continuing.
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            temp.removeAllTownCits();
-            plugin.removeTown(temp.getName() );
+            temp.removeAllTownCits();            //NPE somewhere
+            plugin.removeTown(temp.getName() );  //NPE somewhere
             plugin.getServer().broadcastMessage(temp.getName()+" and all its citizens were removed by the mayor, "+ officer.getName()+"!" );
             return true;
         } else if (args[0].equalsIgnoreCase("deputize")) { // buggy but working on it - 19 Feb 13
@@ -315,7 +317,8 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "/deputy resign");
             //plugin.out(player, "/deputy regions");
             //plugin.out(player, "/deputy setRegion");
-            plugin.out(sender, "/deputy setTax <money> <sponges>");
+            plugin.out(sender, "/deputy setTax <money>");
+            plugin.out(sender, "/deputy setItemTax <sponges>");
             //plugin.out(player, "**/deputy pushBorder");
             plugin.out(sender, "**/deputy bank deposit");
             plugin.out(sender, "** (with perm) ");
