@@ -348,6 +348,35 @@ public class Town implements Comparable<Town> {
         } else { return false; }
     }
     
+    public List<Citizen> getAllMembers(){
+        List<Citizen> rtn = new ArrayList<Citizen>();
+        
+        if (mayor.isValid() ){
+            rtn.add(mayor);
+        }
+        for (Citizen c: deputies.values() ) {
+            if (c.isValid() ){
+                rtn.add(c);
+            }
+        }
+        for (Citizen c: citizens.values() ) {
+            if (c.isValid() ){
+                rtn.add(c);
+            }
+        }
+        for (Citizen c: invitees.values() ) {
+            if (c.isValid() ){
+                rtn.add(c);
+            }
+        }
+        for (Citizen c: applicants.values() ) {
+            if (c.isValid() ){
+                rtn.add(c);
+            }
+        }
+        return rtn;
+    }
+    
     /**
      * Gives a string that has all the valid database column names
      * @return 
@@ -388,21 +417,29 @@ public class Town implements Comparable<Town> {
      */
     public boolean checkTaxes (Player officer, String citizen){
         
+        if (!plugin.isCitizen(citizen) ){
+            officer.sendMessage(citizen+" is not a member of any town");
+            return false; 
+        }
+        
         if ( isOfficer(officer) ) {
-            if (isCitizen(citizen) || !isDeputy(citizen) || isMayor(citizen) ){
-                 
+            if (isCitizen(citizen) || isDeputy(citizen) || isMayor(citizen) ){
+                officer.sendMessage("Checking tax history for: "+citizen);
             } else {
-                officer.sendMessage(citizen+" is not a citizen of your town");
+                officer.sendMessage(citizen+" is not a member of your town");
                 return false;
             }
             List<Transaction> trans = plugin.dbwrapper.getTaxHistory(this, citizen);
+            if (trans.isEmpty() ){
+                officer.sendMessage(citizen+" has no tax history.");
+            }
             for (Transaction tr : trans){
                 officer.sendMessage(tr.toStringTaxesFormat() );
             }
             return true; 
         } else {
             officer.sendMessage("You're not an officer!") ; 
-        return false; 
+            return false; 
         }
     }
     /**
@@ -421,6 +458,8 @@ public class Town implements Comparable<Town> {
     public void info(CommandSender player){
         plugin.out( player, townName+" is a "+plugin.townRanks[townRank].getName() );
         plugin.out( player, "The town bank balance is "+townBankBal+" and the tax rate is "+taxRate+".");
+        plugin.out( player, "The town vault "+townBankItemBal+" "+
+                plugin.econwrapper.getRankupItemName() +" and the item tax rate is "+taxItemRate+".");
         listAllCitizens(player);
     }
     public List<String> getOfficerList(){
@@ -1265,13 +1304,13 @@ public class Town implements Comparable<Town> {
      * @param amount
      * @return 
      */
-    public boolean payTaxes(Player player, Double amount,int itemAmount){
+    public boolean payTaxes(Player player, Double amount, int itemAmount){
         if ( plugin.econwrapper.pay(player, amount, itemAmount, "taxes" ) ){
             townBankBal = townBankBal + amount;
             player.sendMessage("You have paid taxes to "+townName+" of "+ amount+" "+plugin.econwrapper.getCurrName(amount) +
-            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+"s.");
+            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+".");
             messageOfficers(player.getName() +"has paid " +amount+" "+plugin.econwrapper.getCurrName(amount) +
-            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+ "s in taxes");
+            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+ " in taxes");
             return true;
         } else { return false; }
     }

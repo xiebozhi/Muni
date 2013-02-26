@@ -97,16 +97,34 @@ public class OfficerCommand implements CommandExecutor {
             temp.checkTaxes(officer, args[1] );
             
             return true;
-        }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
-            if (!plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ||!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
+        }  else if (args[0].equalsIgnoreCase("setTax")) { 
+            if (!plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ||
+                    !plugin.econwrapper.hasPerm(officer, "muni.mayor") ) {
             officer.sendMessage("You do not have permission to set the taxs");
             return true; 
-        }
+            }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             try {
                 if (temp.isOfficer(officer ) ){
                     temp.setTaxRate( plugin.parseD( args[1] ) );
                     temp.announce(officer.getName()+" has set the tax rate for "+temp.getName()+ " to "+ args[1] );
+                } else{ officer.sendMessage("You are not an officer of "+temp.getName() ); }
+                return true;
+            } catch (Exception ex) {
+                officer.sendMessage("You should write an actual number next time");
+                return true;
+            }
+        } else if (args[0].equalsIgnoreCase("setItemTax")) {
+            if (!plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ||
+                    !plugin.econwrapper.hasPerm(officer, "muni.mayor") ) {
+            officer.sendMessage("You do not have permission to set the taxs");
+            return true; 
+            }
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            try {
+                if (temp.isOfficer(officer ) ){
+                    temp.setItemTaxRate( plugin.parseI( args[1] ) );
+                    temp.announce(officer.getName()+" has set the item tax rate for "+temp.getName()+ " to "+ args[1] );
                 } else{ officer.sendMessage("You are not an officer of "+temp.getName() ); }
                 return true;
             } catch (Exception ex) {
@@ -123,7 +141,7 @@ public class OfficerCommand implements CommandExecutor {
             }
             return true;
             
-        } else if (args[0].equalsIgnoreCase("resign")) { //working - 19 Feb 13
+        } else if (args[0].equalsIgnoreCase("resign")) { 
             if (args.length != 1) {
                 officer.sendMessage("Incorrect number of parameters");
                 return false;
@@ -136,7 +154,7 @@ public class OfficerCommand implements CommandExecutor {
                 temp.resignDeputy(officer);
                 return true;
             }
-        } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("bank")) { 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             switch (args.length){
                 case 1:
@@ -233,7 +251,7 @@ public class OfficerCommand implements CommandExecutor {
             return true; 
         } 
         
-        if (args[0].equalsIgnoreCase("found") || //tested and needed fixes - 19 Feb 13
+        if (args[0].equalsIgnoreCase("found") || 
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
             if (args.length != 2) {
                 officer.sendMessage("/mayor found <TownName>");
@@ -254,7 +272,7 @@ public class OfficerCommand implements CommandExecutor {
                 plugin.getServer().broadcastMessage(t.getName()+" is now an official "+t.getTitle()+" thanks to the new mayor " +t.getMayor()+"!" );
             } else { officer.sendMessage("Could not start the town due to insufficent resources" ); }
             return true;
-        } else if (args[0].equalsIgnoreCase("delete")  //tested not working, think its now fixed - 19 Feb 13
+        } else if (args[0].equalsIgnoreCase("delete")  
                 || args[0].equalsIgnoreCase("disband")) {
             // this should verify intention before continuing.
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
@@ -275,7 +293,7 @@ public class OfficerCommand implements CommandExecutor {
             temp.makeDeputy( args[1] ,officer);
             return true;
             
-        } else if (args[0].equalsIgnoreCase("rankup")) { //working but needs better output - 18 Feb 
+        } else if (args[0].equalsIgnoreCase("rankup")) { 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             if ( temp.rankup(officer) ){
                 plugin.getServer().broadcastMessage(temp.getName()+" has been ranked to "+temp.getTitle()+" by " + officer.getName() );
@@ -287,7 +305,7 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         }
     }
-    private void displayHelp(CommandSender sender, String subcmd){ // Tested and working - 18 feb
+    private void displayHelp(CommandSender sender, String subcmd){ 
         if (subcmd.equalsIgnoreCase("deputy") ){
             plugin.out(sender, "Muni Deputy Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
             plugin.out(sender, "/deputy invite <playerName>");

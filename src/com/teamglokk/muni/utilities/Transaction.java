@@ -63,14 +63,18 @@ public class Transaction {
      * @param item_payment 
      */
     public Transaction (Muni instance, String town_Name, String player, 
-            String reason, double payment, int item_payment ){
+            String reason, double payment, int item_payment, Timestamp stamp ){
         plugin = instance;
         playerName = player;
         townName = town_Name;
         type = reason;
         amount = payment;
         item_amount = item_payment;
-        datetime = new Timestamp ( System.currentTimeMillis() );
+        if (stamp == null ) {
+            datetime = new Timestamp ( System.currentTimeMillis() ); 
+        } else {
+            datetime = stamp;
+        }
                 //= Calendar.getInstance();
         //time = Calendar.getInstance();
     }
@@ -143,7 +147,7 @@ public class Transaction {
         String s = (item_amount > 1 ) ? "s" : "" ;
         return playerName+" paid taxes to "+townName+": "+
                 amount+" "+plugin.econwrapper.getCurrName(amount)+", "+
-                item_amount+" "+plugin.econwrapper.getItemName(plugin.getRankupItemID() )+s+" on "+datetime+".";
+                item_amount+" "+plugin.econwrapper.getItemName(plugin.getRankupItemID() )+s+" on "+datetime+"."; //consistently outputing as 1969
     }
     /*
     public Calendar date(){

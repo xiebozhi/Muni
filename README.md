@@ -6,7 +6,7 @@ http://dev.bukkit.org/server-mods/muni
 
 Development Roadmap
 ===================
-First Alpha ( Alpha v0.1 Released 21 Feb 2013 )
+First Alpha ( Alpha v0.11 Released 26 Feb 2013 )
 ===========
 1) Command executors responds with messages 
 
@@ -22,11 +22,13 @@ First Alpha ( Alpha v0.1 Released 21 Feb 2013 )
 (There may still be some bugs in this area)
 
 6) Town Bank (/town bank, /mayor bank deposit, /mayor bank withdraw)
+6a) Town Item Bank (/mayor itemBank)
 
 7) Taxes working in a basic fashion (/town paytaxes, /mayor settax) 
 
-8) Transactions reporting (Working very well 18 Feb) 
-*_needs to have in game lookup commands added_*
+8) Transactions reporting 
+8a) Tax lookup (/deputy checkTaxes <playerName> ) 
+9a) Bank transaction lookup (to be added) 
 
 
 Second Alpha (*Development has started*)
@@ -34,11 +36,11 @@ Second Alpha (*Development has started*)
 
 Add World Guard Region functionality
 
-1) Define a 20x20 (configurable) region centered at command location
+1) Define a 20x20 (maybe configurable) region centered at command location (DONE!)
 
-2) Flag the region for no-PVP and (maybe) no MobSpawn
+2) Flag the region for no-PVP and (maybe) no MobSpawn (maybe working) 
 
-3) Define 5x5 sub-regions with Restaurant and Hospital flags
+3) Define 5x5 sub-regions with Restaurant and Hospital flags (Skeleton in place)
 
 4) Create border push mechanism
 

@@ -167,7 +167,8 @@ public class Muni extends JavaPlugin {
             for (String curr : dbwrapper.getSingleCol("towns", "townName") ){
                 if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
                 copyTown.loadFromDB( curr );
-                towns.put(copyTown.getName(), new Town ( copyTown ) );
+                addTown(copyTown);
+                //towns.put(copyTown.getName(), new Town ( copyTown ) );
                 copyTown = new Town (this); 
             }
         } catch (NullPointerException ex){
@@ -203,7 +204,9 @@ public class Muni extends JavaPlugin {
         maker.loadFromDB("SecondTest");
         this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
     }
-    
+    /**
+     * To be deleted 
+     */
     public void makeDefaultCitizens(){
         this.getLogger().info ("Making test citizens");
         Citizen maker = new Citizen(this);
@@ -233,6 +236,9 @@ public class Muni extends JavaPlugin {
         /*for (Town curr: towns.values()) {
             curr.saveToDB();
         } */
+        for (Town t : towns.values() ) {
+            this.dbwrapper.saveCitizens(t.getAllMembers() );
+        }
         this.dbwrapper.saveTowns( towns.values() );
     }
     
@@ -243,6 +249,7 @@ public class Muni extends JavaPlugin {
     public boolean addTown( Town addition ) {
         if ( addition.isValid() ){
             towns.put(addition.getName(),addition);
+            //update database
             return true; 
         }
         return false; 
@@ -253,32 +260,36 @@ public class Muni extends JavaPlugin {
      * @return 
      */
     public boolean isTown( String town ) {
+        if (town == null) {return false; }
         return towns.containsKey(town);
     }
     
     /**
      * Removes a town from the collection
-     * @param town_Name 
+     * @param town 
      */
-    public void removeTown(String town_Name){
-        if (towns.containsKey( town_Name ) ){
-            towns.remove( town_Name );
+    public boolean removeTown(String town){
+        if (town == null) {return false; }
+        if (towns.containsKey( town ) ){
+            towns.remove( town );
+            // if in database, remove from database
+            return true;
         }
-        // if in database, remove from database
+        return false; 
     }
     
     /**
      * Searches for town by name
-     * @param town_Name
+     * @param town
      * @return  the Town if found, null if not
      */
-    public Town getTown(String town_Name){
+    public Town getTown(String town){
         Town temp = null;
-        if (town_Name == null) {this.getLogger().info("getTown received a null string") ;}
+        if (town == null) {this.getLogger().info("getTown received a null string") ;}
         
-        if (towns.containsKey(town_Name) ){
-            temp = towns.get(town_Name); 
-        } else { this.getLogger().info("Town search result: " +town_Name+" not found"  ); }
+        if (towns.containsKey(town) ){
+            temp = towns.get(town); 
+        } else { this.getLogger().info("Town search result: " +town+" not found"  ); }
         
         return temp;
         

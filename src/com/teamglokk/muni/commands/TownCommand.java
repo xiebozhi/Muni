@@ -48,7 +48,7 @@ public class TownCommand implements CommandExecutor {
         if (args.length == 0){
             displayHelp(sender);
             return true;
-        } else if (args[0].equalsIgnoreCase("list")) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("list")) { 
             if (args.length != 1) {
                 plugin.out(sender,"/town list (no parameters allowed)");
                 return false;
@@ -65,14 +65,14 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(sender,current.getName() ) ;
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("rankings")) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("rankings")) { 
             if (args.length != 1) {
                 plugin.out(sender,"/town rankings (no parameters allowed)");
                 return false;
             }
             plugin.displayTownRankings(sender);
             return true;
-        } else if (args[0].equalsIgnoreCase("info")) { //tested and working - 19 Feb 13
+        } else if (args[0].equalsIgnoreCase("info")) { 
             if(args.length>2){
                 plugin.out(sender,"/town info <town_Name> "+ChatColor.RED+"OR" +ChatColor.WHITE+" /town info (this is for your own town",ChatColor.WHITE); 
                 return true;
@@ -86,7 +86,7 @@ public class TownCommand implements CommandExecutor {
                 } else { sender.sendMessage(args[1]+" is not a valid town.  (/town list)"); }
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("help") ) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("help") ) { 
             displayHelp(sender);
             return true;
         }  
@@ -103,7 +103,7 @@ public class TownCommand implements CommandExecutor {
             }
         }
         
-        if (args[0].equalsIgnoreCase("payTaxes")) { //tested and working - 18 Feb 13 
+        if (args[0].equalsIgnoreCase("payTaxes")) { 
             boolean rtn = false; 
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if (args.length == 2 ) {
@@ -113,7 +113,7 @@ public class TownCommand implements CommandExecutor {
                 rtn = temp.payTaxes(player);
             } 
             return rtn;
-        } else if (args[0].equalsIgnoreCase("apply")) { //tested and working well - 28 Feb 13
+        } else if (args[0].equalsIgnoreCase("apply")) { 
             if (args.length != 2) {
                 player.sendMessage("Incorrect number of parameters");
                 return false;
@@ -143,7 +143,7 @@ public class TownCommand implements CommandExecutor {
             temp.acceptInvite(player);
             
             return true;
-        } else if (args[0].equalsIgnoreCase("viewInvite")) { //seems to be working - 19 Feb
+        } else if (args[0].equalsIgnoreCase("viewInvite")) { 
             if (args.length != 1) {
                 player.sendMessage("/town viewInvite (no parameters)");
                 return false;
@@ -159,7 +159,7 @@ public class TownCommand implements CommandExecutor {
                 plugin.out(player,"You are not an invitee of " + temp.getName() );
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("leave")) { //working - 19 Feb
+        } else if (args[0].equalsIgnoreCase("leave")) { 
             Town temp = plugin.getTown( plugin.getTownName( player.getName() ) );
             if ( temp.leave(player) ){
             }
@@ -170,7 +170,7 @@ public class TownCommand implements CommandExecutor {
         }else if (args[0].equalsIgnoreCase("vote")) {
             player.sendMessage("Voting not yet added.");
             return true;
-        } else if (args[0].equalsIgnoreCase("bank")) { //tested and working - 18 Feb 13
+        } else if (args[0].equalsIgnoreCase("bank")) { 
             if (!plugin.isCitizen(player) ){ 
                 player.sendMessage("You are not a member of a town" ); 
                 return true;

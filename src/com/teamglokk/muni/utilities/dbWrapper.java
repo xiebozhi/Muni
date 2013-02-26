@@ -342,11 +342,13 @@ public class dbWrapper extends Muni {
             if (!updates.isEmpty() ){
                 for (String SQL : updates ) {
                     stmt.executeUpdate(SQL); 
+                    if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
                 }
             } 
             if (!inserts.isEmpty() ){
                 for (String SQL : inserts){
                     stmt.executeQuery(SQL);
+                    if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
                 }
             }
         } catch (SQLException ex){
@@ -387,6 +389,48 @@ public class dbWrapper extends Muni {
         return temp;
     }
     
+    public boolean saveCitizens(Collection<Citizen> cits){
+        boolean rtn = false; 
+        List<String> updates = new ArrayList<String>();
+        List<String> inserts = new ArrayList<String>();
+        
+        for (Citizen c : cits){
+            if (checkExistence("citizens","playerName",c.getName() ) ){
+                updates.add("UPDATE "+plugin.getDB_prefix()+"citizens SET "+
+                    c.toDB_UpdateRowVals()+" WHERE playerName='"+c.getName()+"';");
+            } else {
+                inserts.add("INSERT INTO "+plugin.getDB_prefix()+"citizens ("+
+                        c.toDB_Cols()+") VALUES ("+c.toDB_Vals()+");");
+            }
+        }
+        
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info("DB: Saving all towns");}
+            if (!updates.isEmpty() ){
+                for (String SQL : updates ) {
+                    stmt.executeUpdate(SQL); 
+                    if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+                }
+            } 
+            if (!inserts.isEmpty() ){
+                for (String SQL : inserts){
+                    stmt.executeQuery(SQL);
+                    if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+                }
+            }
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_saveTowns: "+ ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_saveTowns: "+ ex.getMessage() ); 
+                rtn = false;
+            } 
+        }
+        return rtn; 
+    }
     /**
      * Insert a single row into the database
      * @param table
@@ -482,15 +526,17 @@ public class dbWrapper extends Muni {
         
         Transaction temp = new Transaction(plugin);
         String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"transactions "+
-                " WHERE playerName='"+player+"'";
+                " WHERE playerName='"+player+"' ORDER BY id DESC";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
-            temp = new Transaction(plugin, rs.getString("townName"), rs.getString("playerName"), 
-                    rs.getString("type"), rs.getDouble("amount"),
-                    rs.getInt("item_amount") ); //, rs.getString("notes"),rs.getTimestamp("timestamp")
-            rtn.add(temp);
+            while (rs.next() ){
+                temp = new Transaction(plugin, rs.getString("townName"), rs.getString("playerName"), 
+                        rs.getString("type"), rs.getDouble("amount"),
+                        rs.getInt("item_amount") ,rs.getTimestamp("timestamp")); //, rs.getString("notes")
+                rtn.add(temp);
+            }
             
         } catch (SQLException ex){
             plugin.getLogger().severe("db_getTaxHistory "+ ex.getMessage() ); 
