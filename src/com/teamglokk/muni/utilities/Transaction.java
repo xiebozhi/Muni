@@ -132,10 +132,18 @@ public class Transaction {
     
     @Override
     public String toString(){
+        String s = (item_amount > 1 ) ? "s" : "" ;
         return "Player "+playerName+" for town "+townName+" made a payment for "+type+" of "+
                 amount+" "+plugin.econwrapper.getCurrName(amount)+" and "+
-                item_amount+" "+Material.getMaterial(plugin.getRankupItemID())+" on "+datetime+".";
+                item_amount+" "+plugin.econwrapper.getItemName(plugin.getRankupItemID() )+s+" on "+datetime+".";
                 //+date()+" at "+time()+".";
+    }
+    
+    public String toStringTaxesFormat(){
+        String s = (item_amount > 1 ) ? "s" : "" ;
+        return playerName+" paid taxes to "+townName+": "+
+                amount+" "+plugin.econwrapper.getCurrName(amount)+", "+
+                item_amount+" "+plugin.econwrapper.getItemName(plugin.getRankupItemID() )+s+" on "+datetime+".";
     }
     /*
     public Calendar date(){

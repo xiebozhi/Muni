@@ -78,7 +78,7 @@ public class TownCommand implements CommandExecutor {
                 return true;
             } else if (args.length==1){
                 if (sender instanceof Player && plugin.isCitizen(sender.getName() ) ) {
-                    plugin.getTown(plugin.getTownName( sender.getName() ) ).info(sender);
+                    plugin.getTown(plugin.getTownName( sender.getName() ) ).info(sender); //NPE when /town info && no town
                 } else { plugin.out(sender, "You must specify a town"); }
             }else if (args.length == 2) { 
                 if ( plugin.towns.containsKey(args[1]) ) {

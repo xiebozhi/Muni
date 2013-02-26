@@ -19,6 +19,7 @@
 */
 package com.teamglokk.muni;
 
+import com.teamglokk.muni.utilities.Transaction;
 import java.sql.Timestamp;
 import java.util.TreeMap;
 import java.util.HashMap;
@@ -361,7 +362,7 @@ public class Town implements Comparable<Town> {
      */
     public String toDB_Vals(){
         return "'"+townName +"','"+mayor.getName()+"','"+
-               Integer.toString(townRank) +"','"+"','"+Boolean.toString(democracy) +"','"+
+               Integer.toString(townRank) +"','"+Boolean.toString(democracy) +"','"+
                Double.toString(townBankBal) +"','"+Double.toString(taxRate)+"','"+
                Integer.toString(townBankItemBal) + "','"+Integer.toString(taxItemRate)+"','"+
                townWorld+"'";
@@ -379,6 +380,31 @@ public class Town implements Comparable<Town> {
                 "', world='"+townWorld+"' ";
     }
     
+    /**
+     * Queries the db to pull tax transaction history and displays to officer
+     * @param officer
+     * @param citizen
+     * @return 
+     */
+    public boolean checkTaxes (Player officer, String citizen){
+        
+        if ( isOfficer(officer) ) {
+            if (isCitizen(citizen) || !isDeputy(citizen) || isMayor(citizen) ){
+                 
+            } else {
+                officer.sendMessage(citizen+" is not a citizen of your town");
+                return false;
+            }
+            List<Transaction> trans = plugin.dbwrapper.getTaxHistory(this, citizen);
+            for (Transaction tr : trans){
+                officer.sendMessage(tr.toStringTaxesFormat() );
+            }
+            return true; 
+        } else {
+            officer.sendMessage("You're not an officer!") ; 
+        return false; 
+        }
+    }
     /**
      * Gives a string of user-friendly information about the town
      * @return 
@@ -1109,11 +1135,12 @@ public class Town implements Comparable<Town> {
         int rankCostItem = plugin.townRanks[townRank+1].getItemCost();
         
         if ( rankCost <= townBankBal && townRank <= plugin.getTotalTownRanks () ){
-            if (plugin.econwrapper.payItemR( mayor, plugin.rankupItemID, rankCostItem,"Rankup" ) ) {
+            if ( rankCostItem <= townBankItemBal ) {
                 mayor.sendMessage("You have successfully ranked "+ townName +" to level " + (++townRank) );
-                return payFromTB(rankCost); //Payment of money taken after sponges are confirmed
+                return paymentFromTB(rankCost, rankCostItem); 
             } else{ 
-                mayor.sendMessage("You do not have enough "+"Sponges"+" in your inventory to rank up "+ townName);
+                mayor.sendMessage("You need to deposit "+plugin.econwrapper.getRankupItemName()+
+                        " into the town bank to rank up "+ townName);
                 return false;
             }
         }else {
@@ -1123,13 +1150,14 @@ public class Town implements Comparable<Town> {
     }
     
     /**
-     * Withdraw from the town bank
+     * Withdraw and destroy from the town bank
      * @param amount
      * @return 
      */
-    public boolean payFromTB (Double amount){
-        if ( townBankBal >= amount ){
-                townBankBal = townBankBal - amount;
+    public boolean paymentFromTB (double money, int item){
+        if ( townBankBal >= money && townBankItemBal >= item){
+                townBankBal = townBankBal - money;
+                townBankItemBal = townBankItemBal - item;
             return true;
         }else{
             return false;
@@ -1186,7 +1214,7 @@ public class Town implements Comparable<Town> {
         if ( plugin.econwrapper.pay(player,amount,0,"TB Deposit") ){
             townBankBal = townBankBal + amount;
             messageOfficers(player.getName()+" deposited "+amount+" into the town bank");
-            saveToDB();
+            saveToDB();///// Change to having a new function that saves just the balance
             return true;
         } else {return false; }
     }
@@ -1202,7 +1230,7 @@ public class Town implements Comparable<Town> {
             if (plugin.econwrapper.giveMoney(officer,amount, "TB Withdraw") ) {
                 townBankBal = townBankBal - amount;
                 messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
-                saveToDB();
+                saveToDB(); ///// Change to having a new function that saves just the balance
                 return true;
             } 
         } 
@@ -1216,6 +1244,11 @@ public class Town implements Comparable<Town> {
     public void checkTownBank(CommandSender sender) {
             sender.sendMessage(townName+"'s town bank has a balance of "+ getBankBal()+" "+
                     plugin.econwrapper.getCurrName( getBankBal()) );
+    }
+    
+    public void checkTownItemBank(CommandSender sender) {
+            sender.sendMessage(townName+"'s town bank has a balance of "+ getBankBal()+" "+
+                    plugin.econwrapper.getRankupItemName());
     }
     /**
      * Player pays the set amount of taxes
@@ -1236,8 +1269,9 @@ public class Town implements Comparable<Town> {
         if ( plugin.econwrapper.pay(player, amount, itemAmount, "taxes" ) ){
             townBankBal = townBankBal + amount;
             player.sendMessage("You have paid taxes to "+townName+" of "+ amount+" "+plugin.econwrapper.getCurrName(amount) +
-            " and "+ itemAmount+" " + plugin.econwrapper.getItemName(itemAmount)+".");
-            messageOfficers(player.getName() +"has paid " +amount+ " in taxes");
+            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+"s.");
+            messageOfficers(player.getName() +"has paid " +amount+" "+plugin.econwrapper.getCurrName(amount) +
+            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+ "s in taxes");
             return true;
         } else { return false; }
     }

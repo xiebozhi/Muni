@@ -490,7 +490,7 @@ public class dbWrapper extends Muni {
         //        plugin.getDB_user()+"'@'"+plugin.getDB_host()+"'" ;//+"' IDENTIFY BY '"+plugin.getDB_pass()+"';";
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
             "id INTEGER "+ spk + serial +", " + 
-            "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, democracy BOOLEAN" + 
+            "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, democracy BOOLEAN, " + 
             "bankBal DOUBLE, taxRate DOUBLE, itemBal INTEGER, itemTaxRate INTEGER, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
             "tcZ INTEGER "+ mpk + ");";
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 

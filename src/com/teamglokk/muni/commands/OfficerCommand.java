@@ -93,7 +93,9 @@ public class OfficerCommand implements CommandExecutor {
             return true;
             
         } else if (args[0].equalsIgnoreCase("checkTaxes")) {
-            officer.sendMessage("Checking taxes will come in time.  Use the DB for now");
+            Town temp = plugin.getTownFromCitizen(officer.getName() );
+            temp.checkTaxes(officer, args[1] );
+            
             return true;
         }  else if (args[0].equalsIgnoreCase("setTax")) { //tested and working - 18 Feb 13
             if (!plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ||!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
@@ -179,6 +181,50 @@ public class OfficerCommand implements CommandExecutor {
                         return false; 
             }
             return true;
+        }else if (args[0].equalsIgnoreCase("itembank")) { 
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            switch (args.length){
+                case 1:
+                    plugin.getTown(plugin.getTownName( officer.getName() ) ).checkTownItemBank(officer);
+                    break;
+                case 2:
+                    temp.checkTownBank(officer);
+                    break;
+                case 3: 
+                    if (args[1].equalsIgnoreCase("deposit") || args[1].equalsIgnoreCase("d") ){
+                        int amount = Integer.parseInt( args[2] );
+                        if (temp.tb_depositItems(officer, amount ) ) {
+                            plugin.out(officer,"You have deposited "+amount+" into your town's bank" );
+                            temp.checkTownItemBank(officer);
+                        }
+                        else {
+                            plugin.out(officer,"You don't have enough to deposit");
+                        } 
+                        return true;
+                    } else if (args[1].equalsIgnoreCase("withdraw") || args[1].equalsIgnoreCase("w") ){
+                        if ( !plugin.econwrapper.hasPerm(officer, "muni.deputy.changetax") ) {
+                            officer.sendMessage("You do not have permission to withdraw from the town bank");
+                            return true;
+                        }
+                        int amount = Integer.parseInt( args[2] );
+                        if (temp.tb_withdrawItems(officer, amount) ) {
+                            plugin.out(officer,"You have withdrawn "+amount+" "+plugin.econwrapper.getRankupItemName()+
+                                    " from your town's bank" ); 
+                            temp.checkTownBank(officer);
+                        } else {
+                            plugin.out( sender,"The town bank didn't have enough to withdraw" );
+                        }
+                    } else if (args[1].equalsIgnoreCase("check") || args[1].equalsIgnoreCase("c") ){
+                        temp.checkTownBank(officer);
+                    } else {
+                        plugin.out(sender,"/town bank - ERROR (subcommand not recognized)");
+                    }
+                    break;
+                default:
+                        plugin.out(sender,"Invalid number of parameters");
+                        return false; 
+            }
+            return true;
         }
         
         // Mayor-only commands from here on out
@@ -193,7 +239,7 @@ public class OfficerCommand implements CommandExecutor {
                 officer.sendMessage("/mayor found <TownName>");
                 return true;
             }
-            if (plugin.towns.containsKey(args[1] ) ){
+            if (plugin.isTown(args[1]) ){
                 officer.sendMessage("That town already exists.  Please choose another name");
                 return true;
             }
