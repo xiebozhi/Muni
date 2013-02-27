@@ -1307,10 +1307,12 @@ public class Town implements Comparable<Town> {
     public boolean payTaxes(Player player, Double amount, int itemAmount){
         if ( plugin.econwrapper.pay(player, amount, itemAmount, "taxes" ) ){
             townBankBal = townBankBal + amount;
-            player.sendMessage("You have paid taxes to "+townName+" of "+ amount+" "+plugin.econwrapper.getCurrName(amount) +
+            player.sendMessage("You have paid taxes to "+townName+" of "+ amount+" "+
+                    plugin.econwrapper.getCurrName(amount) +
             " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+".");
-            messageOfficers(player.getName() +"has paid " +amount+" "+plugin.econwrapper.getCurrName(amount) +
-            " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName()+ " in taxes");
+            messageOfficers(player.getName() +" has paid taxes:" +amount+" "
+                    +plugin.econwrapper.getCurrName(amount) +
+                " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName());
             return true;
         } else { return false; }
     }

@@ -340,10 +340,7 @@ public class Muni extends JavaPlugin {
     public String [] trimSplit (String [] split ) {
         if (split.length == 0 ){
             return new String [0];
-        } else if (split.length > 7) {
-            this.getLogger().warning("trimSplit: more than 7 parameters so skipping"); 
-            return null; 
-        }
+        } 
         String [] temp = new String[split.length];
         int i = 0;
         for (String entry: split) {

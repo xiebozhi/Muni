@@ -526,7 +526,8 @@ public class dbWrapper extends Muni {
         
         Transaction temp = new Transaction(plugin);
         String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"transactions "+
-                " WHERE playerName='"+player+"' ORDER BY id DESC";
+                " WHERE playerName='"+player+"' AND townName='"+ t.getName()+
+                "' ORDER BY id DESC";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}

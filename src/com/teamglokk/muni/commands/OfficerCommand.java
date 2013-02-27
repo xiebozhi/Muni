@@ -154,6 +154,20 @@ public class OfficerCommand implements CommandExecutor {
                 temp.resignDeputy(officer);
                 return true;
             }
+        } else if (args[0].equalsIgnoreCase("announce")) { 
+            if (args.length == 1) {
+                officer.sendMessage("/deputy announce <YOUR MSG HERE>");
+                return false;
+            }
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            if ( temp.isOfficer(officer) ) {
+                String msg = ChatColor.DARK_AQUA+"["+temp.getName()+"] "+ChatColor.YELLOW;
+                for (int i =1; i<args.length; i++ ){
+                    msg = msg + args[i] +" ";
+                }
+                temp.announce(msg);
+                return true;
+            } 
         } else if (args[0].equalsIgnoreCase("bank")) { 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             switch (args.length){
@@ -271,7 +285,8 @@ public class OfficerCommand implements CommandExecutor {
                 t.admin_makeMayor(officer.getName() );
                 t.saveToDB();
                 officer.sendMessage("You have founded "+t.getName());
-                plugin.getServer().broadcastMessage(t.getName()+" is now an official "+t.getTitle()+" thanks to the new mayor " +t.getMayor()+"!" );
+                plugin.getServer().broadcastMessage(t.getName()+" is now an official "+
+                        t.getTitle()+" thanks to the new mayor " +t.getMayor()+"!" );
             } else { officer.sendMessage("Could not start the town due to insufficent resources" ); }
             return true;
         } else if (args[0].equalsIgnoreCase("delete")  
@@ -280,7 +295,8 @@ public class OfficerCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             temp.removeAllTownCits();            //NPE somewhere
             plugin.removeTown(temp.getName() );  //NPE somewhere
-            plugin.getServer().broadcastMessage(temp.getName()+" and all its citizens were removed by the mayor, "+ officer.getName()+"!" );
+            plugin.getServer().broadcastMessage(temp.getName()+
+                    " and all its citizens were removed by the mayor, "+ officer.getName()+"!" );
             return true;
         } else if (args[0].equalsIgnoreCase("deputize")) { // buggy but working on it - 19 Feb 13
             if (args.length != 2) {
@@ -298,7 +314,20 @@ public class OfficerCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("rankup")) { 
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             if ( temp.rankup(officer) ){
-                plugin.getServer().broadcastMessage(temp.getName()+" has been ranked to "+temp.getTitle()+" by " + officer.getName() );
+                plugin.getServer().broadcastMessage(temp.getName()+" has been ranked to "+
+                        temp.getTitle()+" by " + officer.getName() );
+            }
+            displayHelp( officer, args[0] );
+            return true;
+            
+        }  else if (args[0].equalsIgnoreCase("expand")) { 
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            
+            if ( temp.isMayor(officer) ){
+                if ( plugin.wgwrapper.expandRegion(officer.getWorld().getName(),
+                        temp.getName(), args[1], 10)){
+                    plugin.getServer().broadcastMessage(temp.getName()+" has expanded its borders ");
+                } else { officer.sendMessage("You must specify {n,s,e,w,u,d}"); }
             }
             return true;
             

@@ -22,8 +22,10 @@ package com.teamglokk.muni.utilities;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.regions.Region;
 import org.bukkit.util.Vector;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
@@ -32,6 +34,7 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 //import static com.sk89q.worldguard.bukkit.BukkitUtil.*;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
@@ -58,7 +61,16 @@ public class WGWrapper extends Muni {
         plugin = instance;
         wg =  plugin.wgp; 
     }
-    
+    /**
+     * Reminder to make this function in the future
+     * @param worldName
+     * @param regionName
+     * @return 
+     */
+    public boolean createSchematic (String worldName, String regionName){
+        
+        return true;
+    }
     /**
      * Deletes a region 
      * @param regionName
@@ -94,6 +106,71 @@ public class WGWrapper extends Muni {
         return true; 
     }
     
+    
+    /**
+     * Expands the specified region in one direction by the rules defined in config
+     * @return 
+     */
+    public boolean expandRegion ( String worldName, String regionName,
+            String dir, int expansion) {
+        
+        //get the current region size
+        //expand the selection by 10 in the direction the player is facing
+        //save again (do not delete then save fresh, would lose flags)
+        World world = plugin.getServer().getWorld( worldName );
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        final ProtectedRegion existing = mgr.getRegion( regionName );
+        ProtectedRegion newRegion;
+        
+        BlockVector min = existing.getMinimumPoint();
+        BlockVector max = existing.getMaximumPoint();
+        if ( dir.equalsIgnoreCase("n") || dir.equalsIgnoreCase("north") ){
+            min.add(0,0,-expansion); 
+        } else if ( dir.equalsIgnoreCase("s") || dir.equalsIgnoreCase("south") ){
+            min.add(0,0,expansion); 
+        } else if ( dir.equalsIgnoreCase("e") || dir.equalsIgnoreCase("east") ){
+            min.add(expansion,0,0); 
+        } else if ( dir.equalsIgnoreCase("w") || dir.equalsIgnoreCase("west") ){
+            min.add(-expansion,0,0); 
+        } else if ( dir.equalsIgnoreCase("u") || dir.equalsIgnoreCase("up") ){
+            min.add(0,expansion,0); 
+        } else if ( dir.equalsIgnoreCase("d") || dir.equalsIgnoreCase("down") ){
+            min.add(0,-expansion,0); 
+        } else { return false; }
+        
+        /*
+        final CuboidSelection selection = new CuboidSelection(world, min, max);
+        
+        Location loc = player.getLocation();
+        Vector shift = new Vector (halfSize,height,halfSize);
+        Location loc1 = loc.add(shift);
+        shift = new Vector (-halfSize,-5,-halfSize);
+        Location loc2 = loc.add(shift);
+        
+        CuboidSelection sel = new CuboidSelection(world,loc1,loc2);
+        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
+        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
+        * */
+        newRegion = new ProtectedCuboidRegion(regionName, min, max);
+            
+        newRegion.setMembers(existing.getMembers());
+        newRegion.setOwners(existing.getOwners());
+        newRegion.setFlags(existing.getFlags());
+        newRegion.setPriority(existing.getPriority());
+        try {
+            newRegion.setParent(existing.getParent());
+        } catch (CircularInheritanceException ignore) {
+        }
+
+        mgr.addRegion(newRegion);
+        
+       try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
+        }
+        return true;
+    } 
     /**
      * Makes a square region of a specified size 
      * @param town
@@ -107,12 +184,133 @@ public class WGWrapper extends Muni {
         ProtectedRegion parent = mgr.getRegion( town.getName() );
         ProtectedRegion child = null;
             
-        if (makeRegion (player.getLocation(),subRegionName,halfSize) ){
+        if (makeRegionVert (player.getLocation(),subRegionName,halfSize) ){
             mgr = wg.getGlobalRegionManager().get( world );
             child = mgr.getRegion( subRegionName );
             setParent(parent,child);
         }
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
+        }
         return child;
+    }
+    
+    
+    /**
+     * Makes a 25x(vert)x25 region centered on the player
+     * @param player
+     * @param regionName
+     * @return 
+     */
+    public boolean makeTownBorder ( Player player, String regionName ) {
+         RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
+         if (!ProtectedRegion.isValidId(regionName ) ) {
+            player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
+            return false; 
+        }
+        if (regionName.equalsIgnoreCase( "__global__" )){
+            player.sendMessage("The region cannot be named __global__" ) ;
+            return false; 
+        }
+        if (mgr.hasRegion(regionName)) {
+            player.sendMessage( "There is already a region by that name" );
+            return false;
+        }
+        return makeRegionVert (player.getLocation(), regionName, 12);
+    }
+    
+    /**
+     * Future planning: highlight with wool or glowstone along the ground at the border
+     * may only replace grass, dirt, and stone along that path
+     * needs to be a temporary function (client side if possible)
+     * 
+     * @param town
+     * @return 
+     */
+    public boolean highlightTownBorder( Town town) {
+        
+        return true; 
+    }
+    
+    /**
+     * Makes a region that centered on the player
+     * @param player
+     * @param regionName
+     * @return 
+     */
+    public boolean makeRegionVert ( Location loc, String regionName, double halfSize ) {
+        if (!ProtectedRegion.isValidId( regionName ) ) {
+            return false; 
+        }
+        if (regionName.equalsIgnoreCase( "__global__" )){
+            return false; 
+        }
+        
+        //Set a cuboid selection with a square area 
+        Vector shift = new Vector (halfSize,0,halfSize);
+        Location loc1 = loc.add(shift);
+        loc1.setY(loc.getWorld().getMaxHeight() );
+        shift = new Vector (-halfSize,0,-halfSize);
+        Location loc2 = loc.add(shift);
+        loc2.setY(0);
+        plugin.getLogger().info(loc1.toString());
+        plugin.getLogger().info(loc2.toString());
+        
+        ProtectedRegion newRegion;
+        CuboidSelection sel = new CuboidSelection(loc.getWorld(),loc1,loc2);
+        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
+        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
+        newRegion = new ProtectedCuboidRegion(regionName, min, max);
+            
+        RegionManager mgr = wg.getGlobalRegionManager().get(loc.getWorld());
+        
+        if (mgr.hasRegion(regionName)) {
+            return false;
+        }
+        mgr.addRegion(newRegion);
+
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
+        }
+        return true; 
+    }
+    public boolean makeRegion ( Location loc, String regionName, int halfSize, int height ) {
+        if (!ProtectedRegion.isValidId( regionName ) ) {
+            return false; 
+        }
+        if (regionName.equalsIgnoreCase( "__global__" )){
+            return false; 
+        }
+        
+        //Set a cuboid selection with a square area 
+        Vector shift = new Vector (halfSize,height,halfSize);
+        Location loc1 = loc.add(shift);
+        shift = new Vector (-halfSize,-5,-halfSize);
+        Location loc2 = loc.add(shift);
+        
+        
+        ProtectedRegion newRegion;
+        CuboidSelection sel = new CuboidSelection(loc.getWorld(),loc1,loc2);
+        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
+        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
+        newRegion = new ProtectedCuboidRegion(regionName, min, max);
+            
+        RegionManager mgr = wg.getGlobalRegionManager().get(loc.getWorld());
+        
+        if (mgr.hasRegion(regionName)) {
+            return false;
+        }
+        mgr.addRegion(newRegion);
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
+        }
+        return true; 
     }
     
     /**
@@ -202,87 +400,6 @@ public class WGWrapper extends Muni {
         
         return rtn;
     }
-    
-    /**
-     * Makes a 25x(vert)x25 region centered on the player
-     * @param player
-     * @param regionName
-     * @return 
-     */
-    public boolean makeTownBorder ( Player player, String regionName ) {
-         RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
-         if (!ProtectedRegion.isValidId(regionName ) ) {
-            player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
-            return false; 
-        }
-        if (regionName.equalsIgnoreCase( "__global__" )){
-            player.sendMessage("The region cannot be named __global__" ) ;
-            return false; 
-        }
-        if (mgr.hasRegion(regionName)) {
-            player.sendMessage( "There is already a region by that name" );
-            return false;
-        }
-        return makeRegion (player.getLocation(), regionName, 12);
-    }
-    
-    /**
-     * Future planning: highlight with wool or glowstone along the ground at the border
-     * may only replace grass, dirt, and stone along that path
-     * needs to be a temporary function (client side if possible)
-     * 
-     * @param town
-     * @return 
-     */
-    public boolean highlightTownBorder( Town town) {
-        
-        return true; 
-    }
-    
-    /**
-     * Makes a region that centered on the player
-     * @param player
-     * @param regionName
-     * @return 
-     */
-    public boolean makeRegion ( Location loc, String regionName, int halfSize ) {
-        if (!ProtectedRegion.isValidId(regionName ) ) {
-            return false; 
-        }
-        if (regionName.equalsIgnoreCase( "__global__" )){
-            return false; 
-        }
-        
-        //Set a cuboid selection with a square area 
-        Vector shift = new Vector (halfSize,0,halfSize);
-        Location loc1 = loc.add(shift);
-        loc1.setY(loc.getWorld().getMaxHeight() );
-        shift = new Vector (-halfSize,0,-halfSize);
-        Location loc2 = loc.add(shift);
-        loc2.setY(0);
-        
-        
-        ProtectedRegion newRegion;
-        CuboidSelection sel = new CuboidSelection(loc.getWorld(),loc1,loc2);
-        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
-        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
-        newRegion = new ProtectedCuboidRegion(regionName, min, max);
-            
-        RegionManager mgr = wg.getGlobalRegionManager().get(loc.getWorld());
-        
-        if (mgr.hasRegion(regionName)) {
-            return false;
-        }
-        mgr.addRegion(newRegion);
-
-        try {
-            mgr.save();
-        } catch (ProtectionDatabaseException e) {
-            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
-        }
-        return true; 
-    }
-    
     /**
      * Takes a list of players and ensures they are members of a region
      * @param worldName
@@ -413,20 +530,6 @@ public class WGWrapper extends Muni {
     
     
     /**
-     * Expands the specified region in one direction by the rules defined in config
-     * @return 
-     */
-    public boolean expandRegion ( Player player, String regionName ) {
-        int expansion = 10;
-        
-        //get the current region size
-        //expand the selection by 10 in the direction the player is facing
-        //save again (do not delete then save fresh, would lose flags)
-        
-        return true;
-    } 
-    
-    /**
      * Checks the World Guard build permission at the player's current location
      * @param player
      * @return 
@@ -442,6 +545,9 @@ public class WGWrapper extends Muni {
                 .getApplicableRegions(player.getLocation() );
     }
 
+   public void setGreeting (ProtectedRegion region, String msg ){
+       setFlag(region, DefaultFlag.GREET_MESSAGE, msg);
+   }
    /**
     * Gets whether the player can use the specified flag at his/her location
     * @param player
@@ -460,10 +566,9 @@ public class WGWrapper extends Muni {
      * @param value
      * @return 
      */
-    public boolean setFlag (ProtectedRegion region, Flag flag, String value){
+    public void setFlag (ProtectedRegion region, Flag flag, String value){
             //Check that the user has ownership
             region.setFlag(flag,value );
-            return true;
         
     }
     
