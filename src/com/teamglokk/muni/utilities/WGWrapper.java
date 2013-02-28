@@ -35,6 +35,7 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -64,7 +65,7 @@ public class WGWrapper extends Muni {
      * @return 
      */
     public boolean createSchematic (String worldName, String regionName){
-        
+        //may have to add an instance of world edit to accomplish this... not sure yet
         return true;
     }
     /**
@@ -115,55 +116,48 @@ public class WGWrapper extends Muni {
         World world = plugin.getServer().getWorld( worldName );
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
         final ProtectedRegion existing = mgr.getRegion( regionName );
-        ProtectedRegion newRegion;
         
         BlockVector min = existing.getMinimumPoint();
         BlockVector max = existing.getMaximumPoint();
         int x1 = min.getBlockX();
-        int y1 = min.getBlockY();
+        int y1 = min.getBlockY() <= 0 ? 0 : min.getBlockY() ;
         int z1 = min.getBlockZ();
         int x2 = max.getBlockX();
-        int y2 = max.getBlockY();
+        int y2 = max.getBlockY() >= world.getMaxHeight() ? world.getMaxHeight() : max.getBlockY();
         int z2 = max.getBlockZ();
         plugin.getLogger().info(min.toString() );
         plugin.getLogger().info(max.toString() );
         
-        BlockVector newMin = new BlockVector(min);
-        BlockVector newMax = new BlockVector(max);
         
         if ( dir.equalsIgnoreCase("n") || dir.equalsIgnoreCase("north") ){
-            newMin.setZ( z2 - expansion );
+            z1 = z1 - expansion;
+            //newMin.setZ( z2 - expansion );
         } else if ( dir.equalsIgnoreCase("s") || dir.equalsIgnoreCase("south") ){
-            newMax.setZ( min.getBlockZ() + expansion ); 
+            z2 = z2 + expansion;
+            //newMax.setZ( min.getBlockZ() + expansion ); 
         } else if ( dir.equalsIgnoreCase("e") || dir.equalsIgnoreCase("east") ){
-            newMax.add(expansion,0,0); 
+            x2 = x2 + expansion;
+            //newMax.add(expansion,0,0); 
         } else if ( dir.equalsIgnoreCase("w") || dir.equalsIgnoreCase("west") ){
-            newMin.add(-expansion,0,0); 
+            x1 = x1 - expansion;
+            //newMin.add(-expansion,0,0); 
         } else if ( dir.equalsIgnoreCase("u") || dir.equalsIgnoreCase("up") ){
-            newMax.add(0,expansion,0); 
+            y2 = y2 + expansion;
+            //newMax.add(0,expansion,0); 
         } else if ( dir.equalsIgnoreCase("d") || dir.equalsIgnoreCase("down") ){
-            newMin.add(0,-expansion,0); 
+            y1 = y1 - expansion;
+            //newMin.add(0,-expansion,0); 
         } else { return -1; }
+        
+        BlockVector newMin = new BlockVector(x1,y1,z1);
+        BlockVector newMax = new BlockVector(x2,y2,z2);
         
         plugin.getLogger().info(newMin.toString() );
         plugin.getLogger().info(newMax.toString() );
         
         int area = (x2 - x1) * (z2 - z1);
         
-        /*
-        final CuboidSelection selection = new CuboidSelection(world, min, max);
-        
-        Location loc = player.getLocation();
-        Vector shift = new Vector (halfSize,height,halfSize);
-        Location loc1 = loc.add(shift);
-        shift = new Vector (-halfSize,-5,-halfSize);
-        Location loc2 = loc.add(shift);
-        
-        CuboidSelection sel = new CuboidSelection(world,loc1,loc2);
-        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
-        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
-        * */
-        newRegion = new ProtectedCuboidRegion(regionName, newMin, newMax);
+        ProtectedRegion newRegion = new ProtectedCuboidRegion(regionName, newMin, newMax);
             
         newRegion.setMembers(existing.getMembers());
         newRegion.setOwners(existing.getOwners());
@@ -192,16 +186,40 @@ public class WGWrapper extends Muni {
      */
     public ProtectedRegion makeSubRegion (Town town, Player player, String subRegionName, 
             int halfSize, int height ){
-        World world = plugin.getServer().getWorld( town.getWorld() );
-        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        return makeSubRegion(town,player,subRegionName,halfSize,height,null,null,false,false,false);
+    }
+    
+    public ProtectedRegion makeSubRegion (Town town, Player player, String subRegionName, 
+            int halfSize, int height, String greeting, String farewell, boolean pvp,
+            boolean heal, boolean feed){
+        
+        World townWorld = plugin.getServer().getWorld( town.getWorld() );
+        RegionManager mgr = wg.getGlobalRegionManager().get( townWorld );
         ProtectedRegion parent = mgr.getRegion( town.getName() );
         ProtectedRegion child = null;
             
         if ( makeRegion (player.getLocation(),subRegionName,halfSize,height,false) > 0 ){
-            mgr = wg.getGlobalRegionManager().get( world );
+            mgr = wg.getGlobalRegionManager().get( player.getWorld() );
             child = mgr.getRegion( subRegionName );
             setParent(parent,child);
         }
+        
+        child.setFlag(DefaultFlag.GREET_MESSAGE, greeting);
+        child.setFlag(DefaultFlag.FAREWELL_MESSAGE, farewell);
+        if (pvp ){ 
+            child.setFlag(DefaultFlag.PVP, StateFlag.State.ALLOW); 
+        } else {
+            child.setFlag(DefaultFlag.PVP, StateFlag.State.ALLOW); 
+        }
+        if (heal){ 
+            child.setFlag(DefaultFlag.HEAL_AMOUNT, 1); 
+            child.setFlag(DefaultFlag.HEAL_DELAY, 1); 
+        }
+        if (feed){ 
+            child.setFlag(DefaultFlag.FEED_AMOUNT, 1); 
+            child.setFlag(DefaultFlag.FEED_DELAY, 1); 
+        }
+        
         try {
             mgr.save();
         } catch (ProtectionDatabaseException e) {
@@ -209,7 +227,6 @@ public class WGWrapper extends Muni {
         }
         return child;
     }
-    
     
     /**
      * Makes a 25x(vert)x25 region centered on the player
@@ -231,7 +248,7 @@ public class WGWrapper extends Muni {
             player.sendMessage( "There is already a region by that name" );
             return -1;
         }
-        return makeRegionVert (player.getLocation(), regionName, 12);
+        return makeRegion (player.getLocation(), regionName, 12, 10, false);
     }
     
     /**
@@ -242,7 +259,22 @@ public class WGWrapper extends Muni {
      * @param town
      * @return 
      */
-    public boolean highlightTownBorder( Town town) {
+    public boolean highlightTownBorder( Town town, int height ) {
+        
+        World world = plugin.getServer().getWorld( town.getWorld() );
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        final ProtectedRegion existing = mgr.getRegion( town.getName() );
+        
+        BlockVector min = existing.getMinimumPoint();
+        BlockVector max = existing.getMaximumPoint();
+        int x1 = min.getBlockX();
+        int y1 = height;
+        int z1 = min.getBlockZ();
+        int x2 = max.getBlockX();
+        int y2 = height;
+        int z2 = max.getBlockZ();
+        
+        
         
         return true; 
     }
@@ -254,52 +286,18 @@ public class WGWrapper extends Muni {
      * @return 
      */
     public int makeRegionVert ( Location loc, String regionName, int halfSize ) {
-        if (!ProtectedRegion.isValidId( regionName ) ) {
-            return -1; 
-        }
-        if (regionName.equalsIgnoreCase( "__global__" )){
-            return -1; 
-        }
-        
-        /*
-        //Prepare the first corner
-        Vector shift = new Vector (halfSize,0,halfSize);
-        Location loc1 = loc.clone();
-        loc1.add(shift);
-        loc1.setY(loc.getWorld().getMaxHeight() );
-        
-        //Prepare the second corner
-        shift = new Vector (-halfSize,0,-halfSize);
-        Location loc2 = loc.clone();
-        loc2.add(shift);
-        loc2.setY(0);
-        plugin.getLogger().info(loc1.toString());
-        plugin.getLogger().info(loc2.toString());
-        
-        ProtectedRegion newRegion;
-        CuboidSelection sel = new CuboidSelection(loc.getWorld(),loc1,loc2);
-        BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
-        BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
-        newRegion = new ProtectedCuboidRegion(regionName, min, max);
-            
-        RegionManager mgr = wg.getGlobalRegionManager().get(loc.getWorld());
-        
-        if (mgr.hasRegion(regionName)) {
-            return false;
-        }
-        mgr.addRegion(newRegion);
-
-        try {
-            mgr.save();
-        } catch (ProtectionDatabaseException e) {
-            plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
-        }
-        return true; 
-        */
         return makeRegion(loc, regionName,halfSize,0,true);
     }
     
-    
+    /**
+     * Makes a square region
+     * @param loc
+     * @param regionName
+     * @param halfSize half the size of the square (halfSize = 12 => region area = 25*25)
+     * @param height how tall the new region should be (above the passed location)
+     * @param vert if true, height is ignored
+     * @return 
+     */
     public int makeRegion ( Location loc, String regionName, int halfSize, int height , boolean vert) {
         if (!ProtectedRegion.isValidId( regionName ) ) {
             return -1; 
@@ -318,6 +316,7 @@ public class WGWrapper extends Muni {
         Location loc2 = loc.clone();
         loc2.add(shift);
         
+        //Decide on the height
         if (vert){
             loc1.setY(loc.getWorld().getMaxHeight() );
             loc2.setY(0);
@@ -325,8 +324,6 @@ public class WGWrapper extends Muni {
             loc1.add( 0, height, 0 );
             loc2.add( 0, -12, 0 );
         }
-        
-        
         
         ProtectedRegion newRegion;
         CuboidSelection sel = new CuboidSelection(loc.getWorld(),loc1,loc2);
@@ -356,7 +353,7 @@ public class WGWrapper extends Muni {
      * @param SRdisplayName
      * @return 
      */
-    public boolean makeOutpost (Town town, Player player, String subRegionName, String SRdisplayName) {
+    public boolean makeOutpost (Town town, Player player, String subRegionName) {
         boolean rtn = true;
         ProtectedRegion region = makeSubRegion(town,player,subRegionName,12,40);
         
@@ -373,9 +370,9 @@ public class WGWrapper extends Muni {
      * @param SRdisplayName
      * @return 
      */
-    public boolean makeRestaurant (Town town, Player player, String subRegionName, String SRdisplayName) {
+    public boolean makeRestaurant (Town town, Player player, String subRegionName) {
         boolean rtn = true;
-        ProtectedRegion region = makeSubRegion(town,player,subRegionName,4,20);
+        makeSubRegion(town,player,subRegionName,7,10,"Welcome to the restaurant","You are leaving the restaurant",false,false,true);
         
         // check inside main town
         // set food regen
@@ -391,9 +388,9 @@ public class WGWrapper extends Muni {
      * @param SRdisplayName
      * @return 
      */
-    public boolean makeHospital (Town town, Player player, String subRegionName, String SRdisplayName) {
+    public boolean makeHospital (Town town, Player player, String subRegionName) {//, String SRdisplayName) {
         boolean rtn = true;
-        ProtectedRegion region = makeSubRegion(town,player,subRegionName,6, 5);
+        makeSubRegion(town,player,subRegionName,7,10,"Welcome to the Hospital","You are leaving the hospital",false,true,false);
         
         // check inside main town
         // set heath regen
@@ -409,9 +406,9 @@ public class WGWrapper extends Muni {
      * @param SRdisplayName
      * @return 
      */
-    public boolean makeEmbassy (Town town, Player player, String subRegionName, String SRdisplayName) {
+    public boolean makeEmbassy (Town town, Player player, String subRegionName) {
         boolean rtn = true;
-        ProtectedRegion region = makeSubRegion(town,player,subRegionName,10, 100);
+        makeSubRegion(town,player,subRegionName,12,50,"Welcome to the embassy","You are leaving the embassy",false,false,false);
         
         // require inside of another town's main protection (no embassy in an outpost)
         
@@ -426,9 +423,9 @@ public class WGWrapper extends Muni {
      * @param SRdisplayName
      * @return 
      */
-    public boolean makeArena (Town town, Player player, String subRegionName, String SRdisplayName) {
+    public boolean makeArena (Town town, Player player, String subRegionName) {
         boolean rtn = true;
-        ProtectedRegion region = makeSubRegion(town,player,subRegionName,74/2,150);
+        makeSubRegion(town,player,subRegionName,37,50,"Welcome to the arena floor","You are leaving the arena floor",true,false,false);
         
         // check inside main town
         // set PVP
@@ -575,14 +572,16 @@ public class WGWrapper extends Muni {
             player.getLocation().getBlock().getRelative(0, -1, 0));
     }
     
-   public ApplicableRegionSet getARS(Player player) {
+    /**
+     * Gets the regions where the player is standing
+     * @param player
+     * @return 
+     */
+    public ApplicableRegionSet getARS(Player player) {
         return plugin.wgp.getRegionManager( player.getWorld() )
                 .getApplicableRegions(player.getLocation() );
     }
 
-   public void setGreeting (ProtectedRegion region, String msg ){
-       setFlag(region, DefaultFlag.GREET_MESSAGE, msg);
-   }
    /**
     * Gets whether the player can use the specified flag at his/her location
     * @param player
@@ -590,7 +589,6 @@ public class WGWrapper extends Muni {
     * @return 
     */
     public boolean isFlagged (Player player, StateFlag flag ){
-        //region.getFlag(flag, flag.parseInput(plugin.wgp, player, flag));
         return getARS(player).allows(flag);
     }
     
@@ -626,7 +624,7 @@ public class WGWrapper extends Muni {
      * @return 
      */
     public boolean setMSG_Entry(ProtectedRegion region,String message){
-        
+        setFlag(region, DefaultFlag.GREET_MESSAGE, message);
         return true;
     }
     
@@ -637,7 +635,7 @@ public class WGWrapper extends Muni {
      * @return 
      */
     public boolean setMSG_Exit(ProtectedRegion region, String message) {
-        
+        setFlag(region, DefaultFlag.GREET_MESSAGE, message);
         return true; 
     }
     

@@ -259,7 +259,43 @@ public class OfficerCommand implements CommandExecutor {
                         return false; 
             }
             return true;
-        }
+        } else if (args[0].equalsIgnoreCase("makePlot")) { 
+            if (args.length == 1) {
+                officer.sendMessage("/deputy makePlot listTypes");
+                officer.sendMessage("/deputy makePlot <type> <name>");
+                return true;
+            }
+            if ( args[1].equalsIgnoreCase( "listTypes" ) ){
+                officer.sendMessage("You may choose from the following types.");
+                officer.sendMessage("(if your current town rank allows it)");
+                officer.sendMessage("restaurant");
+                officer.sendMessage("hospital");
+                officer.sendMessage("arena");
+                officer.sendMessage("outpost");
+                officer.sendMessage("embassy");
+            }
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            boolean test = false;
+            if ( temp.isOfficer(officer) ) {
+                if ( args[1].equalsIgnoreCase( "restaurant" ) ){
+                    test = plugin.wgwrapper.makeRestaurant(temp, officer, temp.getName()+"_restaurant");
+                } else if ( args[1].equalsIgnoreCase( "hospital" ) ){
+                    test = plugin.wgwrapper.makeHospital(temp, officer, temp.getName()+"_hospital");
+                } else if ( args[1].equalsIgnoreCase( "arena" ) ){
+                    test = plugin.wgwrapper.makeArena(temp, officer, temp.getName()+"_arena");
+                } else if ( args[1].equalsIgnoreCase( "outpost" ) ){
+                    test = plugin.wgwrapper.makeOutpost(temp, officer, temp.getName()+"_outpost");
+                } else if ( args[1].equalsIgnoreCase( "embassy" ) ){
+                    test = plugin.wgwrapper.makeEmbassy(temp, officer, temp.getName()+"_embassy");
+                }
+                if (test) {
+                    officer.sendMessage("The sub-region was created successfully");
+                } else {
+                    officer.sendMessage("There was a problem creating the sub-region");
+                }
+            } 
+            return true; 
+        } 
         
         // Mayor-only commands from here on out
         if (!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
@@ -267,7 +303,24 @@ public class OfficerCommand implements CommandExecutor {
             return true; 
         } 
         
-        if (args[0].equalsIgnoreCase("found") || 
+        if (args[0].equalsIgnoreCase("makeBorder")) { 
+            if (args.length == 1) {
+                officer.sendMessage("This makes the 25x25 town border centered at your current location");
+                officer.sendMessage("/mayor makeBorder confirm");
+                return true;
+            }
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            if ( temp.isOfficer(officer) ) {
+                if ( args[1].equalsIgnoreCase( "confirm" ) ){
+                    if ( plugin.wgwrapper.makeTownBorder(officer, temp.getName() ) > 0 ){
+                        officer.sendMessage("Your town border has been created!");
+                    } else {
+                        officer.sendMessage("There was a problem ");
+                    }
+                } 
+            } 
+            return true; 
+        }  else if (args[0].equalsIgnoreCase("found") || 
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
             if (args.length != 2) {
                 officer.sendMessage("/mayor found <TownName>");
