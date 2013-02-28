@@ -321,13 +321,21 @@ public class OfficerCommand implements CommandExecutor {
             return true;
             
         }  else if (args[0].equalsIgnoreCase("expand")) { 
+            if (args.length != 2){
+                officer.sendMessage("You must specify a direction");
+                officer.sendMessage("north, south, east, or west");
+                officer.sendMessage("n,s,e,w");
+                return true;
+            }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             
             if ( temp.isMayor(officer) ){
-                if ( plugin.wgwrapper.expandRegion(officer.getWorld().getName(),
-                        temp.getName(), args[1], 10)){
+                int area = plugin.wgwrapper.expandRegion(officer.getWorld().getName(),
+                        temp.getName(), args[1], 10);
+                if ( area  > 0 ){
+                    officer.sendMessage("The new area is "+area );
                     plugin.getServer().broadcastMessage(temp.getName()+" has expanded its borders ");
-                } else { officer.sendMessage("You must specify {n,s,e,w,u,d}"); }
+                } else { officer.sendMessage("You must specify {n,s,e,w}"); }
             }
             return true;
             
