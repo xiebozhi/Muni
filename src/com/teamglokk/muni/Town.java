@@ -161,6 +161,7 @@ public class Town implements Comparable<Town> {
         townRank = copy.getRank();
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
+        townWorld = copy.getWorld();
         
         
         if ( copy.getMayor() == null ) {return false;}

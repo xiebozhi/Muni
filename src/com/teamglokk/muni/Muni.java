@@ -138,22 +138,14 @@ public class Muni extends JavaPlugin {
         
         //this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
-        boolean runDefault = false;
-        if (runDefault){ // this is for testing purposes only, will be deleted  
-            // Passing true drops the db first, normally false
-            this.getLogger().warning("Dropping database!");
-            dbwrapper.createDB(true);
-            makeDefaultCitizens();
-            makeTestTowns();
-        }
-        // Ensure the database is there but does not drop tables
+        // Ensure the database is there but don't drop the tables
         dbwrapper.createDB(false);
         
         this.getLogger().info ("Loading Towns from database");
         loadTowns();
         
         this.getLogger().info ("Loaded and Ready" );
-    }// end: onEnable()
+    }
         
     /**
      * Queries DB for town names then town constructor loads towns individually 
@@ -168,7 +160,6 @@ public class Muni extends JavaPlugin {
                 if ( isDebug() ) { this.getLogger().info("Loading town: " + curr); }
                 copyTown.loadFromDB( curr );
                 addTown(copyTown);
-                //towns.put(copyTown.getName(), new Town ( copyTown ) );
                 copyTown = new Town (this); 
             }
         } catch (NullPointerException ex){
@@ -233,11 +224,8 @@ public class Muni extends JavaPlugin {
      * Saves all towns to the database
      */
     public void saveTowns() {
-        /*for (Town curr: towns.values()) {
-            curr.saveToDB();
-        } */
         for (Town t : towns.values() ) {
-            this.dbwrapper.saveCitizens(t.getAllMembers() );
+            this.dbwrapper.saveCitizens( t.getAllMembers() );
         }
         this.dbwrapper.saveTowns( towns.values() );
     }
@@ -249,13 +237,12 @@ public class Muni extends JavaPlugin {
     public boolean addTown( Town addition ) {
         if ( addition.isValid() ){
             towns.put(addition.getName(),addition);
-            //update database
             return true; 
         }
         return false; 
     }
     /**
-     * Returns true if the town is in the towns map
+     * Returns true if the specified town is in the collection
      * @param town
      * @return 
      */
@@ -272,7 +259,6 @@ public class Muni extends JavaPlugin {
         if (town == null) {return false; }
         if (towns.containsKey( town ) ){
             towns.remove( town );
-            // if in database, remove from database
             return true;
         }
         return false; 
@@ -308,9 +294,14 @@ public class Muni extends JavaPlugin {
         return temp;
     }
     
-    
+    /**
+     * Verifies the string then checks whether player is online
+     * @param player
+     * @return 
+     */
     public boolean isOnline(String player) {
-        if (player.isEmpty() || player==null) { return false; } //NPE
+        if (player==null) { return false; } 
+        if (player.isEmpty()) { return false; } 
         
         if (this.getServer().getPlayer(player) != null ){
             return true;
@@ -318,7 +309,7 @@ public class Muni extends JavaPlugin {
     }
     
     /**
-     * Check to see if the player is online or offline
+     * Checks to see if the player is online/offline or unknown
      * The player must have logged into the server to be 'valid'
      * @param player
      * @return 
@@ -333,9 +324,9 @@ public class Muni extends JavaPlugin {
     }
        
     /**
-     * Takes an array of strings, deletes empty or null elements, and trims the remaining elements
+     * Deletes empty/null elements and trims the elements of a string array
      * @param split the array to be parsed
-     * @return trimmed and cleaned array of strings
+     * @return resized array of strings
      */
     public String [] trimSplit (String [] split ) {
         if (split.length == 0 ){
@@ -358,6 +349,7 @@ public class Muni extends JavaPlugin {
         }
         return rtn;
     }
+    
     /**
      * Parses a double safely
      * @param dbl
@@ -381,7 +373,7 @@ public class Muni extends JavaPlugin {
     }
     
     /**
-     * Gets whether the player name  is a citizen of any town
+     * Gets whether the player name is a citizen of any town
      * @param player
      * @return 
      */
@@ -409,7 +401,7 @@ public class Muni extends JavaPlugin {
     }
     
     /**
-     * Returns the town where a player is involved
+     * Returns the instance of the player's town
      * @param player
      * @return 
      */
@@ -418,18 +410,6 @@ public class Muni extends JavaPlugin {
             return towns.get( allCitizens.get(player) );
         }
         return null;
-    }
-    
-    /**
-     * Gives a comma separated list of towns
-     * @return 
-     */
-    public String getAllTowns(){
-        String temp = "";
-        for (Town curr: towns.values() ) {
-            temp = temp + curr.getName() +", ";
-        }
-        return temp;
     }
     
     public void displayTownRankings(CommandSender sender) {
@@ -463,15 +443,19 @@ public class Muni extends JavaPlugin {
      * Hooks into World Guard, Vault, and loads custom wrappers
      */
     private void hookInDependencies() {
+        // Store the instance of World Guard
         try {
             wgp = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
             wgwrapper = new WGWrapper(this);
         } catch (Exception e) {
             getLogger().severe( "Error occurred in hooking in to WorldGuard. Are both WorldGuard and WorldEdit installed?");
-            getLogger().severe( "!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
-            this.getPluginLoader().disablePlugin(this);
+            if (true){ // allow for the possibility of no world guard
+                getLogger().severe( "!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
+                this.getPluginLoader().disablePlugin(this);
+            }
         }
 
+        // Bring Vault online
         try {
             boolean Econ_success = setupEconomy();
             if (!Econ_success) {
@@ -482,6 +466,8 @@ public class Muni extends JavaPlugin {
             getLogger().severe("!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
             this.getPluginLoader().disablePlugin(this);
         }
+        
+        // Database wrapper initialization
         dbwrapper = new dbWrapper(this);
         if ( isDebug() ) { getLogger().info( "Dependancies Hooked"); }
     }
@@ -504,7 +490,7 @@ public class Muni extends JavaPlugin {
     }
 
     /**
-     * Loads the config settings from config.yml in plugins/muni
+     * Loads the config settings from config.yml in plugins/muni/
      */
     protected void loadConfigSettings(){
         if (CONFIG_VERSION != this.getConfig().getDouble("config_version") ){
@@ -558,25 +544,25 @@ public class Muni extends JavaPlugin {
    }
    
     /**
-     * Used by permissions to decided whether to let Ops continue
+     * Global config: Used by permissions to decided whether to let Ops continue
      * @return 
      */
     public boolean useOP(){ return USE_OP; }
     
     /**
-     * DBwrapper checks this before logging 
+     * Global config: DBwrapper checks this before logging 
      * @return 
      */
     public boolean isSQLdebug(){ return SQL_DEBUG; }
     
     /**
-     * DBwrapper uses this to decide where to send DB queries
+     * Global config: DBwrapper uses this to decide where to send DB queries
      * @return 
      */
     public boolean useMysql() { return useMYSQL; } 
     
     /**
-     * Whether the plugin should output verbose debugging info to the log
+     * Global config: Whether the plugin should output verbose debugging info to the log
      * @return 
      */
    public boolean isDebug() { return DEBUG; }
@@ -591,7 +577,7 @@ public class Muni extends JavaPlugin {
    }
    
     /**
-     * Whether the plugin should output verbose debugging info to the log
+     * Global config: Whether the plugin should output verbose debugging info to the log
      * @return 
      */
    public boolean isSQLDebug() { return SQL_DEBUG; }

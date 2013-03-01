@@ -113,6 +113,7 @@ public class WGWrapper extends Muni {
         
         if (expansion <= 0 ) { return -1; }
         
+        plugin.getLogger().severe("World name: "+worldName);
         World world = plugin.getServer().getWorld( worldName );
         RegionManager mgr = wg.getGlobalRegionManager().get( world );
         final ProtectedRegion existing = mgr.getRegion( regionName );
@@ -131,22 +132,18 @@ public class WGWrapper extends Muni {
         
         if ( dir.equalsIgnoreCase("n") || dir.equalsIgnoreCase("north") ){
             z1 = z1 - expansion;
-            //newMin.setZ( z2 - expansion );
         } else if ( dir.equalsIgnoreCase("s") || dir.equalsIgnoreCase("south") ){
             z2 = z2 + expansion;
-            //newMax.setZ( min.getBlockZ() + expansion ); 
         } else if ( dir.equalsIgnoreCase("e") || dir.equalsIgnoreCase("east") ){
             x2 = x2 + expansion;
-            //newMax.add(expansion,0,0); 
         } else if ( dir.equalsIgnoreCase("w") || dir.equalsIgnoreCase("west") ){
             x1 = x1 - expansion;
-            //newMin.add(-expansion,0,0); 
         } else if ( dir.equalsIgnoreCase("u") || dir.equalsIgnoreCase("up") ){
             y2 = y2 + expansion;
-            //newMax.add(0,expansion,0); 
+            if (y2 > world.getMaxHeight() ) {return -2; }
         } else if ( dir.equalsIgnoreCase("d") || dir.equalsIgnoreCase("down") ){
             y1 = y1 - expansion;
-            //newMin.add(0,-expansion,0); 
+            if (y1 < 0 ) {return -2; }
         } else { return -1; }
         
         BlockVector newMin = new BlockVector(x1,y1,z1);

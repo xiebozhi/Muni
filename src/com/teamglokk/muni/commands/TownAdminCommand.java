@@ -35,7 +35,7 @@ import org.bukkit.ChatColor;
  */
 public class TownAdminCommand implements CommandExecutor {
     private Muni plugin;
-    private Player player;
+    private Player staffer;
     
     public TownAdminCommand (Muni instance){
         plugin = instance;
@@ -46,9 +46,9 @@ public class TownAdminCommand implements CommandExecutor {
         
         if (!(sender instanceof Player)) {
         } else { 
-            player = (Player) sender; 
-            if (!plugin.econwrapper.hasPerm(player, "muni.admin") ){
-                player.sendMessage("You do not have permission to run /townadmin subcommands");
+            staffer = (Player) sender; 
+            if (!plugin.econwrapper.hasPerm(staffer, "muni.admin") ){
+                staffer.sendMessage("You do not have permission to run /townadmin subcommands");
                 return true; 
             }
         }
@@ -139,33 +139,31 @@ public class TownAdminCommand implements CommandExecutor {
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
-            temp.admin_removeCitizenship( player, args[2] ); //NPE --------------20 feb
-            return true;
-        } else if (args[0].equalsIgnoreCase("check")) { // been working since early on - 18 Feb
-            player.sendMessage("Checking build perms.");
-            if (plugin.wgwrapper.checkBuildPerms(player) ){
-               player.sendMessage("You may build here");
-            } else{
-                player.sendMessage("You may not build here.");
-            }
+            temp.admin_removeCitizenship( staffer, args[2] ); //NPE --------------20 feb
             return true;
         } else if (args[0].equalsIgnoreCase("tp")) { //Transform to ticketing system in time
             if (args.length != 4) {
                 plugin.out(sender, "Incorrect number of parameters;");
                 return false;
             }
-            player.sendMessage("TP to pos.");
+            staffer.sendMessage("TP to pos.");
             try {
                 double x = Double.parseDouble( args[1] );
                 double y = Double.parseDouble( args[2] );
                 double z = Double.parseDouble( args[3] );
 
-                player.teleport(new Location(player.getWorld(), x, y, z));
+                staffer.teleport(new Location(staffer.getWorld(), x, y, z));
                 return true;
             } catch (NumberFormatException ex) {
                 plugin.out(sender, "Given location is invalid");
                 return false;
             }
+        } else if (args[0].equalsIgnoreCase("blankUpdate")  ) { //delete meeeeeee 
+            plugin.out(sender,"Dropping the database!  Then re-creating");
+            plugin.towns.clear();
+            plugin.allCitizens.clear();
+            plugin.dbwrapper.createDB(true);
+            return true;
         } else if (args[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
             plugin.out(sender,"Dropping the database!  Then re-creating");
             plugin.towns.clear();
@@ -178,7 +176,7 @@ public class TownAdminCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
             for (Town t : plugin.towns.values() ){
                 plugin.out(sender, "Displaying players for "+t.getName() );
-                t.listAllCitizens(player);
+                t.listAllCitizens(staffer);
             }
             return true;
         } else if (args[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
@@ -188,20 +186,21 @@ public class TownAdminCommand implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
             
-            player.sendMessage("Here!");
-            player.sendMessage(plugin.getTownName("bobbshields") );
+            staffer.sendMessage("Here!");
+            staffer.sendMessage(plugin.getTownName("bobbshields") );
             return true;
         } else if (args[0].equalsIgnoreCase("makeRegion")) { //DELETE MEEEEEE
-            if (plugin.wgwrapper.makeTownBorder(player, args[1] ) > 0 ){
-                plugin.wgwrapper.makeOwners(player.getWorld().getName(), args[1], 
-                        plugin.getTownFromCitizen(player.getName() ).getOfficerList() );
-                plugin.wgwrapper.makeMembers(player.getWorld().getName(), args[1], 
-                        plugin.getTownFromCitizen(player.getName() ).getRegCitsList() );
-                player.sendMessage("Region created!");
+            if (plugin.wgwrapper.makeTownBorder(staffer, args[1] ) > 0 ){
+                plugin.wgwrapper.makeOwners(staffer.getWorld().getName(), args[1], 
+                        plugin.getTownFromCitizen(staffer.getName() ).getOfficerList() );
+                plugin.wgwrapper.makeMembers(staffer.getWorld().getName(), args[1], 
+                        plugin.getTownFromCitizen(staffer.getName() ).getRegCitsList() );
+                staffer.sendMessage("Region created!");
             }
-            player.sendMessage(plugin.getTownName("bobbshields") );
+            staffer.sendMessage(plugin.getTownName("bobbshields") );
             return true;
         } else {
+            staffer.sendMessage("[Muni] Input not understood.");
             displayHelp(sender);
             return true;
         }

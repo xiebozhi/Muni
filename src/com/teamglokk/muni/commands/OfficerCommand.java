@@ -261,11 +261,11 @@ public class OfficerCommand implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("makePlot")) { 
             if (args.length == 1) {
-                officer.sendMessage("/deputy makePlot listTypes");
-                officer.sendMessage("/deputy makePlot <type> <name>");
+                officer.sendMessage("/deputy makePlot list");
+                officer.sendMessage("/deputy makePlot <type>");
                 return true;
             }
-            if ( args[1].equalsIgnoreCase( "listTypes" ) ){
+            if ( args[1].equalsIgnoreCase( "list" ) ){
                 officer.sendMessage("You may choose from the following types.");
                 officer.sendMessage("(if your current town rank allows it)");
                 officer.sendMessage("restaurant");
@@ -278,15 +278,15 @@ public class OfficerCommand implements CommandExecutor {
             boolean test = false;
             if ( temp.isOfficer(officer) ) {
                 if ( args[1].equalsIgnoreCase( "restaurant" ) ){
-                    test = plugin.wgwrapper.makeRestaurant(temp, officer, temp.getName()+"_restaurant");
+                    test = plugin.wgwrapper.makeRestaurant(temp, officer, temp.getName()+"_r");
                 } else if ( args[1].equalsIgnoreCase( "hospital" ) ){
-                    test = plugin.wgwrapper.makeHospital(temp, officer, temp.getName()+"_hospital");
+                    test = plugin.wgwrapper.makeHospital(temp, officer, temp.getName()+"_h");
                 } else if ( args[1].equalsIgnoreCase( "arena" ) ){
-                    test = plugin.wgwrapper.makeArena(temp, officer, temp.getName()+"_arena");
+                    test = plugin.wgwrapper.makeArena(temp, officer, temp.getName()+"_a");
                 } else if ( args[1].equalsIgnoreCase( "outpost" ) ){
-                    test = plugin.wgwrapper.makeOutpost(temp, officer, temp.getName()+"_outpost");
+                    test = plugin.wgwrapper.makeOutpost(temp, officer, temp.getName()+"_o");
                 } else if ( args[1].equalsIgnoreCase( "embassy" ) ){
-                    test = plugin.wgwrapper.makeEmbassy(temp, officer, temp.getName()+"_embassy");
+                    test = plugin.wgwrapper.makeEmbassy(temp, officer, temp.getName()+"_e");
                 }
                 if (test) {
                     officer.sendMessage("The sub-region was created successfully");
@@ -324,6 +324,10 @@ public class OfficerCommand implements CommandExecutor {
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
             if (args.length != 2) {
                 officer.sendMessage("/mayor found <TownName>");
+                return true;
+            }
+            if (plugin.isCitizen(officer) ){ 
+                officer.sendMessage("You are already a member of another town.");
                 return true;
             }
             if (plugin.isTown(args[1]) ){
@@ -391,8 +395,8 @@ public class OfficerCommand implements CommandExecutor {
                 } else { officer.sendMessage("You must specify {n,s,e,w}"); }
             }
             return true;
-            
         } else {
+            officer.sendMessage("[Muni] Input not understood.");
             displayHelp( officer, args[0] );
             return true;
         }
@@ -405,19 +409,20 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "/deputy decline <playerName>");
             plugin.out(sender, "/deputy kick <playerName>");
             plugin.out(sender, "/deputy resign");
-            //plugin.out(player, "/deputy regions");
-            //plugin.out(player, "/deputy setRegion");
+            plugin.out(sender, "/deputy makePlot <optional:list>");
+            //plugin.out(sender, "/deputy setRegion");
             plugin.out(sender, "/deputy setTax <money>");
             plugin.out(sender, "/deputy setItemTax <sponges>");
-            //plugin.out(player, "**/deputy pushBorder");
-            plugin.out(sender, "**/deputy bank deposit");
+            //plugin.out(sender, "**/deputy pushBorder");
+            plugin.out(sender, "**/deputy bank deposit/withdraw <amount>");
             plugin.out(sender, "** (with perm) ");
         } else if (subcmd.equalsIgnoreCase("mayor") ){
             plugin.out(sender, "Muni Mayor Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
-            plugin.out(sender, "/mayor bank");
+            plugin.out(sender, "/mayor found <newTownName>");
+            plugin.out(sender, "/mayor makeBorder");
+            plugin.out(sender, "/mayor expand <dir> (dir = n, s, e, w)");
             plugin.out(sender, "/mayor bank check");
-            plugin.out(sender, "/mayor bank deposit <amount>");
-            plugin.out(sender, "/mayor bank withdraw <amount>");
+            plugin.out(sender, "/mayor bank deposit/withdraw <amount>");
             plugin.out(sender, "/mayor deputize <citizen>");
             plugin.out(sender, "/mayor resign");
             plugin.out(sender, "/mayor delete");

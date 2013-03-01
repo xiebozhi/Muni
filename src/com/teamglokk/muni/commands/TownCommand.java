@@ -182,8 +182,9 @@ public class TownCommand implements CommandExecutor {
             player.sendMessage("Charters not yet enabled ");
             return true;
         } else {
+            player.sendMessage("[Muni] Input not understood.");
             displayHelp(player);
-            return false;
+            return true;
         }
     }
     private void displayHelp(CommandSender player){
