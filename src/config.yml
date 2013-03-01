@@ -1,6 +1,9 @@
 # Muni configuration file
 # Authored by bobbshields
 #
+# Note: If something is commented out (#), it is done on purpose by the dev
+#        It is likely that the functionality is not yet added to Muni
+#
 #################################################################
 # Descriptions of certain nodes
 #####
@@ -8,6 +11,11 @@
 # debug: true will output more to the console
 # sql_debug: true outputs the SQL statements and allows DB warnings
 # use_op: true means that ops can run any command, false means Ops need to be given Muni permissions
+#
+# modules (allows you to turn off parts of Muni) 
+#####
+#
+#
 #
 # database 
 #####
@@ -29,10 +37,15 @@
 # mines: will likely be an integration with MineResetLite 
 #################################################################
 
-config_version: .03
+config_version: .04
 debug: false
 sql_debug: false
 use_op: true
+modules:
+    disable_WorldGuard: false
+    disable_Voting: false
+    #disable_DynmapMarkers: false
+    #disable_GiantShopLocation: false
 database:
     use-mysql: false  
     host: localhost
@@ -46,6 +59,14 @@ townsGlobal:
     rankupItemValueEach: 10
     maxTownBankBalance: -1 
     maxRanks: 5 
+    expansionCostSeed: 500
+    storeCost: 1000
+    restaurantCost: 2500
+    hosptialCost: 5000
+    outpostCost: 10000
+    mineCost: 10000
+    embassyCost: 15000
+    arenaCost: 20000
 townRanks:
     1: 
          title: Hamlet 
@@ -54,6 +75,7 @@ townRanks:
          maxDeputies: 1 
          minCitizens: 1 
          maxCitizens: 5 
+         expansions: 4
          outposts: 0 
          restaurants: 1
          hospitals: 1
@@ -67,6 +89,7 @@ townRanks:
          maxDeputies: 2   
          minCitizens: 4
          maxCitizens: 10
+         expansions: 4
          outposts: 1 
          restaurants: 1
          hospitals: 1
@@ -79,6 +102,7 @@ townRanks:
          maxDeputies: 3
          minCitizens: 8
          maxCitizens: 15
+         expansions: 4
          outposts: 2 
          restaurants: 2
          hospitals: 2
@@ -91,6 +115,7 @@ townRanks:
          maxDeputies: 4
          minCitizens: 12
          maxCitizens: 20
+         expansions: 4
          outposts: 2 
          restaurants: 3
          hospitals: 3
@@ -103,6 +128,7 @@ townRanks:
          maxDeputies: 5
          minCitizens: 16
          maxCitizens: 25
+         expansions: 4
          outposts: 3 
          restaurants: 4
          hospitals: 4

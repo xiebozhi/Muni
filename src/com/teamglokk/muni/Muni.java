@@ -62,11 +62,20 @@ public class Muni extends JavaPlugin {
     public static dbWrapper dbwrapper = null;
    
     //Global options to be pulled from config
-    private static double CONFIG_VERSION = .03;
+    private static double CONFIG_VERSION = .04;
     private static boolean DEBUG = true;
     private static boolean SQL_DEBUG = true;
     private static boolean USE_OP = true;
     protected static boolean useMYSQL = false;
+    
+    protected static boolean disableWG = false; 
+    protected static boolean disableVoting = false; 
+    //protected static boolean disableDynmapMarkers = false; 
+    //protected static boolean disableGSL = false; 
+    public static boolean isDisabled_WG() { return disableWG;}
+    public static boolean isDisabled_Voting() { return disableVoting;}
+    //public static boolean isDisabled_DynmapMarkers() { return disableDynmapMarkers;}
+    //public static boolean isDisabled_GSL() { return disableGSL;}
     
     private static String db_host = "jdbc:sqlite://localhost:3306/defaultdb";
     private static String db_database = "defaultdatabase";
@@ -81,15 +90,32 @@ public class Muni extends JavaPlugin {
     public static String getDB_pass() { return db_pass;}
     public static String getDB_prefix() {return db_prefix; }
     
+    protected static double storeCost = 0 ;
+    protected static double restaurantCost = 0 ;
+    protected static double hospitalCost = 0 ;
+    protected static double outpostCost = 0 ;
+    protected static double mineCost = 0 ;
+    protected static double embassyCost = 0 ;
+    protected static double arenaCost = 0 ;
+    public static double getStoreCost() {return storeCost; }
+    public static double getRestaurantCost() {return restaurantCost; }
+    public static double getHospitalCost() {return hospitalCost; }
+    public static double getOutpostCost() {return outpostCost; }
+    public static double getMineCost() {return mineCost; }
+    public static double getEmbassyCost() {return embassyCost; }
+    public static double getArenaCost() {return arenaCost; }
+    
     protected static double maxTaxRate = 10000;
     protected static int rankupItemID = 19;
     protected static double rankupItemValueEach = 1; 
     protected static double maxTBbal = -1;
     protected static int totalTownRanks = 5;
+    protected static double expansionCostMultiplier = 0;
     public static double getMaxTaxRate () { return maxTaxRate; }
     public static int getRankupItemID () { return rankupItemID; }
     public static double getMaxTBbal () { return maxTBbal; }
     public static int getTotalTownRanks () { return totalTownRanks; } 
+    public static double getExpansionCostMultiplier() {return expansionCostMultiplier; } 
     
     public static TownRank [] townRanks;
     
@@ -508,6 +534,7 @@ public class Muni extends JavaPlugin {
         SQL_DEBUG = this.getConfig().getBoolean("sql_debug");
         USE_OP = this.getConfig().getBoolean("use_op");
         
+        // Get database parameters
         useMYSQL = this.getConfig().getBoolean("database.use-mysql");
         db_host = this.getConfig().getString("database.host");
         db_database = this.getConfig().getString("database.database");
@@ -520,16 +547,33 @@ public class Muni extends JavaPlugin {
                 : "jdbc:sqlite:plugins/Muni/"+db_database+".db";
         
         if ( isDebug() ) {getLogger().info("dbURL = " + db_URL); }
-                    
+        
+        // Get disabled modules from config
+        disableWG = this.getConfig().getBoolean("modules.disable_WorldGuard"); 
+        disableVoting = this.getConfig().getBoolean("modules.disable_Voting"); 
+        //disableDynmapMarkers = this.getConfig().getBoolean("modules.disable_DynmapMarkers"); 
+        //disableGSL = this.getConfig().getBoolean("modules.disable_GiantShopLocation"); 
+                
+        // Get global options related to towns
         maxTaxRate = this.getConfig().getDouble("townsGlobal.maxTaxRate"); 
         rankupItemID = this.getConfig().getInt("townsGlobal.rankupItemID");    
         rankupItemValueEach = this.getConfig().getDouble("townsGlobal.rankupItemValueEach");
         maxTBbal = this.getConfig().getDouble("townsGlobal.maxTownBankBalance");  
         totalTownRanks = this.getConfig().getInt("townsGlobal.maxRanks"); 
+        expansionCostMultiplier = this.getConfig().getInt("townsGlobal.expansionCostSeed"); 
+        
+        storeCost = this.getConfig().getDouble("townsGlobal.storeCost"); 
+        restaurantCost = this.getConfig().getDouble("townsGlobal.restaurantCost"); 
+        hospitalCost = this.getConfig().getDouble("townsGlobal.hospitalCost"); 
+        outpostCost = this.getConfig().getDouble("townsGlobal.outpostCost"); 
+        mineCost = this.getConfig().getDouble("townsGlobal.mineCost"); 
+        embassyCost = this.getConfig().getDouble("townsGlobal.embassyCost"); 
+        arenaCost = this.getConfig().getDouble("townsGlobal.arenaCost"); 
 
         if ( isDebug() ) {getLogger().info( maxTaxRate + " " + rankupItemID +
                 " " + maxTBbal + " " + totalTownRanks ); }
         
+        // Populate the town ranks array
         townRanks = new TownRank [totalTownRanks+1];
         for ( int i=1; i <= totalTownRanks; i++ ){
             townRanks[i] = new TownRank( i,
@@ -539,11 +583,13 @@ public class Muni extends JavaPlugin {
                     this.getConfig().getInt   ("townRanks."+(i)+".maxCitizens"),
                     this.getConfig().getDouble("townRanks."+(i)+".moneyCost"),
                     this.getConfig().getInt   ("townRanks."+(i)+".itemCost"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".expansions"),
                     this.getConfig().getInt   ("townRanks."+(i)+".outposts"),
                     this.getConfig().getInt   ("townRanks."+(i)+".restaurants"),
                     this.getConfig().getInt   ("townRanks."+(i)+".hospitals"),
                     this.getConfig().getInt   ("townRanks."+(i)+".mines"),
-                    this.getConfig().getInt   ("townRanks."+(i)+".embassies") );
+                    this.getConfig().getInt   ("townRanks."+(i)+".embassies"),
+                    this.getConfig().getInt   ("townRanks."+(i)+".arenas") );
                     if ( isDebug() ) { getLogger().info( townRanks[i].getName()+
                             " config settings were loaded"); }
         }
