@@ -148,9 +148,9 @@ public class TownAdminCommand implements CommandExecutor {
             }
             staffer.sendMessage("TP to pos.");
             try {
-                double x = Double.parseDouble( args[1] );
-                double y = Double.parseDouble( args[2] );
-                double z = Double.parseDouble( args[3] );
+                double x = plugin.parseD( args[1] );
+                double y = plugin.parseD( args[2] );
+                double z = plugin.parseD( args[3] );
 
                 staffer.teleport(new Location(staffer.getWorld(), x, y, z));
                 return true;

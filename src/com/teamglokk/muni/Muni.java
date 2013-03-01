@@ -356,9 +356,13 @@ public class Muni extends JavaPlugin {
      * @return 
      */
     public Double parseD (String num) {
-    
-        double rtn = Double.parseDouble(num);
-        return rtn;
+        try {
+            double rtn = Double.parseDouble(num);
+            return rtn;
+        } catch (Exception e){
+            this.getLogger().warning(num+" is not a number: "+e.getMessage() );
+            return -9999.99;
+        }
     }
     
     /**
@@ -367,9 +371,13 @@ public class Muni extends JavaPlugin {
      * @return 
      */
     public int parseI (String num) {
-    
-        int rtn = Integer.parseInt(num);
-        return rtn;
+        try {
+            int rtn = Integer.parseInt(num);
+            return rtn;
+        } catch (Exception e){
+            this.getLogger().warning(num+" is not a number: "+e.getMessage() );
+            return -9999;
+        }
     }
     
     /**

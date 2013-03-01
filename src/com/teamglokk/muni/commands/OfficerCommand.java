@@ -181,7 +181,7 @@ public class OfficerCommand implements CommandExecutor {
                     break;
                 case 3: 
                     if (args[1].equalsIgnoreCase("deposit") || args[1].equalsIgnoreCase("d") ){
-                        double amount = Double.parseDouble( args[2] );
+                        double amount = plugin.parseD( args[2] );
                         if (temp.tb_deposit(officer, amount ) ) {
                             plugin.out(officer,"You have deposited "+amount+" into your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
@@ -196,7 +196,7 @@ public class OfficerCommand implements CommandExecutor {
                             officer.sendMessage("You do not have permission to withdraw from the town bank");
                             return true;
                         }
-                        double amount = Double.parseDouble( args[2] );
+                        double amount = plugin.parseD( args[2] );
                         if (temp.tb_withdraw(officer, amount) ) {
                             plugin.out(officer,"You have withdrawn "+amount+" from your town's bank" );
                             plugin.out(officer,"Your personal balance is now: "+plugin.econwrapper.getBalance(officer) );
@@ -226,7 +226,7 @@ public class OfficerCommand implements CommandExecutor {
                     break;
                 case 3: 
                     if (args[1].equalsIgnoreCase("deposit") || args[1].equalsIgnoreCase("d") ){
-                        int amount = Integer.parseInt( args[2] );
+                        int amount = plugin.parseI( args[2] );
                         if (temp.tb_depositItems(officer, amount ) ) {
                             plugin.out(officer,"You have deposited "+amount+" into your town's bank" );
                             temp.checkTownItemBank(officer);
@@ -240,7 +240,7 @@ public class OfficerCommand implements CommandExecutor {
                             officer.sendMessage("You do not have permission to withdraw from the town bank");
                             return true;
                         }
-                        int amount = Integer.parseInt( args[2] );
+                        int amount = plugin.parseI( args[2] );
                         if (temp.tb_withdrawItems(officer, amount) ) {
                             plugin.out(officer,"You have withdrawn "+amount+" "+plugin.econwrapper.getRankupItemName()+
                                     " from your town's bank" ); 
