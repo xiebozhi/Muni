@@ -206,13 +206,13 @@ public class Muni extends JavaPlugin {
     public void makeTestTowns(){
         this.getLogger().info ("Making test towns");
         Town maker = new Town(this);
-        maker = new Town (this,"TestTown","bobbshields","world",false,1,1005.0,100.0,0,16);
+        maker = new Town (this,"TestTown","bobbshields","world",0,false,1,1005.0,100.0,0,16);
         //maker.setMaxDeputies(5); maker.setRank(0); Removed from the town class
         maker.setTaxRate(105.5);
         
         maker.saveToDB();
         
-        maker = new Town (this,"SecondTest","astickynote","world",false,2,1000,100,64,32);
+        maker = new Town (this,"SecondTest","astickynote","world",0,false,2,1000,100,64,32);
         maker.saveToDB();
         
         maker.loadFromDB("TestTown");

@@ -279,10 +279,8 @@ public class dbWrapper extends Muni {
             if(plugin.isSQLdebug() ){plugin.getLogger().warning(SQL);}
             int resultCount = stmt.executeUpdate(SQL); 
             if (resultCount == 1){
-                return true;
-            } 
-            return false;
-            
+                rtn = true;
+            } else { rtn =  false; }
         } catch (SQLException ex){
             plugin.getLogger().severe( "deleteCitizen: "+ex.getMessage() ); 
             rtn = false;
@@ -308,8 +306,9 @@ public class dbWrapper extends Muni {
             if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             rs = stmt.executeQuery(SQL);
             temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"), rs.getString("world"),
-                    rs.getBoolean("democracy"),rs.getInt("townRank"),rs.getDouble("bankBal"),
-                    rs.getDouble("taxRate"),  rs.getInt("itemBal"), rs.getInt("itemTaxRate") );
+                    rs.getInt("expansions"), rs.getBoolean("democracy"),
+                    rs.getInt("townRank"),rs.getDouble("bankBal"), rs.getDouble("taxRate"),  
+                    rs.getInt("itemBal"), rs.getInt("itemTaxRate") );
         } catch (SQLException ex){
             plugin.getLogger().info ( "getTown: "+ townName+" not found in database" );
         } finally {
@@ -526,8 +525,8 @@ public class dbWrapper extends Muni {
         
         Transaction temp = new Transaction(plugin);
         String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"transactions "+
-                " WHERE playerName='"+player+"' AND townName='"+ t.getName()+
-                "' ORDER BY id DESC";
+                " WHERE playerName='"+player+"' AND townName='"+ t.getName()+"' AND type='taxes' " +
+                "ORDER BY id DESC";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
@@ -550,6 +549,149 @@ public class dbWrapper extends Muni {
         
         return rtn;
     }
+    
+    /**
+     * Returns the banking history of the specified officer
+     * @param t
+     * @param officer
+     * @return 
+     */
+    public ArrayList<Transaction> getTownBankHistory (Town t, String officer){
+        ArrayList<Transaction> rtn = new ArrayList<Transaction>();
+        
+        Transaction temp = new Transaction(plugin);
+        String SQL = "SELECT "+temp.toDB_Cols()+" FROM "+plugin.getDB_prefix()+"transactions "+
+                " WHERE playerName='"+officer+"' AND townName='"+ t.getName()+"' AND type='bank' " +
+                "ORDER BY id DESC";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            while (rs.next() ){
+                temp = new Transaction(plugin, rs.getString("townName"), rs.getString("playerName"), 
+                        rs.getString("type"), rs.getDouble("amount"),
+                        rs.getInt("item_amount") ,rs.getTimestamp("timestamp")); //, rs.getString("notes")
+                rtn.add(temp);
+            }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getBankHistory "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getBankHistory: "+ ex.getMessage() ); 
+            } 
+        }
+        
+        return rtn;
+    }
+    
+    /**
+     * Returns a list of regions that belong to the specified town
+     * @param t
+     * @return 
+     */
+    public ArrayList<MuniWGRegion> getSubRegions (Town t){
+        ArrayList<MuniWGRegion> rtn = new ArrayList<MuniWGRegion>();
+        
+        MuniWGRegion temp;
+        String SQL = "SELECT world,region,type FROM "+plugin.getDB_prefix()+"subregions "+
+                " WHERE townName='"+ t.getName()+"' ORDER BY id DESC";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            while (rs.next() ){
+                temp = new MuniWGRegion(rs.getString("world"), rs.getString("region"), 
+                        rs.getString("type") );
+                rtn.add(temp);
+            }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getSubRegions "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getSubRegions: "+ ex.getMessage() ); 
+            } 
+        }
+        return rtn;
+    }
+    
+    public int getNumSubRegions(Town t, String type){
+        int rtn = 0;
+        
+        String SQL = "SELECT COUNT(type) FROM "+plugin.getDB_prefix()+"subregions "+
+                " AS count WHERE townName='"+ t.getName()+"' AND type='"+type+"'";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            rs = stmt.executeQuery(SQL); 
+            rtn = rs.getInt("count");
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getSubRegions "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getSubRegions: "+ ex.getMessage() ); 
+            } 
+        }
+        return rtn;
+    }
+    
+    /**
+     * Deletes a specific subregion from the database
+     * @param t
+     * @param region
+     * @return 
+     */
+    public boolean deleteSubRegion(Town t, String region){
+        boolean rtn = false;
+        String SQL = "DELETE FROM "+plugin.getDB_prefix()+"subregions "+
+                "WHERE townName='"+ t.getName()+"' AND region='"+region+"'";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            int resultCount = stmt.executeUpdate(SQL); 
+            if (resultCount == 1){
+                rtn = true;
+            } else { rtn =  false; }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getSubRegions "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getSubRegions: "+ ex.getMessage() ); 
+            } 
+        }
+        return rtn;
+    }
+    
+    public boolean deleteAllSubRegions(Town t){
+        boolean rtn = false;
+        String SQL = "DELETE FROM "+plugin.getDB_prefix()+"subregions "+
+                "WHERE townName='"+ t.getName()+"'";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            int resultCount = stmt.executeUpdate(SQL); 
+            if (resultCount > 0){
+                rtn = true;
+            } else { rtn =  false; }
+            
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getSubRegions "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getSubRegions: "+ ex.getMessage() ); 
+            } 
+        }
+        return rtn;
+    }
+    
     /**
      * Creates the database specifically for Muni 
      * @param drops true means the tables will be dropped before creating them again
@@ -581,8 +723,8 @@ public class dbWrapper extends Muni {
         String SQL1 = "CREATE TABLE IF NOT EXISTS "+prefix+"towns ( " + 
             "id INTEGER "+ spk + serial +", " + 
             "townName VARCHAR(30) UNIQUE NOT NULL, mayor VARCHAR(16), townRank INTEGER, democracy BOOLEAN, " + 
-            "bankBal DOUBLE, taxRate DOUBLE, itemBal INTEGER, itemTaxRate INTEGER, world VARCHAR(30), tcX INTEGER, tcY INTEGER, "+
-            "tcZ INTEGER "+ mpk + ");";
+            "bankBal DOUBLE, taxRate DOUBLE, itemBal INTEGER, itemTaxRate INTEGER, "+
+            "world VARCHAR(30), expansions INTEGER, tcX INTEGER, tcY INTEGER, tcZ INTEGER "+ mpk + ");";
         String SQL2 = "CREATE TABLE IF NOT EXISTS "+prefix+"citizens ( " + 
             "id INTEGER "+ spk + serial +", " + 
             "playerName VARCHAR(16) UNIQUE NOT NULL, " +"townName VARCHAR(25), " +
@@ -608,7 +750,7 @@ public class dbWrapper extends Muni {
                 +mpk +");";
         String SQL6 = "CREATE TABLE IF NOT EXISTS "+prefix+"subregions ( "  + 
             "id INTEGER "+ spk + serial +", " + 
-                "town VARCHAR(30) NOT NULL , region VARCHAR(30) NOT NULL, "+
+                "town VARCHAR(30) NOT NULL , regionName VARCHAR(30) NOT NULL UNIQUE, "+
                 "world VARCHAR(30) NOT NULL, type VARCHAR(15) " 
                 +mpk +");";
         try {

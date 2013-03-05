@@ -1,4 +1,4 @@
-F/* 
+/* 
  * Muni 
  * Copyright (C) 2013 bobbshields <https://github.com/xiebozhi/Muni> and contributors
  *
@@ -101,7 +101,7 @@ public class TownRank {
     }
     public int getEmbassies(){
         return embassies;
-	}
+    }
     public int getArenas(){
         return arenas;
     }

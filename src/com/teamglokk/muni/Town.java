@@ -49,6 +49,7 @@ public class Town implements Comparable<Town> {
     private int taxItemRate;
     private int townRank;
     private String townWorld;
+    private int expansions; 
     private boolean democracy;
      
     // Stored in (prefix)_citizens	
@@ -60,11 +61,7 @@ public class Town implements Comparable<Town> {
     protected TreeMap<String,Citizen> invitees   = new TreeMap<String,Citizen>(String.CASE_INSENSITIVE_ORDER);
     protected HashMap<String,String> citizensMap = new HashMap<String,String>();
     
-    
-    
     private Timestamp createdDate;
-    
-    
     
     /**
      * Default constructor with no data
@@ -92,6 +89,7 @@ public class Town implements Comparable<Town> {
         applicants = copy.applicants;
         invitees = copy.invitees;
         townWorld = copy.townWorld;
+        expansions = copy.expansions;
     }
     
     /**
@@ -113,6 +111,7 @@ public class Town implements Comparable<Town> {
         townBankItemBal = 0;
         taxItemRate = 16;
         townWorld = world;
+        expansions = 0; 
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }    
@@ -121,7 +120,7 @@ public class Town implements Comparable<Town> {
      * 
      * @author bobbshields
      */
-    public Town (Muni instance, String town_Name, String mayor, String world, boolean democracy,
+    public Town (Muni instance, String town_Name, String mayor, String world, int expansions, boolean democracy,
             int rank, double bankBal, double tax, int itemBal, int itemTax){
         
         plugin = instance;
@@ -135,6 +134,7 @@ public class Town implements Comparable<Town> {
         townBankItemBal = itemBal;
         taxItemRate = itemTax;
         townWorld = world;
+        this.expansions = expansions; 
         if (plugin.isDebug() ) plugin.getLogger().info("End Muni Constructor: "+toDB_Vals() );
         
     }
@@ -162,6 +162,7 @@ public class Town implements Comparable<Town> {
         townBankBal = copy.getBankBal();
         taxRate = copy.getTaxRate();
         townWorld = copy.getWorld();
+        expansions = copy.getExpansions();
         
         
         if ( copy.getMayor() == null ) {return false;}
@@ -383,7 +384,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public String toDB_Cols(){
-        return "townName,mayor,townRank,democracy,bankBal,taxRate,itemBal,itemTaxRate,world";
+        return "townName,mayor,townRank,democracy,bankBal,taxRate,itemBal,itemTaxRate,world,expansions";
     }
     
     /**
@@ -395,7 +396,7 @@ public class Town implements Comparable<Town> {
                Integer.toString(townRank) +"','"+Boolean.toString(democracy) +"','"+
                Double.toString(townBankBal) +"','"+Double.toString(taxRate)+"','"+
                Integer.toString(townBankItemBal) + "','"+Integer.toString(taxItemRate)+"','"+
-               townWorld+"'";
+               townWorld+"','"+expansions+"'";
     }  
     
     /**
@@ -407,7 +408,7 @@ public class Town implements Comparable<Town> {
                 +"', democracy='"+Boolean.toString(democracy)+"', bankBal='"+
                 Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+
                 "', itemBal='"+ Integer.toString(townBankItemBal) +"', itemTaxRate='"+ Integer.toString(taxItemRate) +
-                "', world='"+townWorld+"' ";
+                "', world='"+townWorld+"', expansions='"+expansions+"'";
     }
     
     /**
@@ -1188,6 +1189,13 @@ public class Town implements Comparable<Town> {
             return false;
         }  
     }
+    public boolean paymentFromTB (double money, int item, String player, String reason){
+        if (paymentFromTB(money,item) ){
+            Transaction t = new Transaction(plugin, townName, player, reason, money, item, true);
+            return true;
+        }
+        return false; 
+    }
     
     /**
      * Withdraw and destroy from the town bank
@@ -1220,7 +1228,7 @@ public class Town implements Comparable<Town> {
     }
     
     public boolean tb_depositItems(Player officer, int amount){
-        if (plugin.econwrapper.payItem(officer, plugin.getRankupItemID(), amount) ){
+        if (plugin.econwrapper.payItemR(officer, plugin.getRankupItemID(), amount, "bank") ){
             townBankItemBal = townBankItemBal + amount;
             messageOfficers(officer.getName()+" deposited "+amount+" " +
                     plugin.econwrapper.getItemName(plugin.getRankupItemID()) + " into the town bank");
@@ -1231,10 +1239,12 @@ public class Town implements Comparable<Town> {
     }
     public boolean tb_withdrawItems(Player officer, int amount) {
         if (townBankItemBal >= amount){
-            plugin.econwrapper.giveItem(officer, plugin.getRankupItemID(), amount);
+            plugin.econwrapper.giveItem(officer, plugin.getRankupItemID(), -amount);
             townBankItemBal = townBankItemBal - amount;
             messageOfficers(officer.getName()+" withdrew "+amount+" " +
                     plugin.econwrapper.getItemName(plugin.getRankupItemID()) + " from the town bank");
+            
+            Transaction t = new Transaction(plugin, townName, officer.getName(), "bank", 0, amount, true);
             saveToDB();
             return true; 
         }
@@ -1251,7 +1261,7 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public boolean tb_deposit(Player player, double amount){
-        if ( plugin.econwrapper.pay(player,amount,0,"TB Deposit") ){
+        if ( plugin.econwrapper.pay(player,amount,0,"bank") ){
             townBankBal = townBankBal + amount;
             messageOfficers(player.getName()+" deposited "+amount+" into the town bank");
             saveToDB();///// Change to having a new function that saves just the balance
@@ -1267,7 +1277,7 @@ public class Town implements Comparable<Town> {
      */
     public boolean tb_withdraw(Player officer, double amount){
         if ( townBankBal >= amount ){
-            if (plugin.econwrapper.giveMoney(officer,amount, "TB Withdraw") ) {
+            if (plugin.econwrapper.giveMoney(officer,-amount, "bank") ) {
                 townBankBal = townBankBal - amount;
                 messageOfficers(officer.getName()+" withdrew "+amount+" from the town bank");
                 saveToDB(); ///// Change to having a new function that saves just the balance
@@ -1316,6 +1326,18 @@ public class Town implements Comparable<Town> {
                 " and "+ itemAmount+" " + plugin.econwrapper.getRankupItemName());
             return true;
         } else { return false; }
+    }
+    
+    public void incrementExpansions(){
+        expansions = expansions + 1;
+    }
+    
+    /**
+     * Returns the total number of expansions the town has experienced
+     * @return 
+     */
+    public int getExpansions() { 
+        return expansions; 
     }
     
     /**
