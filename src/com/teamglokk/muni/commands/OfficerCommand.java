@@ -330,10 +330,10 @@ public class OfficerCommand implements CommandExecutor {
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            if ( temp.isMayor(officer) ) {
+            if ( temp.isMayor(officer) ) { // NPE when no town
                 if ( args[1].equalsIgnoreCase( "confirm" ) ){
                     if ( plugin.wgwrapper.makeTownBorder(officer, temp.getName() ) > 0 ){
-                        officer.sendMessage("Your town border has been created!");
+                        plugin.getServer().broadcastMessage("The "+temp.getName()+" town border has been created!");
                     } else {
                         officer.sendMessage("There was a problem ");
                     }
