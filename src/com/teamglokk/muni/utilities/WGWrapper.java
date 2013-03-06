@@ -245,7 +245,9 @@ public class WGWrapper extends Muni {
             player.sendMessage( "There is already a region by that name" );
             return -1;
         }
-        return makeRegion (player.getLocation(), regionName, 12, 10, false);
+        int rtn =  makeRegion (player.getLocation(), regionName, 12, 10, false);
+        
+        return rtn; 
     }
     
     /**

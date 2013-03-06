@@ -596,7 +596,7 @@ public class dbWrapper extends Muni {
         
         MuniWGRegion temp;
         String SQL = "SELECT world,region,type FROM "+plugin.getDB_prefix()+"subregions "+
-                " WHERE townName='"+ t.getName()+"' ORDER BY id DESC";
+                " WHERE town='"+ t.getName()+"' ORDER BY id DESC";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
