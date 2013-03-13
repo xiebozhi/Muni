@@ -259,8 +259,9 @@ public class OfficerCommand implements CommandExecutor {
                         return false; 
             }
             return true;
-        } else if (args[0].equalsIgnoreCase("makePlot")) { 
+        } else if ( args[0].equalsIgnoreCase("makePlot") || args[0].equalsIgnoreCase("makeSubRegion") ) { 
             if (args.length == 1) {
+                officer.sendMessage("This command will make a pre-sized plot around your location as the center");
                 officer.sendMessage("/deputy makePlot list");
                 officer.sendMessage("/deputy makePlot <type>");
                 return true;
@@ -315,7 +316,7 @@ public class OfficerCommand implements CommandExecutor {
                 }
             } 
             return true; 
-        } 
+        }
         
         // Mayor-only commands from here on out
         if (!plugin.econwrapper.hasPerm(officer, "muni.mayor")){
@@ -366,6 +367,22 @@ public class OfficerCommand implements CommandExecutor {
                         t.getTitle()+" thanks to the new mayor " +t.getMayor()+"!" );
             } else { officer.sendMessage("Could not start the town due to insufficent resources" ); }
             return true;
+        }  else if ( args[0].equalsIgnoreCase("renameTown") ) { 
+            if (args.length == 1) {
+                officer.sendMessage("This command will rename your town");
+                officer.sendMessage("/mayor renameTown <newName>");
+                return true;
+            }
+            if ( args.length == 2 ){
+                Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+                if ( temp.isMayor(officer) ) {
+                    //copy then delete the old name in the index
+                    //add the new name in the index
+                    //check the existance of the town plot and change
+                    //check for existence of subregions and rename in db, then change in wg
+                } 
+            } else { officer.sendMessage("/mayor renameTown <newName>"); }
+            return true; 
         } else if (args[0].equalsIgnoreCase("delete")  
                 || args[0].equalsIgnoreCase("disband")) {
             if (args.length == 1 ) {

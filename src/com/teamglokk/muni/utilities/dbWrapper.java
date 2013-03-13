@@ -595,7 +595,7 @@ public class dbWrapper extends Muni {
         ArrayList<MuniWGRegion> rtn = new ArrayList<MuniWGRegion>();
         
         MuniWGRegion temp;
-        String SQL = "SELECT world,region,type FROM "+plugin.getDB_prefix()+"subregions "+
+        String SQL = "SELECT world,region,displayName,type FROM "+plugin.getDB_prefix()+"subregions "+
                 " WHERE town='"+ t.getName()+"' ORDER BY id DESC";
         try {
             db_open();
@@ -603,7 +603,7 @@ public class dbWrapper extends Muni {
             rs = stmt.executeQuery(SQL); 
             while (rs.next() ){
                 temp = new MuniWGRegion(rs.getString("world"), rs.getString("region"), 
-                        rs.getString("type") );
+                        rs.getString("displayName"), rs.getString("type") );
                 rtn.add(temp);
             }
             
@@ -751,7 +751,7 @@ public class dbWrapper extends Muni {
         String SQL6 = "CREATE TABLE IF NOT EXISTS "+prefix+"subregions ( "  + 
             "id INTEGER "+ spk + serial +", " + 
                 "town VARCHAR(30) NOT NULL , regionName VARCHAR(30) NOT NULL UNIQUE, "+
-                "world VARCHAR(30) NOT NULL, type VARCHAR(15) " 
+                "displayName VARCHAR(30), world VARCHAR(30) NOT NULL, type VARCHAR(15) " 
                 +mpk +");";
         try {
             db_open();
