@@ -586,6 +586,28 @@ public class dbWrapper extends Muni {
         return rtn;
     }
     
+    public boolean addSubRegion(String world, String townName, String displayName, String type) {
+        boolean rtn = true;
+        String SQL = "INSERT INTO "+plugin.getDB_prefix()+"subregions ("+
+                "town,world,region,displayName,type) VALUES ('"+
+                townName+"','"+world+"','"+townName+"','"+displayName+"','"+type+"');";
+            
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            stmt.executeUpdate(SQL); 
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "db_addSubRegion: "+ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "db_addSubRegion: "+ex.getMessage() ); 
+                rtn = false;
+            } finally{}
+        }
+        return rtn;
+    }
     /**
      * Returns a list of regions that belong to the specified town
      * @param t
@@ -602,7 +624,8 @@ public class dbWrapper extends Muni {
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
             while (rs.next() ){
-                temp = new MuniWGRegion(rs.getString("world"), rs.getString("region"), 
+                temp = new MuniWGRegion(rs.getString("world"), 
+                        rs.getString("region"), 
                         rs.getString("displayName"), rs.getString("type") );
                 rtn.add(temp);
             }
@@ -622,19 +645,19 @@ public class dbWrapper extends Muni {
         int rtn = 0;
         
         String SQL = "SELECT COUNT(type) FROM "+plugin.getDB_prefix()+"subregions "+
-                " AS count WHERE townName='"+ t.getName()+"' AND type='"+type+"'";
+                " AS count WHERE town='"+ t.getName()+"' AND type='"+type+"'";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
-            rtn = rs.getInt("count");
+            rtn = stmt.getUpdateCount();
             
         } catch (SQLException ex){
-            plugin.getLogger().severe("db_getSubRegions "+ ex.getMessage() ); 
+            plugin.getLogger().severe("db_getNumSubRegions "+ ex.getMessage() ); 
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning("db_getSubRegions: "+ ex.getMessage() ); 
+                plugin.getLogger().warning("db_getNumSubRegions: "+ ex.getMessage() ); 
             } 
         }
         return rtn;
@@ -649,7 +672,7 @@ public class dbWrapper extends Muni {
     public boolean deleteSubRegion(Town t, String region){
         boolean rtn = false;
         String SQL = "DELETE FROM "+plugin.getDB_prefix()+"subregions "+
-                "WHERE townName='"+ t.getName()+"' AND region='"+region+"'";
+                "WHERE town='"+ t.getName()+"' AND region='"+region+"'";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
@@ -672,7 +695,7 @@ public class dbWrapper extends Muni {
     public boolean deleteAllSubRegions(Town t){
         boolean rtn = false;
         String SQL = "DELETE FROM "+plugin.getDB_prefix()+"subregions "+
-                "WHERE townName='"+ t.getName()+"'";
+                "WHERE town='"+ t.getName()+"'";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
@@ -682,11 +705,11 @@ public class dbWrapper extends Muni {
             } else { rtn =  false; }
             
         } catch (SQLException ex){
-            plugin.getLogger().severe("db_getSubRegions "+ ex.getMessage() ); 
+            plugin.getLogger().severe("db_getAllSubRegions "+ ex.getMessage() ); 
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning("db_getSubRegions: "+ ex.getMessage() ); 
+                plugin.getLogger().warning("db_getAllSubRegions: "+ ex.getMessage() ); 
             } 
         }
         return rtn;
@@ -750,7 +773,7 @@ public class dbWrapper extends Muni {
                 +mpk +");";
         String SQL6 = "CREATE TABLE IF NOT EXISTS "+prefix+"subregions ( "  + 
             "id INTEGER "+ spk + serial +", " + 
-                "town VARCHAR(30) NOT NULL , regionName VARCHAR(30) NOT NULL UNIQUE, "+
+                "town VARCHAR(30) NOT NULL , region VARCHAR(30) NOT NULL UNIQUE, "+
                 "displayName VARCHAR(30), world VARCHAR(30) NOT NULL, type VARCHAR(15) " 
                 +mpk +");";
         try {

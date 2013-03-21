@@ -189,16 +189,6 @@ public class TownAdminCommand implements CommandExecutor {
             staffer.sendMessage("Here!");
             staffer.sendMessage(plugin.getTownName("bobbshields") );
             return true;
-        } else if (args[0].equalsIgnoreCase("makeRegion")) { //DELETE MEEEEEE
-            if (plugin.wgwrapper.makeTownBorder(staffer, args[1] ) > 0 ){
-                plugin.wgwrapper.makeOwners(staffer.getWorld().getName(), args[1], 
-                        plugin.getTownFromCitizen(staffer.getName() ).getOfficerList() );
-                plugin.wgwrapper.makeMembers(staffer.getWorld().getName(), args[1], 
-                        plugin.getTownFromCitizen(staffer.getName() ).getRegCitsList() );
-                staffer.sendMessage("Region created!");
-            }
-            staffer.sendMessage(plugin.getTownName("bobbshields") );
-            return true;
         } else {
             staffer.sendMessage("[Muni] Input not understood.");
             displayHelp(sender);

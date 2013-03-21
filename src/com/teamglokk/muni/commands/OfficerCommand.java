@@ -274,6 +274,7 @@ public class OfficerCommand implements CommandExecutor {
                 officer.sendMessage("arena");
                 officer.sendMessage("outpost");
                 officer.sendMessage("embassy");
+                return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             boolean test = false;
@@ -282,32 +283,32 @@ public class OfficerCommand implements CommandExecutor {
                     if (temp.paymentFromTB(plugin.getRestaurantCost(), 0, officer.getName(), "restaurant creation") ){
                         if (plugin.dbwrapper.getNumSubRegions(temp, "restaurant" ) < plugin.townRanks[temp.getRank()].getRestaurants() ){
                             test = plugin.wgwrapper.makeRestaurant(temp, officer, temp.getName()+"_r");
-                        } else { officer.sendMessage("Your town already has the max number of restaurants"); } 
-                    } else { officer.sendMessage("Not enough money in the town bank."); } 
+                        } else { officer.sendMessage("Your town already has the max number of restaurants"); return true; } 
+                    } else { officer.sendMessage("Not enough money in the town bank."); return true; } 
                 } else if ( args[1].equalsIgnoreCase( "hospital" ) ){
                     if (temp.paymentFromTB(plugin.getHospitalCost(), 0, officer.getName(), "hospital creation") ){
                         if (plugin.dbwrapper.getNumSubRegions(temp, "hospital" ) < plugin.townRanks[temp.getRank()].getHospitals() ){
                             test = plugin.wgwrapper.makeHospital(temp, officer, temp.getName()+"_h");
-                        } else { officer.sendMessage("Your town already has the max number of hospitals"); } 
-                    } else { officer.sendMessage("Not enough money in the town bank."); } 
+                        } else { officer.sendMessage("Your town already has the max number of hospitals"); return true; } 
+                    } else { officer.sendMessage("Not enough money in the town bank."); return true; } 
                 } else if ( args[1].equalsIgnoreCase( "arena" ) ){
                     if (temp.paymentFromTB(plugin.getArenaCost(), 0, officer.getName(), "arena creation") ){
                         if (plugin.dbwrapper.getNumSubRegions(temp, "arena" ) < plugin.townRanks[temp.getRank()].getArenas() ){
                             test = plugin.wgwrapper.makeArena(temp, officer, temp.getName()+"_a");
-                        } else { officer.sendMessage("Your town already has the max number of arenas"); } 
-                    } else { officer.sendMessage("Not enough money in the town bank."); } 
+                        } else { officer.sendMessage("Your town already has the max number of arenas"); return true; } 
+                    } else { officer.sendMessage("Not enough money in the town bank."); return true; } 
                 } else if ( args[1].equalsIgnoreCase( "outpost" ) ){
                     if (temp.paymentFromTB(plugin.getOutpostCost(), 0, officer.getName(), "outpost creation") ){
                         if (plugin.dbwrapper.getNumSubRegions(temp, "outpost" ) < plugin.townRanks[temp.getRank()].getOutposts() ){
                             test = plugin.wgwrapper.makeOutpost(temp, officer, temp.getName()+"_o");
-                        } else { officer.sendMessage("Your town already has the max number of outposts"); } 
-                    } else { officer.sendMessage("Not enough money in the town bank."); } 
+                        } else { officer.sendMessage("Your town already has the max number of outposts"); return true; } 
+                    } else { officer.sendMessage("Not enough money in the town bank."); return true; } 
                 } else if ( args[1].equalsIgnoreCase( "embassy" ) ){
                     if (temp.paymentFromTB(plugin.getEmbassyCost(), 0, officer.getName(), "embassy creation") ){
                         if (plugin.dbwrapper.getNumSubRegions(temp, "embassy" ) < plugin.townRanks[temp.getRank()].getEmbassies() ){
                             test = plugin.wgwrapper.makeEmbassy(temp, officer, temp.getName()+"_e");
-                        } else { officer.sendMessage("Your town already has the max number of embassies"); } 
-                    } else { officer.sendMessage("Not enough money in the town bank. "); } 
+                        } else { officer.sendMessage("Your town already has the max number of embassies"); return true; } 
+                    } else { officer.sendMessage("Not enough money in the town bank. "); return true; } 
                 }
                 if (test) {
                     officer.sendMessage("The sub-region was created successfully");
@@ -333,7 +334,7 @@ public class OfficerCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             if ( temp.isMayor(officer) ) { // NPE when no town
                 if ( args[1].equalsIgnoreCase( "confirm" ) ){
-                    if ( plugin.wgwrapper.makeTownBorder(officer, temp.getName() ) > 0 ){
+                    if ( plugin.wgwrapper.makeTownBorder(officer, temp ) > 0 ){
                         plugin.getServer().broadcastMessage("The "+temp.getName()+" town border has been created!");
                     } else {
                         officer.sendMessage("There was a problem ");
@@ -343,7 +344,7 @@ public class OfficerCommand implements CommandExecutor {
             return true; 
         }  else if (args[0].equalsIgnoreCase("found") || 
                 args[0].equalsIgnoreCase("charter") ||args[0].equalsIgnoreCase("add")) {
-            if (args.length != 2) {
+            if (args.length == 1 || args.length > 3) {
                 officer.sendMessage("/mayor found <TownName>");
                 return true;
             }
@@ -354,6 +355,17 @@ public class OfficerCommand implements CommandExecutor {
             if (plugin.isTown(args[1]) ){
                 officer.sendMessage("That town already exists.  Please choose another name");
                 return true;
+            }
+            if ( args.length == 2 ) { 
+                officer.sendMessage("Are you sure you want to name your town "+args[1]+"?");
+                officer.sendMessage("It is permanent and you may not change it later!!!");
+                officer.sendMessage("It cannot contain spaces.  Be sure your capitalization is how you want it");
+                officer.sendMessage("To confirm do /mayor found <TownName> confirm "+args[1]+"?");
+                return true; 
+            }
+            if ( args.length != 3) { return true; }
+            if (!args[2].equalsIgnoreCase("confirm") ){
+                return true; 
             }
             if (plugin.econwrapper.pay(officer, plugin.townRanks[1].getMoneyCost(),
                     plugin.townRanks[1].getItemCost(), "Found: "+args[1] ) ){
@@ -376,10 +388,8 @@ public class OfficerCommand implements CommandExecutor {
             if ( args.length == 2 ){
                 Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
                 if ( temp.isMayor(officer) ) {
-                    //copy then delete the old name in the index
-                    //add the new name in the index
-                    //check the existance of the town plot and change
-                    //check for existence of subregions and rename in db, then change in wg
+                    //temp.renameTown(args[1]);
+                    officer.sendMessage("Town names are currently permanent.  Delete your town and re-make");
                 } 
             } else { officer.sendMessage("/mayor renameTown <newName>"); }
             return true; 
@@ -394,6 +404,7 @@ public class OfficerCommand implements CommandExecutor {
                 plugin.wgwrapper.removeTown(temp.getName());
                 temp.removeAllTownCits();            //NPE somewhere
                 plugin.removeTown(temp.getName() );  //NPE somewhere
+                plugin.wgwrapper.deleteAllRegions(temp);
                 plugin.getServer().broadcastMessage(temp.getName()+
                         " and all its citizens were removed by the mayor, "+ officer.getName()+"!" );
             } else { officer.sendMessage("To confirm town deletion, do /mayor delete confirm"); }
@@ -421,22 +432,37 @@ public class OfficerCommand implements CommandExecutor {
             return true;
             
         }  else if (args[0].equalsIgnoreCase("expand")) { 
-            if (args.length != 2){
+            if (args.length == 1 || args.length >3){
                 officer.sendMessage("You must specify a direction");
                 officer.sendMessage("north, south, east, or west");
                 officer.sendMessage("n,s,e,w");
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            
+            Double price = plugin.getExpansionCostMultiplier()*temp.getExpansions()+1;
+            try {
+                if (!args[2].equalsIgnoreCase("confirm") ){
+                    officer.sendMessage("The expansion will cost the town "+price+" "+
+                            plugin.econwrapper.getCurrNamePlural()+".");
+                    officer.sendMessage("To confirm do /mayor expand <direction> confirm ");
+                    return true; 
+                }
+            }
+            catch (ArrayIndexOutOfBoundsException ex ){
+                    officer.sendMessage("To confirm do /mayor expand <direction> confirm ");
+                    return true;
+            }
             if ( temp.isMayor(officer) ){
-                if (temp.paymentFromTB(plugin.getExpansionCostMultiplier()*temp.getExpansions(), 0) ){
+                if (temp.paymentFromTB(price, 0) ){
                     int area = plugin.wgwrapper.expandRegion(officer.getWorld().getName(),
                             temp.getName(), args[1], 10);
                     if ( area  > 0 ){
                         temp.incrementExpansions();
+                        temp.messageOfficers(price+" "+plugin.econwrapper.getCurrNamePlural()
+                                +" has been deducted from the town bank for border expansion");
                         officer.sendMessage("The new area is "+area );
                         plugin.getServer().broadcastMessage(temp.getName()+" has expanded its borders ");
+                        //log transaction here
                     } else { officer.sendMessage("You must specify {n,s,e,w}"); }
                 }
             }
@@ -456,19 +482,16 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "/deputy kick <playerName>");
             plugin.out(sender, "/deputy resign");
             plugin.out(sender, "/deputy makePlot <optional:list>");
-            //plugin.out(sender, "/deputy setRegion");
             plugin.out(sender, "/deputy setTax <money>");
             plugin.out(sender, "/deputy setItemTax <sponges>");
-            //plugin.out(sender, "**/deputy pushBorder");
             plugin.out(sender, "**/deputy bank deposit/withdraw <amount>");
+            plugin.out(sender, "**/deputy itemBank deposit/withdraw <amount>");
             plugin.out(sender, "** (with perm) ");
         } else if (subcmd.equalsIgnoreCase("mayor") ){
             plugin.out(sender, "Muni Mayor Help.  You can do these commands:",ChatColor.LIGHT_PURPLE);
             plugin.out(sender, "/mayor found <newTownName>");
             plugin.out(sender, "/mayor makeBorder");
             plugin.out(sender, "/mayor expand <dir> (dir = n, s, e, w)");
-            plugin.out(sender, "/mayor bank check");
-            plugin.out(sender, "/mayor bank deposit/withdraw <amount>");
             plugin.out(sender, "/mayor deputize <citizen>");
             plugin.out(sender, "/mayor resign");
             plugin.out(sender, "/mayor delete");

@@ -92,6 +92,19 @@ public class WGWrapper extends Muni {
     }
     
     /**
+     * Deletes the parent and the subregions of the given town
+     * @param town 
+     */
+    public void deleteAllRegions(Town town) {
+        
+        List<MuniWGRegion> subRegions = plugin.dbwrapper.getSubRegions(town);
+        for ( MuniWGRegion wgr : subRegions ){
+            this.deleteRegion(wgr.getWorld(), wgr.getRegionName());
+        }
+        this.deleteRegion( town.getWorld(), town.getName() );
+    }
+    
+    /**
      * This will be used to check a square area for other regions
      * @param player
      * @param radius
@@ -203,10 +216,10 @@ public class WGWrapper extends Muni {
         
         child.setFlag(DefaultFlag.GREET_MESSAGE, greeting);
         child.setFlag(DefaultFlag.FAREWELL_MESSAGE, farewell);
-        if (pvp ){ 
+        if (pvp){ 
             child.setFlag(DefaultFlag.PVP, StateFlag.State.ALLOW); 
         } else {
-            child.setFlag(DefaultFlag.PVP, StateFlag.State.ALLOW); 
+            child.setFlag(DefaultFlag.PVP, StateFlag.State.DENY); 
         }
         if (heal){ 
             child.setFlag(DefaultFlag.HEAL_AMOUNT, 1); 
@@ -231,21 +244,24 @@ public class WGWrapper extends Muni {
      * @param regionName
      * @return 
      */
-    public int makeTownBorder ( Player player, String regionName ) {
+    public int makeTownBorder ( Player player, Town town ) {
          RegionManager mgr = wg.getGlobalRegionManager().get(player.getWorld());
-         if (!ProtectedRegion.isValidId(regionName ) ) {
-            player.sendMessage("Region cannot be named: " +regionName+" (INVALID)" ) ;
+         if (!ProtectedRegion.isValidId(town.getName() ) ) {
+            player.sendMessage("Region cannot be named: " +town.getName()+" (INVALID)" ) ;
             return -1; 
         }
-        if (regionName.equalsIgnoreCase( "__global__" )){
+        if (town.getName().equalsIgnoreCase( "__global__" )){
             player.sendMessage("The region cannot be named __global__" ) ;
             return -1; 
         }
-        if (mgr.hasRegion(regionName)) {
+        if (mgr.hasRegion(town.getName())) {
             player.sendMessage( "There is already a region by that name" );
             return -1;
         }
-        int rtn =  makeRegion (player.getLocation(), regionName, 12, 10, false);
+        int rtn =  makeRegion (player.getLocation(), town.getName(), 12, 10, false);
+        
+        this.makeOwners(town.getWorld(), town.getName(), town.getOfficerList());
+        this.makeMembers(town.getWorld(), town.getName(), town.getRegCitsList());
         
         return rtn; 
     }
@@ -355,6 +371,7 @@ public class WGWrapper extends Muni {
     public boolean makeOutpost (Town town, Player player, String subRegionName) {
         boolean rtn = true;
         ProtectedRegion region = makeSubRegion(town,player,subRegionName,12,40);
+        plugin.dbwrapper.addSubRegion(town.getWorld(), town.getName(), subRegionName, "outpost");
         
         // require outside of any protections 
         
@@ -372,6 +389,7 @@ public class WGWrapper extends Muni {
     public boolean makeRestaurant (Town town, Player player, String subRegionName) {
         boolean rtn = true;
         makeSubRegion(town,player,subRegionName,7,10,"Welcome to the restaurant","You are leaving the restaurant",false,false,true);
+        plugin.dbwrapper.addSubRegion(town.getWorld(), town.getName(), subRegionName, "restaurant");
         
         // check inside main town
         // set food regen
@@ -390,7 +408,7 @@ public class WGWrapper extends Muni {
     public boolean makeHospital (Town town, Player player, String subRegionName) {//, String SRdisplayName) {
         boolean rtn = true;
         makeSubRegion(town,player,subRegionName,7,10,"Welcome to the Hospital","You are leaving the hospital",false,true,false);
-        
+        plugin.dbwrapper.addSubRegion(town.getWorld(), town.getName(), subRegionName, "hospital");
         // check inside main town
         // set heath regen
         
@@ -408,7 +426,7 @@ public class WGWrapper extends Muni {
     public boolean makeEmbassy (Town town, Player player, String subRegionName) {
         boolean rtn = true;
         makeSubRegion(town,player,subRegionName,12,50,"Welcome to the embassy","You are leaving the embassy",false,false,false);
-        
+        plugin.dbwrapper.addSubRegion(town.getWorld(), town.getName(), subRegionName, "embassy");
         // require inside of another town's main protection (no embassy in an outpost)
         
         return rtn;
@@ -425,7 +443,7 @@ public class WGWrapper extends Muni {
     public boolean makeArena (Town town, Player player, String subRegionName) {
         boolean rtn = true;
         makeSubRegion(town,player,subRegionName,37,50,"Welcome to the arena floor","You are leaving the arena floor",true,false,false);
-        
+        plugin.dbwrapper.addSubRegion(town.getWorld(), town.getName(), subRegionName, "arena");
         // check inside main town
         // set PVP
         

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -217,6 +218,22 @@ public class Town implements Comparable<Town> {
     public double getRankingValue(){
         return townBankBal+ plugin.getRankupItemValueEach()*townBankItemBal;
     }
+    
+    /*
+    public boolean renameTown (String newName ){
+        boolean rtn = false;
+        //copy then delete the old name in the index
+        if (!plugin.isTown(newName) ){
+            plugin.removeTown(townName);
+            plugin.addTown(new Town(plugin,newName,));
+        } //else there is already a town that name
+        //add the new name in the index
+        //check the existance of the town plot and change
+        //check for existence of subregions and rename in db, then change in wg
+        
+        return rtn;
+    }
+    */
     
     /**
      * Saves the data for the mayor to the database 
@@ -458,8 +475,8 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public void info(CommandSender player){
-        plugin.out( player, townName+" is a "+plugin.townRanks[townRank].getName() );
-        plugin.out( player, "The town bank balance is "+townBankBal+" and the tax rate is "+taxRate+".");
+        plugin.out( player, ChatColor.LIGHT_PURPLE+townName+" is a "+plugin.townRanks[townRank].getName() );
+        plugin.out( player, "The bank balance is "+townBankBal+" with a tax rate of "+taxRate+".");
         plugin.out( player, "The town vault has "+townBankItemBal+" "+
                 plugin.econwrapper.getRankupItemName() +" and the item tax rate is "+taxItemRate+".");
         listAllCitizens(player);
@@ -487,11 +504,10 @@ public class Town implements Comparable<Town> {
         for (String name : citizens.keySet() ){
             rtn.add(name);
         }
-        
         return rtn;
     }
     /**
-     * Gives a string of user-friendly information about the town
+     * Outputs to the player the lists of citizens involved with this town
      * @return 
      */
     public void listAllCitizens(CommandSender player){
@@ -1297,7 +1313,7 @@ public class Town implements Comparable<Town> {
     }
     
     public void checkTownItemBank(CommandSender sender) {
-            sender.sendMessage(townName+"'s town bank has a balance of "+ getBankBal()+" "+
+            sender.sendMessage(townName+"'s town bank has a balance of "+ getBankItemBal()+" "+
                     plugin.econwrapper.getRankupItemName());
     }
     /**

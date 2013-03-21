@@ -59,7 +59,7 @@ townsGlobal:
     rankupItemValueEach: 10
     maxTownBankBalance: -1 
     maxRanks: 5 
-    expansionCostSeed: 500
+    expansionCostSeed: 1000
     storeCost: 1000
     restaurantCost: 2500
     hosptialCost: 5000
