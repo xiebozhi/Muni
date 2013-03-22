@@ -644,13 +644,16 @@ public class dbWrapper extends Muni {
     public int getNumSubRegions(Town t, String type){
         int rtn = 0;
         
-        String SQL = "SELECT COUNT(type) FROM "+plugin.getDB_prefix()+"subregions "+
+        String SQL = "SELECT town FROM "+plugin.getDB_prefix()+"subregions "+
                 " AS count WHERE town='"+ t.getName()+"' AND type='"+type+"'";
         try {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
+            
             rtn = stmt.getUpdateCount();
+            
+            plugin.getLogger().severe("There are "+rtn+" subregions of "+t.getName() ); // DELETE ME
             
         } catch (SQLException ex){
             plugin.getLogger().severe("db_getNumSubRegions "+ ex.getMessage() ); 

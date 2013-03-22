@@ -28,6 +28,7 @@ import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.teamglokk.muni.listeners.MuniHeartbeat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -156,6 +157,10 @@ public class Muni extends JavaPlugin {
         // Register Muni listener(s)
         getServer().getPluginManager().registerEvents(new MuniLoginEvent(this),this );
 
+        //Register the heartbeat
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, 
+                new MuniHeartbeat(this), 20*20 , 30*60*20 );
+        
         // Register Muni commands
         getCommand("town"     ).setExecutor(new TownCommand     (this) );
         getCommand("deputy"   ).setExecutor(new OfficerCommand  (this) );
