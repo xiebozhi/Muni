@@ -33,11 +33,11 @@ import org.bukkit.ChatColor;
  * Handler for the /town command.
  * @author BobbShields
  */
-public class TownAdminCommand implements CommandExecutor {
+public class MuniCommand implements CommandExecutor {
     private Muni plugin;
     private Player staffer;
     
-    public TownAdminCommand (Muni instance){
+    public MuniCommand (Muni instance){
         plugin = instance;
     }
     @Override

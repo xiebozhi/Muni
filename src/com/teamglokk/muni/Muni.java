@@ -22,12 +22,12 @@ package com.teamglokk.muni;
 
 import com.teamglokk.muni.commands.TownCommand;
 import com.teamglokk.muni.commands.OfficerCommand;
-import com.teamglokk.muni.commands.TownAdminCommand;
 import com.teamglokk.muni.utilities.dbWrapper;
 import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.teamglokk.muni.commands.MuniCommand;
 import com.teamglokk.muni.listeners.MuniHeartbeat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -165,7 +165,7 @@ public class Muni extends JavaPlugin {
         getCommand("town"     ).setExecutor(new TownCommand     (this) );
         getCommand("deputy"   ).setExecutor(new OfficerCommand  (this) );
         getCommand("mayor"    ).setExecutor(new OfficerCommand  (this) );
-        getCommand("townadmin").setExecutor(new TownAdminCommand(this) );
+        getCommand("muni").setExecutor(new MuniCommand(this) );
         
         //this.getLogger().info( Calendar.getInstance().getTime().toString() );
         
