@@ -15,10 +15,10 @@ commands:
         description: So deputies may work with towns
         aliases: []
         usage: /deputy help
-    townadmin:
+    muni:
         description: For server staff, overrides cost and some checks
         aliases: []
-        usage: /townadmin help
+        usage: /muni help
 permissions:
     muni.*:
         description: Gives access to all Muni permissions
