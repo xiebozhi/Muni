@@ -22,16 +22,17 @@ package com.teamglokk.muni;
 
 import com.teamglokk.muni.commands.TownCommand;
 import com.teamglokk.muni.commands.OfficerCommand;
+import com.teamglokk.muni.commands.MuniCommand;
 import com.teamglokk.muni.utilities.dbWrapper;
 import com.teamglokk.muni.utilities.WGWrapper;
 import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.teamglokk.muni.commands.MuniCommand;
 import com.teamglokk.muni.listeners.MuniHeartbeat;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import net.milkbowl.vault.economy.Economy;
 
@@ -158,16 +159,27 @@ public class Muni extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MuniLoginEvent(this),this );
 
         //Register the heartbeat
+        this.getLogger().info( "The heart beat is registering." ); 
+        long start = System.currentTimeMillis();
+        int roundTo = 30; // 0 <= rT <= 60
+        long roundedHour =  Math.round( (double) start / ( roundTo*60*1000 ) ) * (roundTo*60*1000) ;
+        if ( roundedHour < start ) {
+            roundedHour = roundedHour + 30*60*1000; 
+        }
+        long waitTicks = 20 * (roundedHour - start )/1000; 
+        if (isDebug() ) {
+            this.getLogger().warning( "The heart beat is scheduled for "+ new Date(roundedHour) ); 
+            this.getLogger().warning( "That is "+waitTicks+" ticks away" ); //delete me
+            this.getLogger().warning( "That is "+waitTicks/20/60+" minutes away" ); //delete me
+    }
         getServer().getScheduler().scheduleSyncRepeatingTask(this, 
-                new MuniHeartbeat(this), 20*20 , 30*60*20 );
+                new MuniHeartbeat(this), waitTicks, 30*60*20 );
         
         // Register Muni commands
-        getCommand("town"     ).setExecutor(new TownCommand     (this) );
-        getCommand("deputy"   ).setExecutor(new OfficerCommand  (this) );
-        getCommand("mayor"    ).setExecutor(new OfficerCommand  (this) );
-        getCommand("muni").setExecutor(new MuniCommand(this) );
-        
-        //this.getLogger().info( Calendar.getInstance().getTime().toString() );
+        getCommand("town"  ).setExecutor(new TownCommand    (this) );
+        getCommand("deputy").setExecutor(new OfficerCommand (this) );
+        getCommand("mayor" ).setExecutor(new OfficerCommand (this) );
+        getCommand("muni"  ).setExecutor(new MuniCommand    (this) );
         
         // Ensure the database is there but don't drop the tables
         dbwrapper.createDB(false);

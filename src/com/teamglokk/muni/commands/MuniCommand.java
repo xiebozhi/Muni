@@ -19,7 +19,6 @@
 */
 package com.teamglokk.muni.commands;
 
-import com.teamglokk.muni.Citizen;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -48,7 +47,7 @@ public class MuniCommand implements CommandExecutor {
         } else { 
             staffer = (Player) sender; 
             if (!plugin.econwrapper.hasPerm(staffer, "muni.admin") ){
-                staffer.sendMessage("You do not have permission to run /townadmin subcommands");
+                staffer.sendMessage("You do not have permission to run /muni subcommands");
                 return true; 
             }
         }
@@ -78,33 +77,33 @@ public class MuniCommand implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("debug")) {
             if (args.length != 2) {
-                plugin.out(sender, "/townadmin debug on|off");
+                plugin.out(sender, "/muni debug on|off");
             }
             if (args[1].equalsIgnoreCase("on") ){
                 plugin.setDebug(true);
             } else if (args[1].equalsIgnoreCase("off") ){
                 plugin.setDebug(false);
             } else {
-                plugin.out(sender, "/townadmin debug on|off");
+                plugin.out(sender, "/muni debug on|off");
             }
             plugin.out(sender, "Debug changed to "+args[1] );
             return true;
         } else if (args[0].equalsIgnoreCase("SQLdebug")) { //added but not tested - 18 Feb
             if (args.length != 2) {
-                plugin.out(sender, "/townadmin SQLdebug on|off");
+                plugin.out(sender, "/muni SQLdebug on|off");
             }
             if (args[1].equalsIgnoreCase("on") ){
                 plugin.setSQLDebug(true);
             } else if (args[1].equalsIgnoreCase("off") ){
                 plugin.setSQLDebug(false);
             } else {
-                plugin.out(sender, "/townadmin SQLdebug on|off");
+                plugin.out(sender, "/muni SQLdebug on|off");
             }
             plugin.out(sender, "SQL_Debug changed to "+args[1] );
             return true;
         } else if (args[0].equalsIgnoreCase("addTown")) { //working but changed to save to db, not fully tested - 18 Feb
             if (args.length != 3) {
-                plugin.out(sender, "Incorrect number of parameters: /townadmin addTown townName mayorName");
+                plugin.out(sender, "Incorrect number of parameters: /muni addTown townName mayorName");
                 return false;
             }
                 Town t = new Town (plugin,args[1],args[2],null);
@@ -115,7 +114,7 @@ public class MuniCommand implements CommandExecutor {
                 
         } else if (args[0].equalsIgnoreCase("addCitizen")) { //was kinda working, now maybe fixed - 18 Feb
             if (args.length != 3) {
-                plugin.out(sender, "/townAdmin addCitizen <townName> <playerName>");
+                plugin.out(sender, "/muni addCitizen <townName> <playerName>");
                 return false;
             }
             Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
@@ -135,7 +134,7 @@ public class MuniCommand implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("removeCitizen")) { // changed, not tested - 18 Feb
             if (args.length != 3) {
-                plugin.out(sender, "/townAdmin removeCitizens <townName> <playerName>");
+                plugin.out(sender, "/muni removeCitizens <townName> <playerName>");
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( args[1] ) );
@@ -196,17 +195,17 @@ public class MuniCommand implements CommandExecutor {
         }
     }
     private void displayHelp(CommandSender sender){
-            plugin.out(sender, "Muni TownAdmin Help.  You can do these commands:", ChatColor.LIGHT_PURPLE );
-            plugin.out(sender, "/townAdmin addTown <townName> <mayorName>");
-            plugin.out(sender, "/townAdmin removeTown <townName>");
-            plugin.out(sender, "/townAdmin setTax <townName> <taxRate>");
-            plugin.out(sender, "/townAdmin addCitizen <townName> <playerName>");
-            plugin.out(sender, "/townAdmin removeCitizen <townName> <playerName>");
-            plugin.out(sender, "/townAdmin deputize <playerName> ");
-            plugin.out(sender, "/townAdmin save");
-            plugin.out(sender, "/townAdmin reload");  
-            plugin.out(sender, "/townAdmin debug <off/on>");   
-            plugin.out(sender, "/townAdmin SQLdebug <off/on>");   
-            plugin.out(sender, "/townAdmin makeTest (Temp! makes a test database)");   
+            plugin.out(sender, "Muni Admin Help.  You can do these commands:", ChatColor.LIGHT_PURPLE );
+            plugin.out(sender, "/muni addTown <townName> <mayorName>");
+            plugin.out(sender, "/muni removeTown <townName>");
+            plugin.out(sender, "/muni setTax <townName> <taxRate>");
+            plugin.out(sender, "/muni addCitizen <townName> <playerName>");
+            plugin.out(sender, "/muni removeCitizen <townName> <playerName>");
+            plugin.out(sender, "/muni deputize <playerName> ");
+            plugin.out(sender, "/muni save");
+            plugin.out(sender, "/muni reload");  
+            plugin.out(sender, "/muni debug <off/on>");   
+            plugin.out(sender, "/muni SQLdebug <off/on>");   
+            plugin.out(sender, "/muni makeTest (Temp! makes a test database)");   
     }
 }
