@@ -35,7 +35,6 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
-import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -106,12 +105,24 @@ public class WGWrapper extends Muni {
     
     /**
      * This will be used to check a square area for other regions
-     * @param player
+     * @param loc
      * @param radius
      * @param excludedRegions
      * @return 
      */
-    public boolean checkSquareArea (Player player, int radius, List<String> excludedRegions){
+    public boolean checkSquareArea (Location loc, int radius, List<String> excludedRegions){
+        
+        return true; 
+    }
+    /**
+     * This will be used to check in a direction
+     * @param loc1
+     * @param loc2
+     * @param dir
+     * @param excludedRegions
+     * @return 
+     */
+    public boolean checkDirection (Location loc1, Location loc2, char dir, List<String> excludedRegions){
         
         return true; 
     }
@@ -187,6 +198,7 @@ public class WGWrapper extends Muni {
         }
         return area;
     } 
+    
     /**
      * Makes a square region of a specified size 
      * @param town
@@ -199,6 +211,20 @@ public class WGWrapper extends Muni {
         return makeSubRegion(town,player,subRegionName,halfSize,height,null,null,false,false,false);
     }
     
+    /**
+     * Makes a subregion of the town with special flags set
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @param halfSize
+     * @param height
+     * @param greeting
+     * @param farewell
+     * @param pvp
+     * @param heal
+     * @param feed
+     * @return 
+     */
     public ProtectedRegion makeSubRegion (Town town, Player player, String subRegionName, 
             int halfSize, int height, String greeting, String farewell, boolean pvp,
             boolean heal, boolean feed){
@@ -358,6 +384,45 @@ public class WGWrapper extends Muni {
             plugin.getLogger().warning("Failed to write region: "  + e.getMessage() );
         }
         return sel.getArea(); 
+    }
+    
+    /**
+     * Makes a personal region where only the player is the owner
+     * @param player
+     * @return 
+     */
+    public boolean makeHome (Player player){
+        // Check that the player doesn't have one first
+        // Check that the player is currently in the town border
+        // Make the region with a set size
+        return true;
+    }
+    
+    /**
+     * Makes a personal region with flags set for a shop
+     * @param player
+     * @return 
+     */
+    public boolean makeShop (Player player) { 
+        // Check that the player doesn't have one first
+        // Check that the player is currently in the town border
+        // Make the region with a set size
+        // set flags
+        return true; 
+    }
+    
+    /**
+     * Makes a subregion of the town where only the officers can build
+     * @param town
+     * @param player
+     * @param subRegionName
+     * @return 
+     */
+    public boolean makeGovernment (Town town, Player player, String subRegionName){
+        boolean rtn = true;
+        //make a region with only the officers as the owners
+        
+        return rtn;
     }
     
     /**
@@ -594,9 +659,9 @@ public class WGWrapper extends Muni {
      * @param player
      * @return 
      */
-    public ApplicableRegionSet getARS(Player player) {
-        return plugin.wgp.getRegionManager( player.getWorld() )
-                .getApplicableRegions(player.getLocation() );
+    public ApplicableRegionSet getARS(Location loc) {
+        return plugin.wgp.getRegionManager( loc.getWorld() )
+                .getApplicableRegions(loc );
     }
 
    /**
@@ -605,8 +670,8 @@ public class WGWrapper extends Muni {
     * @param flag
     * @return 
     */
-    public boolean isFlagged (Player player, StateFlag flag ){
-        return getARS(player).allows(flag);
+    public boolean isFlagged (Location loc, StateFlag flag ){
+        return getARS( loc ).allows(flag);
     }
     
     /**
