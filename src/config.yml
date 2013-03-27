@@ -37,10 +37,11 @@
 # mines: will likely be an integration with MineResetLite 
 #################################################################
 
-config_version: .04
+config_version: .05
 debug: false
 sql_debug: false
 use_op: true
+use_metrics: true
 modules:
     disable_WorldGuard: false
     disable_Voting: false

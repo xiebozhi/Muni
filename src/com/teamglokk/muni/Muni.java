@@ -29,6 +29,7 @@ import com.teamglokk.muni.utilities.EconWrapper;
 import com.teamglokk.muni.listeners.MuniLoginEvent;
 import com.teamglokk.muni.listeners.MuniHeartbeat;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,6 +46,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 
 import org.bukkit.command.CommandSender;
+import org.mcstats.Metrics;
 
 /**
  * The Muni plugin
@@ -64,11 +66,12 @@ public class Muni extends JavaPlugin {
     public static dbWrapper dbwrapper = null;
    
     //Global options to be pulled from config
-    private static double CONFIG_VERSION = .04;
+    private static double CONFIG_VERSION = .05;
     private static boolean DEBUG = true;
     private static boolean SQL_DEBUG = true;
     private static boolean USE_OP = true;
     protected static boolean useMYSQL = false;
+    protected boolean USE_METRICS = true; 
     
     protected static boolean disableWG = false; 
     protected static boolean disableVoting = false; 
@@ -151,9 +154,11 @@ public class Muni extends JavaPlugin {
         // Hooks in Vault, World Guard, Muni wrappers
         hookInDependencies();
         
+        
         //Load the configuration file
         this.saveDefaultConfig(); // saves plugins/Muni/config.yml if !exists
         loadConfigSettings(); // parses the settings and loads into memory
+               
         
         // Register Muni listener(s)
         getServer().getPluginManager().registerEvents(new MuniLoginEvent(this),this );
@@ -186,6 +191,29 @@ public class Muni extends JavaPlugin {
         
         this.getLogger().info ("Loading Towns from database");
         loadTowns();
+        
+        
+        // Start Metrics if allowed by server owner
+        if (USE_METRICS){
+            if ( isDebug() ) {getLogger().info("Loading metrics") ; }
+            try {
+                Metrics metrics = new Metrics(this);
+                
+                //Make a graph to track the number of towns at startup
+                metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
+
+                    @Override
+                    public int getValue() {
+                        return towns.size();
+                    }
+                });
+                
+                metrics.start();
+            } catch (IOException e) {
+                // Failed to submit the stats :-(
+                getLogger().warning("There was an error loading Metrics");
+            }
+        }
         
         this.getLogger().info ("Loaded and Ready" );
     }
@@ -550,6 +578,7 @@ public class Muni extends JavaPlugin {
         DEBUG = this.getConfig().getBoolean("debug");
         SQL_DEBUG = this.getConfig().getBoolean("sql_debug");
         USE_OP = this.getConfig().getBoolean("use_op");
+        USE_METRICS = this.getConfig().getBoolean("use_metrics");
         
         // Get database parameters
         useMYSQL = this.getConfig().getBoolean("database.use-mysql");
