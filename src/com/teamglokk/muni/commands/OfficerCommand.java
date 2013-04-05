@@ -360,7 +360,7 @@ public class OfficerCommand implements CommandExecutor {
                 officer.sendMessage("Are you sure you want to name your town "+args[1]+"?");
                 officer.sendMessage("It is permanent and you may not change it later!!!");
                 officer.sendMessage("It cannot contain spaces.  Be sure your capitalization is how you want it");
-                officer.sendMessage("To confirm do /mayor found <TownName> confirm "+args[1]+"?");
+                officer.sendMessage("To confirm do /mayor found "+args[1]+" confirm");
                 return true; 
             }
             if ( args.length != 3) { return true; }
@@ -375,8 +375,8 @@ public class OfficerCommand implements CommandExecutor {
                 t.admin_makeMayor(officer.getName() );
                 t.saveToDB();
                 officer.sendMessage("You have founded "+t.getName());
-                plugin.getServer().broadcastMessage(t.getName()+" is now an official "+
-                        t.getTitle()+" thanks to the new mayor " +t.getMayor()+"!" );
+                plugin.getServer().broadcastMessage(t.getName()+" is now a  "+
+                        t.getTitle()+" thanks to its new mayor " +t.getMayor()+"!" );
             } else { officer.sendMessage("Could not start the town due to insufficent resources" ); }
             return true;
         }  else if ( args[0].equalsIgnoreCase("renameTown") ) { 
@@ -439,7 +439,7 @@ public class OfficerCommand implements CommandExecutor {
                 return true;
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
-            Double price = plugin.getExpansionCostMultiplier()*temp.getExpansions()+1;
+            Double price = plugin.getExpansionCostMultiplier()*(temp.getExpansions()+1);
             try {
                 if (!args[2].equalsIgnoreCase("confirm") ){
                     officer.sendMessage("The expansion will cost the town "+price+" "+
