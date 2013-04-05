@@ -100,7 +100,7 @@ public class dbWrapper extends Muni {
             db_open();
             if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
             rs = stmt.executeQuery(SQL); 
-            //rs.next();
+            rs.next();
             String temp = rs.getString(1);
             plugin.getLogger().info("Here: " + temp ) ;
             if (temp == null || temp.equals("")||temp.equals(null)) {return false; } //NPE fix?
@@ -148,7 +148,7 @@ public class dbWrapper extends Muni {
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
+                plugin.getLogger().warning( "getSingleCol: "+ex.getMessage() ); 
                 rtn = null;
             } finally{}
         }
@@ -175,12 +175,12 @@ public class dbWrapper extends Muni {
            }
             
         } catch (SQLException ex){
-            plugin.getLogger().severe( "getSingleCol: "+ex.getMessage() ); 
+            plugin.getLogger().severe( "getTownCits: "+ex.getMessage() ); 
             rtn = null;
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( "checkExistence: "+ex.getMessage() ); 
+                plugin.getLogger().warning( "getTownCits: "+ex.getMessage() ); 
                 rtn = null;
             } finally{}
         }
@@ -305,16 +305,20 @@ public class dbWrapper extends Muni {
             db_open();
             if (plugin.isSQLdebug() ){plugin.getLogger().info(SQL); }
             rs = stmt.executeQuery(SQL);
+            rs.next();
+            
             temp = new Town(plugin,rs.getString("townName"),rs.getString("mayor"), rs.getString("world"),
                     rs.getInt("expansions"), rs.getBoolean("democracy"),
                     rs.getInt("townRank"),rs.getDouble("bankBal"), rs.getDouble("taxRate"),  
                     rs.getInt("itemBal"), rs.getInt("itemTaxRate") );
+            
         } catch (SQLException ex){
-            plugin.getLogger().info ( "getTown: "+ townName+" not found in database" );
+            plugin.getLogger().warning ( "getTown: "+ townName+" not found in database" );
+            
         } finally {
             try { db_close();
             } catch (SQLException ex) {
-                plugin.getLogger().warning( "getTown: "+ ex.getMessage() );
+                plugin.getLogger().warning( "getTown: "+ ex.toString() );
             } finally{}
         }
         return temp;
@@ -346,7 +350,7 @@ public class dbWrapper extends Muni {
             } 
             if (!inserts.isEmpty() ){
                 for (String SQL : inserts){
-                    stmt.executeQuery(SQL);
+                    stmt.executeUpdate(SQL);
                     if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
                 }
             }
@@ -653,8 +657,32 @@ public class dbWrapper extends Muni {
             
             rtn = stmt.getUpdateCount();
             
-            plugin.getLogger().severe("There are "+rtn+" subregions of "+t.getName() ); // DELETE ME
             
+        } catch (SQLException ex){
+            plugin.getLogger().severe("db_getNumSubRegions "+ ex.getMessage() ); 
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning("db_getNumSubRegions: "+ ex.getMessage() ); 
+            } 
+        }
+        return rtn;
+    }
+    
+    public int getNumTownsOfRank(int rank){
+        int rtn = 0;
+        
+        String SQL = "SELECT townName,townRank FROM "+plugin.getDB_prefix()+"towns "+
+                "WHERE townRank='"+ rank +"';";
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            //rs = 
+            stmt.executeQuery(SQL); 
+            
+            rtn = stmt.getUpdateCount();
+            plugin.getLogger().severe("HERE: "+rtn);//DELETE MEEEEEEEEE
+                        
         } catch (SQLException ex){
             plugin.getLogger().severe("db_getNumSubRegions "+ ex.getMessage() ); 
         } finally {

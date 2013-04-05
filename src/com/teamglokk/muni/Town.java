@@ -409,8 +409,11 @@ public class Town implements Comparable<Town> {
      * @return 
      */
     public String toDB_Vals(){
+        // This fix is needed since MySQL uses a tinyint instead of an actual boolean variable type
+        String democracyMySQLfix = (plugin.useMysql()? (democracy? "1": "0" ) : Boolean.toString(democracy));
+        
         return "'"+townName +"','"+mayor.getName()+"','"+
-               Integer.toString(townRank) +"','"+Boolean.toString(democracy) +"','"+
+               Integer.toString(townRank) +"','"+ democracyMySQLfix +"','"+
                Double.toString(townBankBal) +"','"+Double.toString(taxRate)+"','"+
                Integer.toString(townBankItemBal) + "','"+Integer.toString(taxItemRate)+"','"+
                townWorld+"','"+expansions+"'";
@@ -421,8 +424,11 @@ public class Town implements Comparable<Town> {
      * @return 
      */ 
     public String toDB_UpdateRowVals(){
+        // This fix is needed since MySQL uses a tinyint instead of an actual boolean variable type
+        String democracyMySQLfix = (plugin.useMysql()? (democracy? "1": "0" ) : Boolean.toString(democracy));
+        
         return "townName='"+townName+"', mayor='"+mayor.getName()+"', townRank='"+townRank
-                +"', democracy='"+Boolean.toString(democracy)+"', bankBal='"+
+                +"', democracy='"+democracyMySQLfix+"', bankBal='"+
                 Double.toString(townBankBal)+"', taxRate='"+Double.toString(taxRate)+
                 "', itemBal='"+ Integer.toString(townBankItemBal) +"', itemTaxRate='"+ Integer.toString(taxItemRate) +
                 "', world='"+townWorld+"', expansions='"+expansions+"'";
