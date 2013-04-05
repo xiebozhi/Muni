@@ -47,6 +47,7 @@ import org.bukkit.ChatColor;
 
 import org.bukkit.command.CommandSender;
 import org.mcstats.Metrics;
+import org.mcstats.Metrics.Graph;
 
 /**
  * The Muni plugin
@@ -195,20 +196,55 @@ public class Muni extends JavaPlugin {
         
         // Start Metrics if allowed by server owner
         if (USE_METRICS){
-            if ( isDebug() ) {getLogger().info("Loading metrics") ; }
+            if ( isDebug() ) {getLogger().info("Loading Metrics") ; }
             try {
                 Metrics metrics = new Metrics(this);
                 
+                final int townCount = towns.size();
+                final int citizenCount = allCitizens.size();
+                
+                if ( isDebug() ) {getLogger().info("Adding number of towns to Metrics") ; }
                 //Make a graph to track the number of towns at startup
-                metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
-
+                Graph towns = metrics.createGraph("Number of Towns");
+                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
+                towns.addPlotter(new Metrics.Plotter("Towns") {
                     @Override
                     public int getValue() {
-                        return towns.size();
+                        return townCount;
                     }
                 });
                 
+                if ( isDebug() ) {getLogger().info("Adding number of citizens to Metrics") ; }
+                //Make a graph to track the number of citizens at startup
+                Graph citizens = metrics.createGraph("Number of Citizens");
+                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
+                citizens.addPlotter(new Metrics.Plotter("Citizens") {
+                    @Override
+                    public int getValue() {
+                        return citizenCount;
+                    }
+                });
+                /*
+                if ( isDebug() ) {getLogger().info("Adding town ranks to Metrics") ; }
+                //Make a graph to track the number of citizens at startup
+                Graph townRanksTotal = metrics.createGraph("Town Ranks");
+                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
+                for (int i=1; i<=totalTownRanks; i++){
+                    int test = dbwrapper.getNumTownsOfRank(i);
+                    this.getLogger().severe("The result of test is " + test);
+                    final int amount = (test >= 0 ? test : 0);
+                    this.getLogger().severe("The number of towns with rank "+i+" is " + amount);
+                    townRanksTotal.addPlotter(new Metrics.Plotter("Rank "+i) {
+                        @Override
+                        public int getValue() {
+                            return amount;
+                        }
+                    });
+                }
+                */
                 metrics.start();
+                if ( isDebug() ) {getLogger().info("Metrics data has been sent") ; }
+                
             } catch (IOException e) {
                 // Failed to submit the stats :-(
                 getLogger().warning("There was an error loading Metrics");
