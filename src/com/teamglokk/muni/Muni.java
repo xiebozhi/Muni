@@ -186,7 +186,7 @@ public class Muni extends JavaPlugin {
         getCommand("deputy").setExecutor(new OfficerCommand (this) );
         getCommand("mayor" ).setExecutor(new OfficerCommand (this) );
         getCommand("muni"  ).setExecutor(new MuniCommand    (this) );
-        
+		
         // Ensure the database is there but don't drop the tables
         dbwrapper.createDB(false);
         
@@ -222,6 +222,25 @@ public class Muni extends JavaPlugin {
                     @Override
                     public int getValue() {
                         return citizenCount;
+                    }
+                });
+                
+                if ( isDebug() ) {getLogger().info("Adding chosen database to Metrics") ; }
+                //Make a graph to track the number of citizens at startup
+                Graph db = metrics.createGraph("Database In Use");
+                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
+                final int my = (useMYSQL ? 1 : 0 );
+                final int lite = (useMYSQL ? 0 : 1 );
+                db.addPlotter(new Metrics.Plotter("MySQL") {
+                    @Override
+                    public int getValue() {
+                        return my;
+                    }
+                });
+                db.addPlotter(new Metrics.Plotter("SQLite") {
+                    @Override
+                    public int getValue() {
+                        return lite;
                     }
                 });
                 /*
