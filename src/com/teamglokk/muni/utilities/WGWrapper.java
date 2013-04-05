@@ -97,7 +97,9 @@ public class WGWrapper extends Muni {
     public void deleteAllRegions(Town town) {
         
         List<MuniWGRegion> subRegions = plugin.dbwrapper.getSubRegions(town);
+        if (plugin.isDebug() ) { plugin.getLogger().info("Deleting: "+town.getName()+"Subregions"); }
         for ( MuniWGRegion wgr : subRegions ){
+            if (plugin.isDebug() ) { plugin.getLogger().info("Deleting: "+wgr.getRegionName()+" on world: "+wgr.getWorld()); }
             this.deleteRegion(wgr.getWorld(), wgr.getRegionName());
         }
         this.deleteRegion( town.getWorld(), town.getName() );
@@ -211,6 +213,13 @@ public class WGWrapper extends Muni {
         return makeSubRegion(town,player,subRegionName,halfSize,height,null,null,false,false,false);
     }
     
+    public boolean isExistingRegion (World world, String name) {
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        if ( mgr.hasRegion(name) ){
+            return true; 
+        } else { return false; }
+    }
+    
     /**
      * Makes a subregion of the town with special flags set
      * @param town
@@ -234,6 +243,10 @@ public class WGWrapper extends Muni {
         ProtectedRegion parent = mgr.getRegion( town.getName() );
         ProtectedRegion child = null;
             
+        if ( isExistingRegion (townWorld, subRegionName) ) {
+            player.sendMessage("That region alreay exists"); 
+            return null;
+        }
         if ( makeRegion (player.getLocation(),subRegionName,halfSize,height,false) > 0 ){
             mgr = wg.getGlobalRegionManager().get( player.getWorld() );
             child = mgr.getRegion( subRegionName );

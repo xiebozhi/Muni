@@ -589,7 +589,8 @@ public class Muni extends JavaPlugin {
         db_prefix = this.getConfig().getString("database.prefix");
         
         // Format the URL from the private variables
-        db_URL = useMysql() ? "jdbc:mysql"+"://"+ db_host +":3306/"+db_database 
+        db_URL = useMysql() ? "jdbc:mysql"+"://"+ db_host +":3306/"+db_database+
+                "?user="+db_user+"&password="+db_pass 
                 : "jdbc:sqlite:plugins/Muni/"+db_database+".db";
         
         if ( isDebug() ) {getLogger().info("dbURL = " + db_URL); }
