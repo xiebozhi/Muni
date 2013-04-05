@@ -1,6 +1,6 @@
 name: Muni
 main: com.teamglokk.muni.Muni
-version: Alpha 0.20
+version: Alpha 0.20b
 authors: [BobbShields]
 commands:
     town:

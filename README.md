@@ -31,7 +31,7 @@ First Alpha ( Alpha v0.11 Released 26 Feb 2013 )
 9a) Bank transaction lookup (to be added) 
 
 
-Second Alpha (*Development has started*)
+Second Alpha (*Alpha v0.20b released 5 March 2013*)
 ============
 
 Add World Guard Region functionality
@@ -40,16 +40,18 @@ Add World Guard Region functionality
 
 2) Flag the region for no-PVP and (maybe) no MobSpawn (maybe working) 
 
-3) Define 5x5 sub-regions with Restaurant and Hospital flags (Skeleton in place)
+3) Define 5x5 sub-regions with Restaurant and Hospital flags (Mostly working)
 
-4) Create border push mechanism
+4) Create border push mechanism (Mostly working)
 
-5) Cost mechanism applied to all these changes
+5) Cost mechanism applied to all these changes (Mostly working but not displaying effectively)
+
+6) MySQL functionality added and needs testing
 
 
 First Beta
 ==========
-1) Voting system
+1) Voting system (Heart beat is started and hits every half hour)
 
 2) Democracy vs. Dictatorship 
 
