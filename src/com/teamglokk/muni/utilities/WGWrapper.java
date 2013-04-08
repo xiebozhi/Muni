@@ -35,6 +35,8 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -406,9 +408,28 @@ public class WGWrapper extends Muni {
      */
     public boolean makeHome (Player player){
         // Check that the player doesn't have one first
+        if (this.isExistingRegion(player.getWorld(), player.getName() ) ){
+            return false; 
+        }
         // Check that the player is currently in the town border
+        ApplicableRegionSet here = getARS(player.getLocation());
+        String townName = plugin.getTownName( player.getName() );
+        boolean result = false; 
+        Iterator<ProtectedRegion> itr = here.iterator();
+        while ( itr.hasNext() ) {
+            if ( itr.next().getId().equalsIgnoreCase( townName ) ) {
+                result = true; 
+            }
+        }
         // Make the region with a set size
-        return true;
+        if (result){
+            this.makeRegion(player.getLocation(), player.getName(), 5, 30, false);
+            List<String> temp = new ArrayList<String>();
+            temp.add(player.getName());
+            this.makeOwners(player.getWorld().getName(),player.getName(), temp);
+            return true; 
+        } 
+        return false;
     }
     
     /**
@@ -418,10 +439,30 @@ public class WGWrapper extends Muni {
      */
     public boolean makeShop (Player player) { 
         // Check that the player doesn't have one first
+        if (this.isExistingRegion(player.getWorld(), player.getName()+"_shop" ) ){
+            return false; 
+        }
         // Check that the player is currently in the town border
+        ApplicableRegionSet here = getARS(player.getLocation());
+        String townName = plugin.getTownName( player.getName() );
+        boolean result = false; 
+        Iterator<ProtectedRegion> itr = here.iterator();
+        while ( itr.hasNext() ) {
+            if ( itr.next().getId().equalsIgnoreCase( townName ) ) {
+                result = true; 
+            }
+        }
         // Make the region with a set size
-        // set flags
-        return true; 
+        if (result){
+            this.makeRegion(player.getLocation(), player.getName()+"_shop", 5, 10, false);
+            List<String> temp = new ArrayList<String>();
+            temp.add(player.getName()+"_shop");
+            this.makeOwners(player.getWorld().getName(),player.getName()+"_shop", temp);
+            // Set flags
+            this.setFlag(this.getRegion(player.getWorld().getName(),player.getName()+"_shop"),DefaultFlag.CHEST_ACCESS,true);
+            return true; 
+        } 
+        return false;
     }
     
     /**
@@ -432,10 +473,27 @@ public class WGWrapper extends Muni {
      * @return 
      */
     public boolean makeGovernment (Town town, Player player, String subRegionName){
-        boolean rtn = true;
-        //make a region with only the officers as the owners
-        
-        return rtn;
+       // Check that the town doesn't have one first
+        if (this.isExistingRegion(player.getWorld(), town.getName()+"_government" ) ){
+            return false; 
+        }
+        // Check that the player is currently in the town border
+        ApplicableRegionSet here = getARS(player.getLocation());
+        boolean result = false; 
+        Iterator<ProtectedRegion> itr = here.iterator();
+        while ( itr.hasNext() ) {
+            if ( itr.next().getId().equalsIgnoreCase(town.getName() ) ) {
+                result = true; 
+            }
+        }
+        // Make the region with a set size
+        if (result){
+            this.makeRegion(player.getLocation(), town.getName()+"_government", 12, 30, false);
+            this.makeOwners(player.getWorld().getName(),town.getName()+"_government", town.getOfficerList() );
+            // Set flags
+            return true; 
+        } 
+        return false;
     }
     
     /**
@@ -641,20 +699,7 @@ public class WGWrapper extends Muni {
         rtn = mgr.getRegion(regionName);
         
         return rtn;
-    }
-    /**
-     * Gets a list of regions at the player's current location 
-     * @param player
-     * @return 
-     */
-    public String getRegions (Player player)
-    {
-        //return this.wgp.getRegionManager(null).
-         //       canBuild(player,
-          //  player.getLocation().getBlock().getRelative(0, -1, 0));
-        return "nothing";
-    }
-    
+    }    
     
     /**
      * Checks the World Guard build permission at the player's current location
@@ -695,6 +740,19 @@ public class WGWrapper extends Muni {
      * @return 
      */
     public void setFlag (ProtectedRegion region, Flag flag, String value){
+            //Check that the user has ownership
+            region.setFlag(flag,value );
+        
+    }
+    
+    /**
+     * Sets the flag for the region 
+     * @param region
+     * @param flag
+     * @param value
+     * @return 
+     */
+    public void setFlag (ProtectedRegion region, Flag flag, boolean value){
             //Check that the user has ownership
             region.setFlag(flag,value );
         
