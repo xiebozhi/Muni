@@ -207,7 +207,8 @@ public class OfficerCommand implements CommandExecutor {
                     } else if (args[1].equalsIgnoreCase("check") || args[1].equalsIgnoreCase("c") ){
                         temp.checkTownBank(officer);
                     } else {
-                        plugin.out(sender,"/town bank - ERROR (subcommand not recognized)");
+                        plugin.out(sender,"/deputy bank - ERROR (subcommand not recognized)");
+                        plugin.out(sender,"/deputy bank (check|withdraw|deposit)");
                     }
                     break;
                 default:
@@ -251,7 +252,8 @@ public class OfficerCommand implements CommandExecutor {
                     } else if (args[1].equalsIgnoreCase("check") || args[1].equalsIgnoreCase("c") ){
                         temp.checkTownBank(officer);
                     } else {
-                        plugin.out(sender,"/town bank - ERROR (subcommand not recognized)");
+                        plugin.out(sender,"/deputy itemBank - ERROR (subcommand not recognized)");
+                        plugin.out(sender,"/deputy itemBank (check|withdraw|deposit)");
                     }
                     break;
                 default:
