@@ -669,31 +669,6 @@ public class dbWrapper extends Muni {
         return rtn;
     }
     
-    public int getNumTownsOfRank(int rank){
-        int rtn = 0;
-        
-        String SQL = "SELECT townName,townRank FROM "+plugin.getDB_prefix()+"towns "+
-                "WHERE townRank='"+ rank +"';";
-        try {
-            db_open();
-            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
-            //rs = 
-            stmt.executeQuery(SQL); 
-            
-            rtn = stmt.getUpdateCount();
-            plugin.getLogger().severe("HERE: "+rtn);//DELETE MEEEEEEEEE
-                        
-        } catch (SQLException ex){
-            plugin.getLogger().severe("db_getNumSubRegions "+ ex.getMessage() ); 
-        } finally {
-            try { db_close();
-            } catch (SQLException ex) {
-                plugin.getLogger().warning("db_getNumSubRegions: "+ ex.getMessage() ); 
-            } 
-        }
-        return rtn;
-    }
-    
     /**
      * Deletes a specific subregion from the database
      * @param t

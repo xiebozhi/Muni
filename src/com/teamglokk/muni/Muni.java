@@ -174,9 +174,9 @@ public class Muni extends JavaPlugin {
         }
         long waitTicks = 20 * (roundedHour - start )/1000; 
         if (isDebug() ) {
-            this.getLogger().warning( "The heart beat is scheduled for "+ new Date(roundedHour) ); 
-            this.getLogger().warning( "That is "+waitTicks+" ticks away" ); //delete me
-            this.getLogger().warning( "That is "+waitTicks/20/60+" minutes away" ); //delete me
+            this.getLogger().info( "The heart beat is scheduled for "+ new Date(roundedHour) ); 
+            this.getLogger().info( "That is "+waitTicks+" ticks away" ); //delete me
+            this.getLogger().info( "That is "+waitTicks/20/60+" minutes away" ); //delete me
     }
         getServer().getScheduler().scheduleSyncRepeatingTask(this, 
                 new MuniHeartbeat(this), waitTicks, 30*60*20 );
@@ -186,8 +186,8 @@ public class Muni extends JavaPlugin {
         getCommand("deputy").setExecutor(new OfficerCommand (this) );
         getCommand("mayor" ).setExecutor(new OfficerCommand (this) );
         getCommand("muni"  ).setExecutor(new MuniCommand    (this) );
-		
-        // Ensure the database is there but don't drop the tables
+        
+        // Ensure the database tables are there but don't drop the tables
         dbwrapper.createDB(false);
         
         this.getLogger().info ("Loading Towns from database");
@@ -205,9 +205,8 @@ public class Muni extends JavaPlugin {
                 
                 if ( isDebug() ) {getLogger().info("Adding number of towns to Metrics") ; }
                 //Make a graph to track the number of towns at startup
-                Graph towns = metrics.createGraph("Number of Towns");
-                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
-                towns.addPlotter(new Metrics.Plotter("Towns") {
+                Graph townsG = metrics.createGraph("Number of Towns");
+                townsG.addPlotter(new Metrics.Plotter("Towns") {
                     @Override
                     public int getValue() {
                         return townCount;
@@ -216,9 +215,8 @@ public class Muni extends JavaPlugin {
                 
                 if ( isDebug() ) {getLogger().info("Adding number of citizens to Metrics") ; }
                 //Make a graph to track the number of citizens at startup
-                Graph citizens = metrics.createGraph("Number of Citizens");
-                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
-                citizens.addPlotter(new Metrics.Plotter("Citizens") {
+                Graph citizensG = metrics.createGraph("Number of Citizens");
+                citizensG.addPlotter(new Metrics.Plotter("Citizens") {
                     @Override
                     public int getValue() {
                         return citizenCount;
@@ -227,40 +225,47 @@ public class Muni extends JavaPlugin {
                 
                 if ( isDebug() ) {getLogger().info("Adding chosen database to Metrics") ; }
                 //Make a graph to track the number of citizens at startup
-                Graph db = metrics.createGraph("Database In Use");
-                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
+                Graph dbG = metrics.createGraph("Database In Use");
                 final int my = (useMYSQL ? 1 : 0 );
                 final int lite = (useMYSQL ? 0 : 1 );
-                db.addPlotter(new Metrics.Plotter("MySQL") {
+                dbG.addPlotter(new Metrics.Plotter("MySQL") {
                     @Override
                     public int getValue() {
                         return my;
                     }
                 });
-                db.addPlotter(new Metrics.Plotter("SQLite") {
+                dbG.addPlotter(new Metrics.Plotter("SQLite") {
                     @Override
                     public int getValue() {
                         return lite;
                     }
                 });
-                /*
+                
                 if ( isDebug() ) {getLogger().info("Adding town ranks to Metrics") ; }
                 //Make a graph to track the number of citizens at startup
-                Graph townRanksTotal = metrics.createGraph("Town Ranks");
-                //metrics.addCustomData(new Metrics.Plotter("Number of Towns at Startup") {
-                for (int i=1; i<=totalTownRanks; i++){
-                    int test = dbwrapper.getNumTownsOfRank(i);
-                    this.getLogger().severe("The result of test is " + test);
-                    final int amount = (test >= 0 ? test : 0);
-                    this.getLogger().severe("The number of towns with rank "+i+" is " + amount);
-                    townRanksTotal.addPlotter(new Metrics.Plotter("Rank "+i) {
-                        @Override
-                        public int getValue() {
-                            return amount;
-                        }
+                Graph townRanksTotalG = metrics.createGraph("Town Ranks");
+                
+                //Make an array to count the town ranks, set all counters to 0
+                int [] tR = new int [this.getTotalTownRanks()];
+                for (int i = 1; i<=this.getTotalTownRanks(); i++ )
+                { tR[i]=0; }
+                
+                //Count each rank in the towns mapping
+                for (Town t: towns.values()) {
+                    tR[t.getRank()]++;
+                }
+                
+                for (int i = 1; i<=this.getTotalTownRanks(); i++ )
+                { 
+                    final int result = tR[i];
+                    townRanksTotalG.addPlotter(new Metrics.Plotter("Rank "+i) {
+                            @Override
+                            public int getValue() {
+                                return result;
+                        } 
                     });
                 }
-                */
+                
                 metrics.start();
                 if ( isDebug() ) {getLogger().info("Metrics data has been sent") ; }
                 
