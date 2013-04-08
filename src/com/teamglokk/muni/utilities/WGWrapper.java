@@ -626,6 +626,54 @@ public class WGWrapper extends Muni {
     }
     
     /**
+     * Removes the listed players from the protection specified.
+     * @param worldName
+     * @param regionName
+     * @param players
+     * @return 
+     */
+    public boolean removeFromProt(String worldName,String regionName,List<String> players){
+        if (players.size() == 0 ) {return false; } 
+        
+        World world = plugin.getServer().getWorld(worldName);
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        ProtectedRegion region = mgr.getRegion(regionName);
+
+        if (region == null) {
+            plugin.getLogger().info("Could not find a region called: "+regionName);
+        }
+
+        String [] MembersToBeRemoved = new String[players.size()];
+        String [] OwnersToBeRemoved = new String[players.size()];
+        int i = 0;
+        
+        for (String localplayer : players ){
+            if (region.isMember(localplayer) ){
+                MembersToBeRemoved[i++] = localplayer;
+            }        
+            if (region.isOwner(localplayer) ){
+                OwnersToBeRemoved[i++] = localplayer;
+            }     
+        }
+        
+        if (MembersToBeRemoved.length != 0) {
+            RegionDBUtil.removeFromDomain(region.getMembers(), MembersToBeRemoved, 0);
+        } else { return true; } //all listed players are not in the domain
+        if (OwnersToBeRemoved.length != 0) {
+            RegionDBUtil.removeFromDomain(region.getOwners(), OwnersToBeRemoved, 0);
+        } else { return true; } //all listed players are not in the domain
+            
+        
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException e) {
+            throw new CommandException("Failed to write regions: "
+                    + e.getMessage());
+        }
+        return true; 
+    }
+    
+    /**
      * Takes a list of players and ensures they are owners of a region
      * @param worldName
      * @param regionName

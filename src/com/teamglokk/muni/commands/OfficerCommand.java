@@ -19,7 +19,6 @@
 */
 package com.teamglokk.muni.commands;
 
-import com.teamglokk.muni.Citizen;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,6 +26,8 @@ import org.bukkit.entity.Player;
 
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 /**
  * Handler for the /town command.
@@ -138,6 +139,27 @@ public class OfficerCommand implements CommandExecutor {
             }
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             if ( temp.removeCitizen(args[1], officer ) ){
+                temp.announce(args[1]+" has been kicked from "+temp.getName()+" by "+officer.getName()+".");
+            }
+            return true;
+            
+        } else if (args[0].equalsIgnoreCase("contractor")) {  
+            if (args.length != 3) {
+                officer.sendMessage("/deputy/mayor contractors (add|remove) PLAYERNAME");
+                return false;
+            }
+            Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
+            List<String> name = new ArrayList<String>();
+            name.add(args[2]);
+            if (args[1].equalsIgnoreCase("add")){
+                plugin.dbwrapper.addContractor(temp.getName(), args[2]);
+                plugin.wgwrapper.makeMembers(temp.getWorld(), temp.getName(), name);
+            } else if (args[2].equalsIgnoreCase("remove")){
+                plugin.dbwrapper.remContractor(temp.getName(), args[2]);
+                plugin.wgwrapper.removeFromProt(temp.getWorld(), temp.getName(), name);
+            } else {
+                officer.sendMessage("You did not type something correctly.");
+                officer.sendMessage("/deputy/mayor contractors (add|remove) PLAYERNAME");
             }
             return true;
             

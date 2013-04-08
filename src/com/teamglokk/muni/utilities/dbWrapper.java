@@ -722,6 +722,62 @@ public class dbWrapper extends Muni {
     }
     
     /**
+     * Adds a player to the town contractors table
+     * @param town
+     * @param player
+     * @return 
+     */
+    public boolean addContractor (String town, String player){
+        boolean rtn = true;
+        String SQL = "INSERT INTO "+plugin.getDB_prefix()+"contractors"+" (townName,playerName)"+
+                ") VALUES ('"+town+"','"+player+"');";
+            
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            stmt.executeUpdate(SQL); 
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "addContractor: "+ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "addContractor: "+ex.getMessage() ); 
+                rtn = false;
+            } finally{}
+        }
+        return rtn;
+    }
+    
+    /**
+     * Removes a player from the town contractors table
+     * @param town
+     * @param player
+     * @return 
+     */
+    public boolean remContractor (String town, String player) {
+        boolean rtn = true;
+        String SQL = "DELETE FROM "+plugin.getDB_prefix()+"contractors"+" WHERE"+
+                "townName='"+town+"' AND playerName='"+player+"');";
+            
+        try {
+            db_open();
+            if(plugin.isSQLdebug() ){plugin.getLogger().info(SQL);}
+            stmt.executeUpdate(SQL); 
+        } catch (SQLException ex){
+            plugin.getLogger().severe( "remContractor: "+ex.getMessage() ); 
+            rtn = false;
+        } finally {
+            try { db_close();
+            } catch (SQLException ex) {
+                plugin.getLogger().warning( "remContractor: "+ex.getMessage() ); 
+                rtn = false;
+            } finally{}
+        }
+        return rtn;
+    }
+    
+    /**
      * Creates the database specifically for Muni 
      * @param drops true means the tables will be dropped before creating them again
      * @return      false if there was a problem
