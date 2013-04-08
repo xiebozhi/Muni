@@ -778,6 +778,91 @@ public class dbWrapper extends Muni {
     }
     
     /**
+     * Creates a new ballot measure, to be voted upon
+     * @param town
+     * @param endTime
+     * @param action
+     * @param description
+     * @return 
+     */
+    public int addBallot( Town town, Long endTime, String action, String description ) {
+        //insert
+        //status = false, result = null.
+        return 1; //return the ballot PK 
+    }
+    /**
+     * Used for canceling an issue
+     * @param BallotID
+     * @return 
+     */
+    public boolean removeBallot(int BallotID){
+        //delete
+        return true;
+    }
+    /**
+     * After the votes have been counted, this finalizes the issue
+     * @param ballotID
+     * @param result
+     * @return 
+     */
+    public boolean settleBallot( int ballotID, boolean result ) {
+        //update
+        //status = true, result = TBD by the answers
+        return true; 
+    }
+    
+    /**
+     * Gets a list of active ballots to be voted upon
+     * @return 
+     */
+    public List<Ballot> getActiveBallots(){
+        List<Ballot> rtn = new ArrayList<Ballot>();
+        
+        //select
+        
+        return rtn;
+    }
+    
+    /**
+     * Gets the number of votes on the specified ballot
+     * @param ballotID
+     * @return 
+     */
+    public List<Vote> getVotes(int ballotID){
+        List<Vote> rtn = new ArrayList<Vote>();
+        
+        //select 
+        
+        return rtn;
+    }
+    
+    /**
+     * Allows the player to vote on an issue
+     * @param ballotID
+     * @param playerName
+     * @param answer
+     * @return 
+     */
+    public boolean vote (String ballotID, String playerName, String answer) {
+        
+        //insert
+        
+        return true;
+    }
+    
+    /**
+     * ALlows the player to update their vote on an issue, provided the time has not passed
+     * @param ballotID
+     * @param playerName
+     * @param newAnswer
+     * @return 
+     */
+    public boolean updateVote(String ballotID, String playerName, String newAnswer){
+        //update
+        return true; 
+    }
+    
+    /**
      * Creates the database specifically for Muni 
      * @param drops true means the tables will be dropped before creating them again
      * @return      false if there was a problem
@@ -824,10 +909,10 @@ public class dbWrapper extends Muni {
             "notes VARCHAR(350) "+ mpk +");";
         String SQL4 = "CREATE TABLE IF NOT EXISTS "+prefix+"votes ( "  + 
             "id INTEGER "+ spk + serial +", " + 
-            "playerName VARCHAR(16) NOT NULL, townName VARCHAR(30) NOT NULL, timestamp DATETIME,  " +
-            "ballotID INTEGER NOT NULL, answer BOOLEAN NOT NULL "+ mpk +");";
+            "playerName VARCHAR(16) NOT NULL, timestamp DATETIME,  " +
+            "ballotID INTEGER NOT NULL, answer VARCHAR(30) NOT NULL "+ mpk +");";
         String SQL4a = "CREATE TABLE IF NOT EXISTS "+prefix+"ballots ( "  + 
-            "id INTEGER "+ spk + serial +", " + "townName VARCHAR(30) NOT NULL, endTime DATETIME,  " +
+            "id INTEGER "+ spk + serial +", " + "townName VARCHAR(30), endTime DATETIME,  " +
             "action VARCHAR(30), description VARCHAR(80), status BOOLEAN NOT NULL, result BOOLEAN "+ mpk +");";
         String SQL5 = "CREATE TABLE IF NOT EXISTS "+prefix+"contractors ( "  + 
             "id INTEGER "+ spk + serial +", " + 
