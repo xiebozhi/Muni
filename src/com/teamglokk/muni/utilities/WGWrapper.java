@@ -472,7 +472,7 @@ public class WGWrapper extends Muni {
      * @param subRegionName
      * @return 
      */
-    public boolean makeGovernment (Town town, Player player, String subRegionName){
+    public boolean makeGovernment (Town town, Player player){
        // Check that the town doesn't have one first
         if (this.isExistingRegion(player.getWorld(), town.getName()+"_government" ) ){
             return false; 

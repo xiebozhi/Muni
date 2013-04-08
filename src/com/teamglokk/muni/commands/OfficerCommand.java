@@ -293,6 +293,7 @@ public class OfficerCommand implements CommandExecutor {
             if ( args[1].equalsIgnoreCase( "list" ) ){
                 officer.sendMessage("You may choose from the following types.");
                 officer.sendMessage("(if your current town rank allows it)");
+                officer.sendMessage("government");
                 officer.sendMessage("restaurant");
                 officer.sendMessage("hospital");
                 officer.sendMessage("arena");
@@ -303,7 +304,10 @@ public class OfficerCommand implements CommandExecutor {
             Town temp = plugin.getTown( plugin.getTownName( officer.getName() ) );
             boolean test = false;
             if ( temp.isOfficer(officer) ) {
-                if ( args[1].equalsIgnoreCase( "restaurant" ) ){
+                if ( args[1].equalsIgnoreCase( "government" ) ){
+                        test = plugin.wgwrapper.makeGovernment(temp, officer);
+                        if (!test){officer.sendMessage("The government plot has already been made, or there's another error"); }
+                } else if ( args[1].equalsIgnoreCase( "restaurant" ) ){
                     if (temp.paymentFromTB(plugin.getRestaurantCost(), 0, officer.getName(), "restaurant creation") ){
                         if (plugin.dbwrapper.getNumSubRegions(temp, "restaurant" ) < plugin.townRanks[temp.getRank()].getRestaurants() ){
                             test = plugin.wgwrapper.makeRestaurant(temp, officer, temp.getName()+"_r");
@@ -504,6 +508,7 @@ public class OfficerCommand implements CommandExecutor {
             plugin.out(sender, "/deputy accept <playerName");
             plugin.out(sender, "/deputy decline <playerName>");
             plugin.out(sender, "/deputy kick <playerName>");
+            plugin.out(sender, "/deputy contractor <add|remove> <playerName>");
             plugin.out(sender, "/deputy resign");
             plugin.out(sender, "/deputy makePlot <optional:list>");
             plugin.out(sender, "/deputy setTax <money>");
