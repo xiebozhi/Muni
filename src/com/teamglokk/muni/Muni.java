@@ -246,7 +246,7 @@ public class Muni extends JavaPlugin {
                 Graph townRanksTotalG = metrics.createGraph("Town Ranks");
                 
                 //Make an array to count the town ranks, set all counters to 0
-                int [] tR = new int [this.getTotalTownRanks()];
+                int [] tR = new int [this.getTotalTownRanks()+1];
                 for (int i = 1; i<=this.getTotalTownRanks(); i++ )
                 { tR[i]=0; }
                 

@@ -121,6 +121,16 @@ public class TownCommand implements CommandExecutor {
                 player.sendMessage(("/town makeShop - incorrect number of parameters"));
             }
             return rtn;
+        } else if (args[0].equalsIgnoreCase("payTaxes")) { 
+            Town temp = plugin.getTown(plugin.getTownName( player.getName() ) );
+            if (args.length == 2 ) {
+                Double amount = plugin.parseD( args[1] );
+                rtn = temp.payTaxes(player, amount, 0 );
+            } else if ( args.length == 1 ){
+                rtn = temp.payTaxes(player);
+            } 
+            return true;
+            
         } else if (args[0].equalsIgnoreCase("apply")) { 
             if (args.length != 2) {
                 player.sendMessage("Incorrect number of parameters");
