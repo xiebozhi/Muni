@@ -155,7 +155,6 @@ public class Muni extends JavaPlugin {
         // Hooks in Vault, World Guard, Muni wrappers
         hookInDependencies();
         
-        
         //Load the configuration file
         this.saveDefaultConfig(); // saves plugins/Muni/config.yml if !exists
         loadConfigSettings(); // parses the settings and loads into memory
