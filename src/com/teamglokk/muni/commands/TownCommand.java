@@ -122,6 +122,7 @@ public class TownCommand implements CommandExecutor {
             }
             return rtn;
         } else if (args[0].equalsIgnoreCase("payTaxes")) { 
+            boolean rtn = false; 
             Town temp = plugin.getTown(plugin.getTownName( player.getName() ) );
             if (args.length == 2 ) {
                 Double amount = plugin.parseD( args[1] );
@@ -129,7 +130,7 @@ public class TownCommand implements CommandExecutor {
             } else if ( args.length == 1 ){
                 rtn = temp.payTaxes(player);
             } 
-            return true;
+            return rtn;
             
         } else if (args[0].equalsIgnoreCase("apply")) { 
             if (args.length != 2) {
