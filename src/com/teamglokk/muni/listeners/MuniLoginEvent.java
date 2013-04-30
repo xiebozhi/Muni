@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.entity.Player;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventPriority;
 
 /**
@@ -29,6 +30,12 @@ public class MuniLoginEvent implements Listener{
     @EventHandler (priority = EventPriority.LOW)
     public void playerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        
+        if (player.isOp() && plugin.EXPECTED_CONFIG_VERSION !=  plugin.CONFIG_VERSION){
+            player.sendMessage( ChatColor.RED+"[Muni] The config version is not the latest.");
+            player.sendMessage( ChatColor.RED+"[Muni] Please backup the config and delete on the next restart!!!");
+            player.sendMessage( ChatColor.RED+"[Muni] When you come back up, you can change options and do /muni reload");
+        }
         if (plugin.isCitizen( player ) ){
             Town t = plugin.getTownFromCitizen(player.getName() );
             if (t.isMayor(player) ){

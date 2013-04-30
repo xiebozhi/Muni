@@ -67,7 +67,8 @@ public class Muni extends JavaPlugin {
     public static dbWrapper dbwrapper = null;
    
     //Global options to be pulled from config
-    private static double CONFIG_VERSION = .05;
+    public static double EXPECTED_CONFIG_VERSION = .05;
+    public static double CONFIG_VERSION = .05;
     private static boolean DEBUG = true;
     private static boolean SQL_DEBUG = true;
     private static boolean USE_OP = true;
@@ -631,7 +632,8 @@ public class Muni extends JavaPlugin {
      * Loads the config settings from config.yml in plugins/muni/
      */
     protected void loadConfigSettings(){
-        if (CONFIG_VERSION != this.getConfig().getDouble("config_version") ){
+        CONFIG_VERSION = this.getConfig().getDouble("config_version");
+        if (EXPECTED_CONFIG_VERSION !=  CONFIG_VERSION){
             getLogger().warning("Config version does not match software requirements.");
         }
         DEBUG = this.getConfig().getBoolean("debug");
