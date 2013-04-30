@@ -30,6 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 
 import java.util.Iterator;
+
 /**
  * Handler for the /town command.
  * @author BobbShields

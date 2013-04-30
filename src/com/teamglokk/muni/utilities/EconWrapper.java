@@ -19,7 +19,6 @@
 */
 package com.teamglokk.muni.utilities;
 
-//import net.milkbowl.vault.chat.Chat;
 import com.teamglokk.muni.Muni;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;

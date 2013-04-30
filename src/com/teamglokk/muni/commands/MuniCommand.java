@@ -28,9 +28,10 @@ import org.bukkit.entity.Player;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
 import org.bukkit.ChatColor;
+
 /**
- * Handler for the /town command.
- * @author BobbShields
+ * Handler for the /muni command
+ * @author Bobb
  */
 public class MuniCommand implements CommandExecutor {
     private Muni plugin;
@@ -157,37 +158,6 @@ public class MuniCommand implements CommandExecutor {
                 plugin.out(sender, "Given location is invalid");
                 return false;
             }
-        } else if (args[0].equalsIgnoreCase("blankUpdate")  ) { //delete meeeeeee 
-            plugin.out(sender,"Dropping the database!  Then re-creating");
-            plugin.towns.clear();
-            plugin.allCitizens.clear();
-            plugin.dbwrapper.createDB(true);
-            return true;
-        } else if (args[0].equalsIgnoreCase("makeTest")  ) { //delete meeeeeee 
-            plugin.out(sender,"Dropping the database!  Then re-creating");
-            plugin.towns.clear();
-            plugin.allCitizens.clear();
-            plugin.dbwrapper.createDB(true);
-            plugin.makeDefaultCitizens();
-            plugin.makeTestTowns();
-            plugin.loadTowns();
-            return true;
-        } else if (args[0].equalsIgnoreCase("listCits")) { //DELETE MEEEEEE
-            for (Town t : plugin.towns.values() ){
-                plugin.out(sender, "Displaying players for "+t.getName() );
-                t.listAllCitizens(staffer);
-            }
-            return true;
-        } else if (args[0].equalsIgnoreCase("listallCits")) { //DELETE MEEEEEE
-            for (String c : plugin.allCitizens.keySet() ){
-                plugin.out(sender,  c+" "+plugin.allCitizens.get(c) );
-            }
-            return true;
-        } else if (args[0].equalsIgnoreCase("test")) { //DELETE MEEEEEE
-            
-            staffer.sendMessage("Here!");
-            staffer.sendMessage(plugin.getTownName("bobbshields") );
-            return true;
         } else {
             staffer.sendMessage("[Muni] Input not understood.");
             displayHelp(sender);

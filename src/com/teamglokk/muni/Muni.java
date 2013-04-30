@@ -126,7 +126,6 @@ public class Muni extends JavaPlugin {
     
     public static TownRank [] townRanks;
     
-    //public static TreeSet<Town> towns = new TreeSet<Town>();
     public TreeMap<String, Town> towns = new TreeMap<String,Town>(String.CASE_INSENSITIVE_ORDER);
     public TreeMap<String,String> allCitizens = new TreeMap<String,String>(String.CASE_INSENSITIVE_ORDER);
 
@@ -153,33 +152,33 @@ public class Muni extends JavaPlugin {
     public void onEnable() {
         getLogger().info("Starting Up");
         
-        // Hooks in Vault, World Guard, Muni wrappers
+        // Hooks in Vault, World Guard, and Muni wrappers
         hookInDependencies();
         
         //Load the configuration file
         this.saveDefaultConfig(); // saves plugins/Muni/config.yml if !exists
         loadConfigSettings(); // parses the settings and loads into memory
                
-        
-        // Register Muni listener(s)
+        // Register Muni login event
         getServer().getPluginManager().registerEvents(new MuniLoginEvent(this),this );
 
-        //Register the heartbeat
-        this.getLogger().info( "The heart beat is registering." ); 
-        long start = System.currentTimeMillis();
-        int roundTo = 30; // 0 <= rT <= 60
-        long roundedHour =  Math.round( (double) start / ( roundTo*60*1000 ) ) * (roundTo*60*1000) ;
-        if ( roundedHour < start ) {
-            roundedHour = roundedHour + 30*60*1000; 
+        // Register Voting recurring task, if not disabled
+        if ( !isDisabled_Voting() ) {
+            //Register the heartbeat
+            this.getLogger().info( "The heart beat is registering." ); 
+            long start = System.currentTimeMillis();
+            int roundTo = 30; // 0 <= rT <= 60
+            long roundedHour =  Math.round( (double) start / ( roundTo*60*1000 ) ) * (roundTo*60*1000) ;
+            if ( roundedHour < start ) {
+                roundedHour = roundedHour + 30*60*1000; 
+            }
+            long waitTicks = 20 * (roundedHour - start )/1000; 
+            if (isDebug() ) {
+                this.getLogger().info( "The heart beat is scheduled for "+ new Date(roundedHour) ); 
+            }
+            getServer().getScheduler().scheduleSyncRepeatingTask(this, 
+                    new MuniHeartbeat(this), waitTicks, 30*60*20 );
         }
-        long waitTicks = 20 * (roundedHour - start )/1000; 
-        if (isDebug() ) {
-            this.getLogger().info( "The heart beat is scheduled for "+ new Date(roundedHour) ); 
-            this.getLogger().info( "That is "+waitTicks+" ticks away" ); //delete me
-            this.getLogger().info( "That is "+waitTicks/20/60+" minutes away" ); //delete me
-    }
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, 
-                new MuniHeartbeat(this), waitTicks, 30*60*20 );
         
         // Register Muni commands
         getCommand("town"  ).setExecutor(new TownCommand    (this) );
@@ -193,7 +192,6 @@ public class Muni extends JavaPlugin {
         this.getLogger().info ("Loading Towns from database");
         loadTowns();
         
-        
         // Start Metrics if allowed by server owner
         if (USE_METRICS){
             if ( isDebug() ) {getLogger().info("Loading Metrics") ; }
@@ -204,6 +202,7 @@ public class Muni extends JavaPlugin {
                 final int citizenCount = allCitizens.size();
                 
                 if ( isDebug() ) {getLogger().info("Adding number of towns to Metrics") ; }
+                
                 //Make a graph to track the number of towns at startup
                 Graph townsG = metrics.createGraph("Number of Towns");
                 townsG.addPlotter(new Metrics.Plotter("Towns") {
@@ -258,6 +257,7 @@ public class Muni extends JavaPlugin {
                 for (int i = 1; i<=this.getTotalTownRanks(); i++ )
                 { 
                     final int result = tR[i];
+                    if (isDebug() ) { getLogger().severe("Rank "+i+": "+result); }// tested as working
                     townRanksTotalG.addPlotter(new Metrics.Plotter("Rank "+i) {
                             @Override
                             public int getValue() {
@@ -270,7 +270,7 @@ public class Muni extends JavaPlugin {
                 if ( isDebug() ) {getLogger().info("Metrics data has been sent") ; }
                 
             } catch (IOException e) {
-                // Failed to submit the stats :-(
+                // Failed to submit the stats 
                 getLogger().warning("There was an error loading Metrics");
             }
         }
@@ -304,53 +304,7 @@ public class Muni extends JavaPlugin {
             t.loadFromDB(t.getName() );
         }
     }
-    
-    /**
-     * For testing only, will be deleted closer to the beta
-     */
-    public void makeTestTowns(){
-        this.getLogger().info ("Making test towns");
-        Town maker = new Town(this);
-        maker = new Town (this,"TestTown","bobbshields","world",0,false,1,1005.0,100.0,0,16);
-        //maker.setMaxDeputies(5); maker.setRank(0); Removed from the town class
-        maker.setTaxRate(105.5);
         
-        maker.saveToDB();
-        
-        maker = new Town (this,"SecondTest","astickynote","world",0,false,2,1000,100,64,32);
-        maker.saveToDB();
-        
-        maker.loadFromDB("TestTown");
-        this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
-        
-        maker.loadFromDB("SecondTest");
-        this.getLogger().warning("Loaded from db: "+maker.toDB_UpdateRowVals() );
-    }
-    /**
-     * To be deleted 
-     */
-    public void makeDefaultCitizens(){
-        this.getLogger().info ("Making test citizens");
-        Citizen maker = new Citizen(this);
-        maker = new Citizen(this,"TestTown","bobbshields","mayor",null);
-        maker.saveToDB();
-        maker = new Citizen(this,"TestTown","tlunarrune","deputy",null);
-        maker.saveToDB();
-        maker = new Citizen(this,"TestTown","themoltenangel","invitee","bobbshields");
-        maker.saveToDB();
-        maker = new Citizen(this,"TestTown","efofex","citizen","bobbshields");
-        maker.saveToDB();
-        maker = new Citizen(this,"TestTown","clawson","applicant",null);
-        maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","astickynote", "mayor", null);
-        maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","astickynote", "mayor", null);
-        maker.saveToDB();
-        maker = new Citizen(this,"SecondTest","pharoahrhames", "deputy", null);
-        maker.saveToDB();
-        
-    } 
-    
     /**
      * Saves all towns to the database
      */
@@ -406,7 +360,7 @@ public class Muni extends JavaPlugin {
         
         if (towns.containsKey(town) ){
             temp = towns.get(town); 
-        } else { this.getLogger().info("Town search result: " +town+" not found"  ); }
+        } else { this.getLogger().info("Town search result: " +town+ " not found"  ); }
         
         return temp;
         
@@ -454,63 +408,6 @@ public class Muni extends JavaPlugin {
         return false;
     }
        
-    /**
-     * Deletes empty/null elements and trims the elements of a string array
-     * @param split the array to be parsed
-     * @return resized array of strings
-     */
-    public String [] trimSplit (String [] split ) {
-        if (split.length == 0 ){
-            return new String [0];
-        } 
-        String [] temp = new String[split.length];
-        int i = 0;
-        for (String entry: split) {
-            if (entry.equalsIgnoreCase(" ") || entry.isEmpty() ){
-                // do nothing (delete the empty space entries)
-            } else {
-                temp[i] = entry.trim();
-                i++;
-            }
-        }
-        String [] rtn = new String[i];
-        int j = 0;
-        for (j=0; j<i; j++){
-            rtn[j] = temp[j];
-        }
-        return rtn;
-    }
-    
-    /**
-     * Parses a double safely
-     * @param dbl
-     * @return 
-     */
-    public Double parseD (String num) {
-        try {
-            double rtn = Double.parseDouble(num);
-            return rtn;
-        } catch (Exception e){
-            this.getLogger().warning(num+" is not a number: "+e.getMessage() );
-            return -9999.99;
-        }
-    }
-    
-    /**
-     * Parses an integer safely
-     * @param num
-     * @return 
-     */
-    public int parseI (String num) {
-        try {
-            int rtn = Integer.parseInt(num);
-            return rtn;
-        } catch (Exception e){
-            this.getLogger().warning(num+" is not a number: "+e.getMessage() );
-            return -9999;
-        }
-    }
-    
     /**
      * Gets whether the player name is a citizen of any town
      * @param player
@@ -573,10 +470,6 @@ public class Muni extends JavaPlugin {
         Collections.sort( rtn, new TownRankingsComparator() );
         return rtn;
     }
-    
-    public double getRankupItemValueEach(){
-        return rankupItemValueEach;
-    }
 
     /**
      * Hooks into World Guard, Vault, and loads custom wrappers
@@ -584,14 +477,14 @@ public class Muni extends JavaPlugin {
     private void hookInDependencies() {
         // Store the instance of World Guard
         try {
-            wgp = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
-            wgwrapper = new WGWrapper(this);
+            if ( !isDisabled_WG() ) {
+                wgp = (WorldGuardPlugin) this.getServer().getPluginManager().getPlugin("WorldGuard");
+                wgwrapper = new WGWrapper(this);
+            }
         } catch (Exception e) {
             getLogger().severe( "Error occurred in hooking in to WorldGuard. Are both WorldGuard and WorldEdit installed?");
-            if (true){ // allow for the possibility of no world guard
-                getLogger().severe( "!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
-                this.getPluginLoader().disablePlugin(this);
-            }
+            getLogger().severe( "!!!!!NOTICE!!!!! MUNI WILL NOW BE DISABLED.  !!!!!NOTICE!!!!!");
+            this.getPluginLoader().disablePlugin(this);
         }
 
         // Bring Vault online
@@ -677,9 +570,6 @@ public class Muni extends JavaPlugin {
         mineCost = this.getConfig().getDouble("townsGlobal.mineCost"); 
         embassyCost = this.getConfig().getDouble("townsGlobal.embassyCost"); 
         arenaCost = this.getConfig().getDouble("townsGlobal.arenaCost"); 
-
-        if ( isDebug() ) {getLogger().info( maxTaxRate + " " + rankupItemID +
-                " " + maxTBbal + " " + totalTownRanks ); }
         
         // Populate the town ranks array
         townRanks = new TownRank [totalTownRanks+1];
@@ -705,6 +595,14 @@ public class Muni extends JavaPlugin {
         
    }
    
+    /**
+     * Global config: Used in town rankings to come to a add the rankup item value to the money balance
+     * @return 
+     */
+    public double getRankupItemValueEach(){
+        return rankupItemValueEach;
+    }
+    
     /**
      * Global config: Used by permissions to decided whether to let Ops continue
      * @return 
@@ -753,6 +651,63 @@ public class Muni extends JavaPlugin {
    }
     
     /**
+     * Deletes empty/null elements and trims the elements of a string array
+     * @param split the array to be parsed
+     * @return resized array of strings
+     */
+    public String [] trimSplit (String [] split ) {
+        if (split.length == 0 ){
+            return new String [0];
+        } 
+        String [] temp = new String[split.length];
+        int i = 0;
+        for (String entry: split) {
+            if (entry.equalsIgnoreCase(" ") || entry.isEmpty() ){
+                // do nothing (delete the empty space entries)
+            } else {
+                temp[i] = entry.trim();
+                i++;
+            }
+        }
+        String [] rtn = new String[i];
+        int j = 0;
+        for (j=0; j<i; j++){
+            rtn[j] = temp[j];
+        }
+        return rtn;
+    }
+    
+    /**
+     * Parses a double safely
+     * @param dbl
+     * @return 
+     */
+    public Double parseD (String num) {
+        try {
+            double rtn = Double.parseDouble(num);
+            return rtn;
+        } catch (Exception e){
+            this.getLogger().warning(num+" is not a number: "+e.getMessage() );
+            return -9999.99;
+        }
+    }
+    
+    /**
+     * Parses an integer safely
+     * @param num
+     * @return 
+     */
+    public int parseI (String num) {
+        try {
+            int rtn = Integer.parseInt(num);
+            return rtn;
+        } catch (Exception e){
+            this.getLogger().warning(num+" is not a number: "+e.getMessage() );
+            return -9999;
+        }
+    }
+    
+    /**
      * Defaulted Override: debug=true color=White
      * @param player
      * @param msg 
@@ -760,6 +715,7 @@ public class Muni extends JavaPlugin {
     public void out (CommandSender sender, String msg){
        out (sender,msg,true,ChatColor.WHITE);
     }
+    
     /**
      * Defaulted Override: debug=true and color is passed. Whole message is given color
      * @param player
@@ -769,6 +725,7 @@ public class Muni extends JavaPlugin {
     public void out (CommandSender sender, String msg, ChatColor color){
        out (sender,msg,true,color);
     }
+    
     /**
      * Defaulted method: color=white and debug is passed.
      * @param player
@@ -778,6 +735,7 @@ public class Muni extends JavaPlugin {
     public void out (CommandSender sender, String msg, boolean useConsole){
        out (sender,msg,useConsole,ChatColor.WHITE);
     }
+    
     /**
      * Real Work 
      * @param player
@@ -800,6 +758,7 @@ public class Muni extends JavaPlugin {
             return true;
         }
     }
+    
     /**
      * Defaulted Override: debug=true color=White
      * @param player
@@ -808,6 +767,7 @@ public class Muni extends JavaPlugin {
     public void out (Player player, String msg){
        out (player,msg,true,ChatColor.WHITE);
     }
+    
     /**
      * Defaulted Override: debug=true and color is passed. Whole message is given color
      * @param player
@@ -817,6 +777,7 @@ public class Muni extends JavaPlugin {
     public void out (Player player, String msg, ChatColor color){
        out (player,msg,true,color);
     }
+    
     /**
      * Defaulted method: color=white and debug is passed.
      * @param player
@@ -826,6 +787,7 @@ public class Muni extends JavaPlugin {
     public void out (Player player, String msg, boolean useConsole){
        out (player,msg,useConsole,ChatColor.WHITE);
     }
+    
     /**
      * Real Work 
      * @param player

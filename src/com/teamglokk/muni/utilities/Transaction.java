@@ -19,7 +19,6 @@
 */
 package com.teamglokk.muni.utilities;
 
-//import java.util.Calendar;
 import com.teamglokk.muni.Muni;
 import java.sql.Timestamp;
 import org.apache.commons.lang.builder.HashCodeBuilder;

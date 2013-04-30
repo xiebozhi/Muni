@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-//import com.teamglokk.muni;
 /**
  * Wraps the database functions to provide simple functions
  * @author BobbShields
