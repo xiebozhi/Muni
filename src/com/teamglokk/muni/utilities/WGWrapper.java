@@ -19,7 +19,6 @@
 */
 package com.teamglokk.muni.utilities;
 
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
@@ -32,12 +31,15 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritanceException;
 import com.teamglokk.muni.Muni;
 import com.teamglokk.muni.Town;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -126,7 +128,38 @@ public class WGWrapper extends Muni {
      * @param excludedRegions
      * @return 
      */
-    public boolean checkDirection (Location loc1, Location loc2, char dir, List<String> excludedRegions){
+    public boolean checkDirection (Location loc1, Location loc2, String dir, int dist, List<String> excludedRegions){
+        Set<ProtectedRegion> regionSet = new HashSet<ProtectedRegion>();
+        ApplicableRegionSet regions = null;
+        
+        if ( loc1.getWorld() != loc2.getWorld() ) { return false; }
+        // needing to verify the two locations are on a line
+        
+        // Figure out the step based on chosen direction
+        Location adjustment = new Location ( loc1.getWorld(), 0, 0, 0 );
+                if ( dir.equalsIgnoreCase("n") || dir.equalsIgnoreCase("north") ){
+            adjustment.add(0, 0, dist);
+        } else if ( dir.equalsIgnoreCase("s") || dir.equalsIgnoreCase("south") ){
+            adjustment.add(0, 0, -dist);
+        } else if ( dir.equalsIgnoreCase("e") || dir.equalsIgnoreCase("east") ){
+            adjustment.add(dist, 0, 0);
+        } else if ( dir.equalsIgnoreCase("w") || dir.equalsIgnoreCase("west") ){
+            adjustment.add(-dist, 0, 0);
+        } else { return false; }
+        
+        Location currenLoc = loc1;
+        regions = getARS(loc1);
+        
+        // At some point we iterate between the line endpoints and note all the regions
+        
+        // Add the found regions to the set (no duplicates) 
+        for (ProtectedRegion r : regions){
+            regionSet.add(r);
+        }
+        
+        for (String eR : excludedRegions){
+            //regionSet.
+        }
         
         return true; 
     }
@@ -204,6 +237,19 @@ public class WGWrapper extends Muni {
     } 
     
     /**
+     * Checks with the region manager to see if the region exists
+     * @param world
+     * @param name
+     * @return 
+     */
+    public boolean isExistingRegion (World world, String name) {
+        RegionManager mgr = wg.getGlobalRegionManager().get( world );
+        if ( mgr.hasRegion(name) ){
+            return true; 
+        } else { return false; }
+    }
+    
+    /**
      * Makes a square region of a specified size 
      * @param town
      * @param player
@@ -213,13 +259,6 @@ public class WGWrapper extends Muni {
     public ProtectedRegion makeSubRegion (Town town, Player player, String subRegionName, 
             int halfSize, int height ){
         return makeSubRegion(town,player,subRegionName,halfSize,height,null,null,false,false,false);
-    }
-    
-    public boolean isExistingRegion (World world, String name) {
-        RegionManager mgr = wg.getGlobalRegionManager().get( world );
-        if ( mgr.hasRegion(name) ){
-            return true; 
-        } else { return false; }
     }
     
     /**
